@@ -2,6 +2,9 @@ package com.tesseract.studio3d;
 
 import java.io.File;
 
+import com.tesseract.studio3d.social.SettingsActivity;
+import com.tesseract.studio3d.social.SocialSharing;
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -182,6 +185,14 @@ public class StartScreen extends Activity {
 	
 	}
 	
+	public void launchSettingsActivity(View v)
+	{
+		Intent settingsIntent = new Intent(this,SettingsActivity.class);
+
+		startActivity(settingsIntent);
+
+		
+	}
 	
 	
 	

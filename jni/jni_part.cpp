@@ -55,6 +55,7 @@ int getGray(Mat& img)
 }
 extern "C" {
 JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong addrBackground,jlong addrForeground,jlong finalImage, jint ji1, jint ji2,jint currentMode);
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong addrBackground,jlong addrForeground,jlong finalImage, jint ji1, jint ji2,jint currentMode);
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_crop5(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
 
@@ -67,6 +68,143 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_crop5(
   img1.copyTo(retVal);
 
 }
+
+
+
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode)
+{
+
+	LOGD("Start");
+  Mat& img = *(Mat*)addrBgr;
+  Mat& disp = *(Mat*)addrDisp;
+
+  Mat& background = *(Mat*)addrBackground;
+  Mat& foreground = *(Mat*)addrForeground;
+
+  Mat& finImg = *(Mat*)finalImage;
+  LOGD("Initialize");
+
+  jfloatArray contourPoints;
+  vector<vector<Point> > contours;
+
+  Mat img1(img, Rect(0, 0, img.cols/2, img.rows));
+  Point point1;
+
+    int x, y;
+    x = ji1;
+    y = ji2;
+
+    point1 = Point(x, y); // to get from android
+    LOGD("Point initial");
+
+
+    getThreshold(disp, point1, 10, foreground);
+    LOGD("THREESH");
+    segmentForeground(img1, foreground, background,contours);
+
+
+    LOGD ("Another breakpt");
+    Mat layerAf, layerAb;
+    cvtColor(foreground, layerAf, CV_BGR2GRAY);
+    cvtColor(background, layerAb, CV_BGR2GRAY);
+
+    LOGD ("Segmented");
+
+    int tLen=0;
+
+  for(int i=0; i<contours.size(); i++)
+  {
+    for(int j=0; j<contours[i].size(); j++)
+    {
+      tLen++;
+    }
+  }
+LOGD("Size"+tLen);
+
+     LOGD ("Start contour points");
+  contourPoints = env->NewFloatArray(2*tLen);
+  jfloat cPoints[2*tLen];
+
+  char str[10];
+  char str2[]={"Value"};
+  sprintf(str, "%d", tLen);
+  strcat(str,str2);
+
+   LOGD (str);
+
+  tLen=0;
+  for(int i=0; i<contours.size(); i++)
+  {
+    for(int j=0; j<contours[i].size(); j++)
+    {
+      cPoints[tLen] = contours[i][j].x;
+      tLen++;
+      cPoints[tLen] = contours[i][j].y;
+      tLen++;
+    }
+  }
+
+     LOGD ("Completed loop");
+
+    if(currentMode==1)
+    {
+    Mat blurBackground;
+        doMultiBlur(img1, blurBackground, disp, point1);
+        bitwise_and(background, blurBackground, background);
+  }
+    else if(currentMode==2)
+    doOilPaint(img1, background);
+    else if(currentMode==3)
+    getMaskedGrayImage(img1, background);
+    else if(currentMode==4)
+    getSepia(img1, background);
+    else if(currentMode == -1)
+        getMaskedImage(img1, background);
+
+    LOGD("Reached the end");
+    getMaskedImage(img1, foreground);
+
+    cvtColor(foreground, foreground, CV_BGR2RGBA);
+    cvtColor(background, background, CV_BGR2RGBA);
+
+    vector<Mat> rgbam;
+    split(foreground, rgbam);
+    rgbam[3] = layerAf;
+    merge(rgbam, foreground);
+    rgbam.clear();
+
+    split(background, rgbam);
+    rgbam[3] = layerAb;
+    merge(rgbam, background);
+    rgbam.clear();
+
+    imwrite("/mnt/sdcard/Studio3D/img_fg22.png", foreground);
+   imwrite("/mnt/sdcard/Studio3D/img_bg22.png", background);
+
+    addFgBg(foreground, background, finImg);
+//    imwrite("/mnt/sdcard/Studio3D/img_fin.png", finImg);
+    //resize(finImg, finImg, Size(finImg.cols*2, finImg.rows));
+
+
+//    env->SetFloatArrayRegion(contourPoints, 0, tLen, cPoints);
+
+   // jsize arraylen=env->GetArrayLength( contourPoints);
+  //  sprintf(str, "%d", arraylen);
+
+    LOGD(str);
+
+
+
+}
+
+
+
+
+
+
+
+
+
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage)
 {
     Mat& img = *(Mat*)addrRgba;
@@ -150,8 +288,10 @@ JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity
 
     if(currentMode==1)
     {
-    Mat blurBackground;
-        doMultiBlur(img1, blurBackground, disp, point1);
+    	Mat blurBackground;
+        doMultiBlur(img1, blurBackground, disp, point1); // why crash ?
+
+        LOGD("did blurring");
         bitwise_and(background, blurBackground, background);
   }
     else if(currentMode==2)

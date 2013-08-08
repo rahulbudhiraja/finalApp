@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
 
 	 private Mat mRgba;
 		
-	 public Mat disp;
+	 public static Mat disp;
 	 public Mat finalImage;
 	 public Mat limg;	
 	 public Mat foreground,background;

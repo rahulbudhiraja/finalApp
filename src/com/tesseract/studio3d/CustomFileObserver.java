@@ -25,7 +25,7 @@ public class CustomFileObserver
 
 	Context activityContext;
 
-	CustomFileObserver(Context context)
+	public CustomFileObserver(Context context)
 	{
 		activityContext=context;
 		createLayersFolder();

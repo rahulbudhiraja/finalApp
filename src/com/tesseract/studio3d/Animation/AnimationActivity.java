@@ -1,12 +1,27 @@
 package com.tesseract.studio3d.Animation;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
 
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
+
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -15,6 +30,8 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -43,7 +60,10 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+
+import com.tesseract.studio3d.CustomFileObserver;
 import com.tesseract.studio3d.R;
+import com.tesseract.studio3d.social.SocialSharing;
 
 public class AnimationActivity extends Activity {
 
@@ -56,9 +76,11 @@ public class AnimationActivity extends Activity {
 	RelativeLayout activityLayout,fullScreenLayout;
 	File seperatedLayersFolder;
 	String TAG = "AnimationActivity";
+	
 
 	int currentSelectedLayer = 0;
 	private Animation animFadeIn;
+	Paint canvasPaint;
 
 	// This has the different layers ,Each layer has an arraylist of different
 	// images ..
@@ -79,7 +101,25 @@ public class AnimationActivity extends Activity {
 
 	double scaleValue=0.16;
 
-	ImageButton next,focus,Replace,reset,full_screen,back;
+	ImageButton next,focus,Replace,reset,full_screen,back,accept;
+	CustomFileObserver fileObserver;
+	
+	Mat img1,img2;
+	
+	static int currentMode=0;
+	
+	boolean focusButtonClicked=false;
+	float converted_xcoord,converted_ycoord;
+
+	 private Mat mRgba;
+		
+	 public Mat disp;
+	 public Mat finalImage;
+	 public Mat limg;	
+	 public Mat foreground,background;
+	 
+	 Bitmap backupBitmap;
+	 
 
 
 	protected void onCreate(Bundle savedInstanceState) {
@@ -117,17 +157,34 @@ public class AnimationActivity extends Activity {
 		LoadFiles(seperatedLayersFolder);
 
 		hs = new HorizontalScrollView(this);
+		
+		
+		canvasPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		canvasPaint.setStyle(Paint.Style.STROKE);
+		canvasPaint.setStrokeWidth(5);
+		canvasPaint.setColor(Color.RED);
+		canvasPaint.setAntiAlias(true);
 
 		// initializeHorizontalScroller();
 		initializenewHorizontallScrollView();
 		animFadeIn=AnimationUtils.loadAnimation(this, R.anim.anim_fade_in);
 
 		initializeVerticalScroller();
-
+		
+		initializeMats();
+		    
 		// setContentView(R.layout.timepasslayout);
 		setContentView(activityLayout);
 
 	}
+	 static {
+		    if (!OpenCVLoader.initDebug()) {
+		        // Handle initialization error
+		    	Log.d("error","error");}
+		    	else  System.loadLibrary("depth_magic");
+			    
+		    
+		}
 	protected void onRestart() {
 	    super.onRestart();  // Always call the superclass method first
 	    
@@ -556,6 +613,36 @@ public class AnimationActivity extends Activity {
 	 * /7924296/how-to-use-onwindowfocuschanged-method
 	 */
 
+	public void onBackPressed() {
+
+		String packageName = "com.android.camera"; //Or whatever package should be launched
+
+    	if(packageName.equals("com.android.camera")){ //Camera
+    	    try
+    	    {
+    	       
+    	    	Intent intent = getPackageManager().getLaunchIntentForPackage("com.android.camera");
+
+    	    	intent.putExtra("android.intent.extras.CAMERA_FACING", 2);
+    	    	intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+    	        //Log.d("Test","num"+Camera.getNumberOfCameras());
+    	        startActivity(intent);
+
+    	    }
+    	    catch(ActivityNotFoundException e){
+    	        Intent intent = new Intent();
+    	        ComponentName comp = new ComponentName("com.android.camera", "com.android.camera.CameraEntry");
+    	        intent.setComponent(comp);
+    	        startActivity(intent);
+    	    }
+    	}
+    	else{ //Any other
+    	    Intent intent = getPackageManager().getLaunchIntentForPackage(packageName);
+    	    startActivity(intent);
+    	}
+    	
+}
+	
 	public void onWindowFocusChanged(boolean hasFocus) {
 
 		if(!isStarted)
@@ -768,6 +855,9 @@ public class AnimationActivity extends Activity {
 
 			// Add the buttons ..
 			addButtonstoActivity();
+			
+			// Add a touch listener to an imageview in the canvas .
+			CanvasImageViews.get(0).setOnTouchListener(new TouchListener());
 
 		}
 
@@ -872,8 +962,7 @@ public class AnimationActivity extends Activity {
 		}
 
 	};
-
-
+	
 	protected void addButtonstoActivity() {
 		// TODO Auto-generated method stub
 
@@ -932,6 +1021,8 @@ public class AnimationActivity extends Activity {
 		focus.setImageDrawable(getResources().getDrawable(R.drawable.bluricon));
 		focus.setLayoutParams(layoutParams);
 		focus.setBackgroundColor(Color.TRANSPARENT);
+		focus.setId(11223);
+		focus.setOnClickListener(buttonClickListener);	
 		activityLayout.addView(focus);
 
 
@@ -968,10 +1059,26 @@ public class AnimationActivity extends Activity {
 		back.setImageDrawable(getResources().getDrawable(R.drawable.back));
 		back.setLayoutParams(layoutParams);
 		back.setBackgroundColor(Color.TRANSPARENT);
+		back.setId(12021);
 		
 		activityLayout.addView(back);
-
-
+		
+		layoutParams=new RelativeLayout.LayoutParams(
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT);
+		
+		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		layoutParams.setMargins(0, 0,20,0);		
+		
+		accept=new ImageButton(this);
+		
+		accept.setOnClickListener(buttonClickListener);
+		accept.setImageDrawable(getResources().getDrawable(R.drawable.greencheck));
+		accept.setLayoutParams(layoutParams);
+		accept.setBackgroundColor(Color.TRANSPARENT);
+		accept.setId(12012);
+		
+		activityLayout.addView(accept);
 	}
 
 	public OnClickListener buttonClickListener = new OnClickListener() {
@@ -1020,7 +1127,7 @@ public class AnimationActivity extends Activity {
 				//backButton.set
 			}
 			
-			if(v.getId()==9876)
+			else if(v.getId()==9876)
 			{
 				
 			for(int i=0;i<CanvasImageViews.size();i++)
@@ -1032,6 +1139,281 @@ public class AnimationActivity extends Activity {
 			resetBorders();
 
 		}
+			
+			else if(v.getId()==12021)
+			{
+				
+				fileObserver=new CustomFileObserver(getBaseContext());
+				
+			  	String packageName = "com.android.camera"; //Or whatever package should be launched
+
+	        	if(packageName.equals("com.android.camera")){ //Camera
+	        	    try
+	        	    {
+	        	       
+	        	    	Intent intent = getPackageManager().getLaunchIntentForPackage("com.android.camera");
+
+	        	    	intent.putExtra("android.intent.extras.CAMERA_FACING", 2);
+	        	    	intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+	        	        //Log.d("Test","num"+Camera.getNumberOfCameras());
+	        	        startActivity(intent);
+
+	        	    }
+	        	    catch(ActivityNotFoundException e){
+	        	        Intent intent = new Intent();
+	        	        ComponentName comp = new ComponentName("com.android.camera", "com.android.camera.CameraEntry");
+	        	        intent.setComponent(comp);
+	        	        startActivity(intent);
+	        	    }
+	        	}
+	        	else{ //Any other
+	        	    Intent intent = getPackageManager().getLaunchIntentForPackage(packageName);
+	        	    startActivity(intent);
+	        	}
+			}
+			
+			else if (v.getId()==12012)
+			{
+				
+				
+				img1=new Mat();img2=new Mat();
+				// Save the canvas image ..
+				Canvas saveImageCanvas;
+//				Bitmap saveImageBitmap =Bitmap.createBitmap(CanvasImageViews.get(0).getWidth(), CanvasImageViews.get(0).getHeight(), Bitmap.Config.ARGB_8888);
+				
+				Drawable saveDrawable=CanvasImageViews.get(1).getDrawable();
+				Bitmap	saveImageBitmap=((BitmapDrawable)saveDrawable).getBitmap();
+				
+				Utils.bitmapToMat(saveImageBitmap, img1);
+				
+				Bitmap mutableBitmap= saveImageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+				
+				saveImageCanvas = new Canvas(mutableBitmap);
+				
+				saveDrawable=CanvasImageViews.get(0).getDrawable();
+				
+				Utils.bitmapToMat( ((BitmapDrawable)saveDrawable).getBitmap(), img2);
+				
+				saveImageCanvas.drawBitmap(((BitmapDrawable)saveDrawable).getBitmap(), 0, 0, null);
+				
+				saveImageCanvas.save();
+				
+				Mat addition = new Mat();
+				
+				Core.add(img1, img2, addition);
+				Mat modified_mat=new Mat();
+			//	
+				Size dimensions = new Size();
+				dimensions.width=0.6*addition.cols();
+				dimensions.height=0.6*addition.rows();
+				
+				//Highgui.imwrite("/mnt/sdcard/Studio3D/combined.png",addition);
+				Imgproc.cvtColor(addition, addition, Imgproc.COLOR_BGR2RGBA);
+				Highgui.imwrite("/mnt/sdcard/Studio3D/combined_orig.png",addition);
+				Imgproc.resize(addition, addition,dimensions);
+				Highgui.imwrite("/mnt/sdcard/Studio3D/combined.png",addition);
+				
+				
+
+				
+				Intent intent = new Intent(getBaseContext(),SocialSharing.class);
+				startActivity(intent);
+				
+			}
+			
+			else if (v.getId()==11223)
+			{
+				// Change the button background ..
+				
+				focusButtonClicked=!focusButtonClicked;
+				if(focusButtonClicked)
+					focus.setImageDrawable(getResources().getDrawable(R.drawable.blur_focus));
+				else focus.setImageDrawable(getResources().getDrawable(R.drawable.bluricon));
+				
+				// 
+				
+			}
+			
+			
+			
+			
 		}
 	};
+	
+private Bitmap addCircles(Bitmap bmp,float x,float y) {
+	    
+		Bitmap tempBitmap=Bitmap.createScaledBitmap(bmp, bmp.getWidth(),bmp.getHeight(), true);
+	    Canvas canvas = new Canvas(tempBitmap);
+//	    Paint bp= new Paint();
+//	    bp.setColor(Color.WHITE);//set a color
+//	    bp.setStrokeWidth(5);// set your stroke width
+//	    
+	    canvas.drawBitmap(tempBitmap, 0, 0, new Paint());
+	    
+	    canvas.drawCircle(x, y, 20, canvasPaint);
+	    canvas.drawCircle(x, y, 40, canvasPaint);
+	    canvas.drawCircle(x, y, 60, canvasPaint);
+	    
+	 //   canvas.drawBitmap(bmp, rect, rect, paint);
+	    
+	    return tempBitmap;
+	}
+	
+	
+	  
+    class TouchListener implements View.OnTouchListener{
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+
+			if(event.getAction() == MotionEvent.ACTION_DOWN&&focusButtonClicked) 
+			{
+				
+				
+				Log.d(TAG,"X ="+(event.getRawX()-CanvasImageViews.get(0).getLeft())+"  Y= "+(event.getRawY()-CanvasImageViews.get(0).getTop())); // For landscape orientation,i.e max val of x is 800 and y max value is 480 ..
+
+ 				
+ 				
+ 				// Pass these to the JNI function .. These will be the touch positions out of 500x500 .
+ 				converted_xcoord=(event.getRawX()-CanvasImageViews.get(0).getLeft());
+ 				converted_ycoord=(event.getRawY()-CanvasImageViews.get(0).getTop());
+ 				
+ 				backupBitmap=((BitmapDrawable)CanvasImageViews.get(0).getDrawable()).getBitmap();
+ 				
+ 				CanvasImageViews.get(0).setImageBitmap(  addCircles( ((BitmapDrawable)CanvasImageViews.get(0).getDrawable()).getBitmap(),converted_xcoord,converted_ycoord));
+ 				
+ 			//	imageViewBitmap=backupBitmap; // not sure ?
+// 				
+ 				// These will be the corresponding touch positions for the original image i.e touch positions in 500x500 are converted into 640x720 ..
+ 				   converted_xcoord=(converted_xcoord/CanvasImageViews.get(0).getWidth())*500;
+ 		           converted_ycoord=(converted_ycoord/CanvasImageViews.get(0).getHeight())*500;
+ 		           Log.d(TAG, String.valueOf(converted_ycoord));
+ 		           Log.d(TAG, String.valueOf(converted_xcoord));
+ 		           Log.d(TAG, "converted");
+ 		            //finalImage = new Mat();
+ 		            
+ 		            currentMode=1;
+ 		          
+ 		            img1=new Mat();img2=new Mat();
+ 					// Save the canvas image ..
+ 					
+// 					Bitmap saveImageBitmap =Bitmap.createBitmap(CanvasImageViews.get(0).getWidth(), CanvasImageViews.get(0).getHeight(), Bitmap.Config.ARGB_8888);
+ 					
+ 					Drawable saveDrawable=CanvasImageViews.get(1).getDrawable();
+ 					Bitmap	saveImageBitmap=((BitmapDrawable)saveDrawable).getBitmap();
+ 					
+ 					Utils.bitmapToMat(saveImageBitmap, img1);
+ 					
+ 				//	Bitmap mutableBitmap= saveImageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+ 					
+ 					saveDrawable=CanvasImageViews.get(0).getDrawable();
+ 					
+ 					Utils.bitmapToMat( ((BitmapDrawable)saveDrawable).getBitmap(), img2);
+ 					
+ 					
+ 					Core.add(img1, img2, mRgba);
+ 					Imgproc.cvtColor(mRgba, mRgba, Imgproc.COLOR_RGBA2BGR);
+ 					
+			    new ComputeDisparity().execute("");
+			   
+				
+			}
+			return false;
+			
+			}
+		}
+    
+    
+    public  void initializeMats() {
+		// TODO Auto-generated method stub
+	    mRgba = new Mat();
+		disp = MainActivity.disp;
+		limg = new Mat();
+		foreground=new Mat();
+		background=new Mat();
+		finalImage=new Mat();
+    
+	    	
+	}
+ private class ComputeDisparity extends AsyncTask<String, Void, String> {
+    	
+        @Override
+        protected String doInBackground(String... params) {
+        	Log.d("reached","reache");
+        	// getDisparity(mRgba.getNativeObjAddr(), finalImage.getNativeObjAddr(), (int)converted_xcoord, (int)converted_ycoord);
+// Commenting out for now ..
+        	
+        	   getThreshold(mRgba.getNativeObjAddr(), disp.getNativeObjAddr(), finalImage.getNativeObjAddr(), background.getNativeObjAddr(),foreground.getNativeObjAddr(),(int)converted_xcoord, (int)converted_ycoord,currentMode);
+	           
+	    	
+              return "";
+        }      
+
+        @Override
+        protected void onPostExecute(String result) {
+           
+            // progress.dismiss();
+             
+             Log.d(TAG,"blah");
+             
+//             String colVal = String.valueOf(finalImage.cols());
+//	            Log.d("Cols", colVal);
+//	            Highgui.imwrite(leftimgFile.getAbsolutePath(), finalImage);
+//	            myBitmap = BitmapFactory.decodeFile(leftimgFile.getAbsolutePath());
+//	            imageViewBitmap=myBitmap;
+//	            mImageView.setImageBitmap(imageViewBitmap);
+  
+             
+             /// Take the foreground and background mat and convert it to the imageview .
+             
+             Imgproc.cvtColor(background, background, Imgproc.COLOR_BGR2RGBA);
+             Bitmap tempBitmap=Bitmap.createBitmap(background.cols(),background.rows(), 
+            		 Bitmap.Config.ARGB_8888);
+             
+             Utils.matToBitmap(background, tempBitmap);
+             
+             CanvasImageViews.get(1).setImageBitmap(tempBitmap);
+             
+             Imgproc.cvtColor(foreground, foreground, Imgproc.COLOR_BGR2RGBA);
+            
+             Utils.matToBitmap(foreground, tempBitmap);
+             
+             CanvasImageViews.get(1).setImageBitmap(tempBitmap);
+             
+             
+             
+             
+             
+             
+             
+          //   Utils.matToBitmap(, bmp)
+             
+             
+	            System.gc();
+	    	  
+		   //  mImageView.setImageBitmap(myBitmap);
+		    
+		       Log.d("done","done");
+             
+             // txt.setText(result);
+             
+              //might want to change "executed" for the returned string passed into onPostExecute() but that is upto you
+        }
+
+        @Override
+        protected void onPreExecute() {
+//        	   progress.setTitle("Processing Image");
+//               progress.setMessage("Please wait while we process your image ...");
+//               progress.show();
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+        }
+        
+  }   
+    
+    
+	public native void getThreshold(long matAddrRgba, long matAddrDisp, long matAddrfinalImage,long matAddrBackground, long matAddrForeground, int ji1, int ji2,int choice);
+	   
 }

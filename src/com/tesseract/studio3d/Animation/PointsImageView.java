@@ -325,7 +325,7 @@ public class PointsImageView extends ImageView {
           
          // points.add(new Point(currPoint.x,currPoint.y));
           
-      Log.d(TAG, "Val"+i);
+     //Log.d(TAG, "Val"+i);
     	  
       }
     	  
@@ -370,7 +370,7 @@ public class PointsImageView extends ImageView {
 	     
 	    invalidate();
 	    
-	    Log.d(TAG,"Index"+currentindex);
+	  //  Log.d(TAG,"Index"+currentindex);
 	    
     	
     }
