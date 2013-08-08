@@ -47,6 +47,7 @@ int getRange(Mat disp, Point p1);
 
 
 static jfloatArray gArray = NULL;
+static int width,height;
 
 int getGray(Mat& img)
 {
@@ -119,14 +120,14 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
       tLen++;
     }
   }
-LOGD("Size"+tLen);
+//LOGD("Size"+tLen);
 
      LOGD ("Start contour points");
   contourPoints = env->NewFloatArray(2*tLen);
   jfloat cPoints[2*tLen];
 
   char str[10];
-  char str2[]={"Value"};
+  char str2[]={" Value"};
   sprintf(str, "%d", tLen);
   strcat(str,str2);
 
@@ -145,6 +146,18 @@ LOGD("Size"+tLen);
   }
 
      LOGD ("Completed loop");
+
+     char str3[]={"dimensions"};
+
+       sprintf(str, "%d", img1.rows);
+       strcat(str,str3);
+
+       imwrite("/mnt/sdcard/Studio3D/img_jni_img.png", finImg);
+//       sprintf(str3, "%d  ", img1.cols);
+//       strcat(str,"  ");
+//       strcat(str,str3);
+
+       LOGD(str);
 
     if(currentMode==1)
     {
@@ -580,6 +593,9 @@ int doMultiBlur(Mat img, Mat& retVal, Mat disp, Point p1)
     //Mat thresh, blur, bitwiseImg;
     int threshVal;
 
+
+
+    LOGD("a");
     dispval = disp.at<uchar>(p1.y, p1.x);
     range = dispval/10;
     //printf("%d %d\n", range, dispval);
@@ -606,13 +622,18 @@ int doMultiBlur(Mat img, Mat& retVal, Mat disp, Point p1)
         //imshow("seg", seg);
         //waitKey(0);
         layers.push_back(seg);
+        imwrite("/mnt/sdcard/Studio3D/img_jni_seg.png", seg);
+
 
         lval = l1;
         hval = h2;
         range*=2;
     }
-
+    LOGD("b");
     blurs.push_back(img);
+    imwrite("/mnt/sdcard/Studio3D/img_jni_img.png", img);
+
+    width=img.rows;
     for(i=1; i<layers.size(); i++)
     {
         Mat blur;
@@ -624,21 +645,30 @@ int doMultiBlur(Mat img, Mat& retVal, Mat disp, Point p1)
     }
     int sigma = 2*i;
     Mat backLayer;
+    LOGD("c");
+
     backLayer = Mat::zeros(img.rows, img.cols, CV_8UC3);
     for(i=1; i<layers.size(); i++)
     {
         Mat bitwiseImg;
         //printf("%d %d %d %d\n", layers[i].cols, layers[i].rows, blurs[i].rows, blurs[i].cols);
         //printf("%d %d\n", layers[i].channels(), blurs[i].channels());
-        bitwise_and(layers[i], blurs[i], bitwiseImg);
+
+
+
+
+
         //imshow("bitwiseImg", bitwiseImg);
         //waitKey(0);
         //printf("%d %d %d %d\n", layers[i].cols, layers[i].rows, backLayer.rows, backLayer.cols);
+
+        LOGD("d");
         add(backLayer, layers[i], backLayer);
         //imshow("thresh", layers[i]);
 
         finLayers.push_back(bitwiseImg);
     }
+    LOGD("d");
     //imshow("backLayer", backLayer);
     //waitKey(0);
     Mat blurImage;
@@ -648,6 +678,7 @@ int doMultiBlur(Mat img, Mat& retVal, Mat disp, Point p1)
     finLayers.push_back(backLayer);
     stackUp(finLayers, retVal);
 
+    LOGD("e");
     return 1;
 
 }
