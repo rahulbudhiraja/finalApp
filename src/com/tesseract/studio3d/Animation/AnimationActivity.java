@@ -120,6 +120,8 @@ public class AnimationActivity extends Activity {
 	 
 	 Bitmap backupBitmap;
 	 
+	 Vector<Integer> selectedFilters; 
+	 
 
 
 	protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +156,7 @@ public class AnimationActivity extends Activity {
 				+ "/Studio3D/Layers/");
 
 		System.gc();
+		selectedFilters=new Vector<Integer>();
 		LoadFiles(seperatedLayersFolder);
 
 		hs = new HorizontalScrollView(this);
@@ -656,10 +659,13 @@ public class AnimationActivity extends Activity {
 				CanvasImageViews.add(createImageView(file.getPath()));
 				layerBitmaps.add(BitmapFactory.decodeFile(file.getPath()));
 
+				selectedFilters.add(-1);
+				Log.d(TAG,file.getPath());
 			}
 
 		}
 
+	
 		// Copy the ImageViews which will be drawn to the Canvas..
 
 	}
@@ -926,7 +932,10 @@ public class AnimationActivity extends Activity {
 			applyFiltertoView(id % imageFilters.length);
 			ImageView temp =(ImageView)v;
 			temp.setImageBitmap(addBorder(  ((BitmapDrawable)temp.getDrawable()).getBitmap(),2,Color.RED));
-
+			
+			selectedFilters.setElementAt(id % imageFilters.length, currentSelectedLayer);
+			
+			Log.d(TAG,"filter at "+currentSelectedLayer+" = "+selectedFilters.get(currentSelectedLayer));
 			Log.d(TAG, "ID" + id);
 
 		}

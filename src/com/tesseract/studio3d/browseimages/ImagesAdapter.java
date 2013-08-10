@@ -30,12 +30,15 @@ public class ImagesAdapter extends BaseAdapter {
   public ImagesAdapter(Context c,File dirPath){
     this.mContext = c;
     storedImages=new Vector<Bitmap>();
+    if(dirPath.isDirectory())
     loadImages(dirPath);
+    
   }
  
   private void loadImages(File dirPath) {
 	// TODO Auto-generated method stub
 	File[] dirFiles=dirPath.listFiles();
+
 	
   for (int i=0;i<dirFiles.length;i++)
   {
@@ -47,8 +50,8 @@ public class ImagesAdapter extends BaseAdapter {
 	  
   }
   Log.d("IMAGE adapter"," length "+storedImages.size());
-}
 
+  }
 @Override
   public int getCount() 
   {
@@ -87,4 +90,5 @@ public class ImagesAdapter extends BaseAdapter {
         return imageView;
   }
  
+  
 }

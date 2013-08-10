@@ -247,6 +247,14 @@ JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity
   vector<vector<Point> > contours;
 
   Mat img1(img, Rect(0, 0, img.cols/2, img.rows));
+
+
+    char str3[10];
+    char str4[]={"Size   "};
+    sprintf(str3, "%d", img1.cols);
+    strcat(str4,str3);
+    LOGD(str4);
+
   Point point1;
 
     int x, y;

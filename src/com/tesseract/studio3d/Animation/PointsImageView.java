@@ -63,7 +63,7 @@ public class PointsImageView extends ImageView {
 	public Mat finalImage;
 	public Mat limg;	
 	public Mat foreground,background;
-	float converted_xcoord=0,converted_ycoord=0;
+	static float converted_xcoord=480,converted_ycoord=270;
 	int currentMode=-1;
 	
 	ProgressDialog conversionProgress;
@@ -98,9 +98,7 @@ public class PointsImageView extends ImageView {
 		 segmentImagesandgetContours();
 		 
 		// loadandparseXML();
-		 configurePaint();
-		 
-		 
+		 configurePaint(); 
 	
 		 animationTime=0;
 		 
@@ -415,6 +413,7 @@ public class PointsImageView extends ImageView {
 	    
     	
     }
+    
     public boolean onTouchEvent(MotionEvent event) {
     	   // TODO Auto-generated method stub
     	   

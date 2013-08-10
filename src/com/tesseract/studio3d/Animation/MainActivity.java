@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Random;
 
 import org.opencv.android.OpenCVLoader;
@@ -16,6 +17,7 @@ import org.opencv.highgui.Highgui;
 import ColorFilters.ApplyFilterstoLayer;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -49,7 +51,8 @@ public class MainActivity extends Activity {
 	static ImageView mImageView;
 	Bitmap imageViewBitmap;
 	private final static String TAG = "MainActivity";
-     ProgressDialog conversionProgress;
+     
+	ProgressDialog conversionProgress;
 
 	 private Mat mRgba;
 		
@@ -67,6 +70,8 @@ public class MainActivity extends Activity {
 	File seperatedLayersFolder;
 	
 	File disparityFile;
+	int converted_x=0,converted_y=0;
+	boolean buttonClicked;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +96,6 @@ public class MainActivity extends Activity {
 		
 //		initializeMats();
 		
-		
-	    
 		mRgba =new Mat();
 		 
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -100,11 +103,23 @@ public class MainActivity extends Activity {
 		paint.setStrokeWidth(5);
 		paint.setColor(Color.RED);
 		paint.setAntiAlias(true);
-		//ContourPoints=new float[100];
+		
+		 // get intent data
+	    Intent i = getIntent();
+	 
+	   
+	    buttonClicked=i.getExtras().getBoolean("browseButtonClicked");
+	    
+	    Log.d("Animation activity","Value: "+buttonClicked);
+	    // Selected image id
+	    int position = i.getExtras().getInt("id");
+		
+	    
+	    //ContourPoints=new float[100];
 
 		// Create that many ImageViews as much as there are in the
 		// Tesseract/Layers
-		seperatedLayersFolder = new File(Environment.getExternalStorageDirectory()+ "/Studio3DLayers/");
+		//seperatedLayersFolder = new File(Environment.getExternalStorageDirectory()+ "/Studio3DLayers/");
 
 	}
 
@@ -113,12 +128,18 @@ public class MainActivity extends Activity {
 	public void ButtonOnClick(View v) {
 		switch (v.getId()) {
 		case R.id.isolatebutton:
+			
+			writeStringToTextFile("touchpos "+PointsImageView.converted_xcoord+" "+PointsImageView.converted_ycoord,Environment.getExternalStorageDirectory().getPath()+"/Studio3D/images/cache/"+CustomFileObserver.getNumFiles());
+
 			// Fade out the Isolate button
 			IsolateButton.startAnimation(animFadeOut);
 
 			// When the animation finishes ,make the button invisible.
 			IsolateButton.setVisibility(View.INVISIBLE);
-
+			
+			// store the x and y position .
+			
+			
 			new ProgressDialogClass().execute("");
 
 			break;
@@ -209,59 +230,86 @@ public class MainActivity extends Activity {
 		@Override
 		protected String doInBackground(String... params) {
 
-			conversionProgress.setMessage("Processing Image - Computing Disparity ");
-			
 			initializeMats();
 			mRgba = Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_full.jpg");
 			
-			getDisparity(mRgba.getNativeObjAddr(), disp.getNativeObjAddr());
-			
-			try {
-				copy(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/disp.png",Environment.getExternalStorageDirectory().getPath()+"/Studio3D/images/cache/"+CustomFileObserver.getNumFiles()+"/disp.png");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			
+
 			runOnUiThread(new Runnable() {
 			     public void run() {
-
-			//stuff that updates ui
-			    	 conversionProgress.setMessage("Processing Image - Cropping Image ");
-
-			    }
-			});
-			
-			Log.d(TAG,"Start cropping");
-			//crop5(mRgba.getNativeObjAddr(), limg.getNativeObjAddr());
-			Log.d(TAG,"End cropping");
-			
-			runOnUiThread(new Runnable() {
-			     public void run() {
-			    	 conversionProgress.setMessage("Processing Image - Splitting Layers ");
+			    	 conversionProgress.setMessage("Processing Image - Computing Disparity ");
+						
 						
 			//stuff that updates ui
 
 			    }
 			});
 			
-			try {
-				copy(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_bg.png",Environment.getExternalStorageDirectory().getPath()+"/Studio3D/images/cache/"+CustomFileObserver.getNumFiles()+"/img_bg.png");
-				copy(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png",Environment.getExternalStorageDirectory().getPath()+"/Studio3D/images/cache/"+CustomFileObserver.getNumFiles()+"/img_fg.png");
+			if(!buttonClicked)
+			{
 				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				getDisparity(mRgba.getNativeObjAddr(), disp.getNativeObjAddr());
+				
+				try {
+					copy(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/disp.png",Environment.getExternalStorageDirectory().getPath()+"/Studio3D/images/cache/"+CustomFileObserver.getNumFiles()+"/disp.png");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+				runOnUiThread(new Runnable() {
+				     public void run() 
+				     {
+	
+				//stuff that updates ui
+				    	 conversionProgress.setMessage("Processing Image - Cropping Image ");
+	
+				    }
+				});
+				
+				Log.d(TAG,"Start cropping");
+				//crop5(mRgba.getNativeObjAddr(), limg.getNativeObjAddr());
+				Log.d(TAG,"End cropping");
+			
 			}
 			
-			
-	 		// passing 0,0,-1 for now ..
-			PointsImageView.ContourPoints= getThreshold(mRgba.getNativeObjAddr(), disp.getNativeObjAddr(), finalImage.getNativeObjAddr(),background.getNativeObjAddr(),foreground.getNativeObjAddr(),0,0,-1);
-	        			
-			// Instagram Filter conversion,Browse the seperated layers directory
-			// and convert ..
-			
+				runOnUiThread(new Runnable() {
+				     public void run() {
+				    	 conversionProgress.setMessage("Processing Image - Splitting Layers ");
+							
+				//stuff that updates ui
+	
+				    }
+				});
+				
+				try { 
+					copy(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_bg.png",Environment.getExternalStorageDirectory().getPath()+"/Studio3D/images/cache/"+CustomFileObserver.getNumFiles()+"/img_bg.png");
+					copy(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png",Environment.getExternalStorageDirectory().getPath()+"/Studio3D/images/cache/"+CustomFileObserver.getNumFiles()+"/img_fg.png");
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if(buttonClicked)
+				{
+					//mRgba = Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_full.jpg");
+					disp=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/disp.png");
+					//background=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_bg.png");
+					//foreground=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png");
+					Log.d("disp"," "+disp.size());
+					// Assign the mRgba ,disp ..and other MAt's 
+					
+				;
+				}
+				
+
+				PointsImageView.ContourPoints= getThreshold(mRgba.getNativeObjAddr(), disp.getNativeObjAddr(), finalImage.getNativeObjAddr(),background.getNativeObjAddr(),foreground.getNativeObjAddr(),(int)PointsImageView.converted_xcoord,(int)PointsImageView.converted_ycoord,-1);
+		        			
+				// Instagram Filter conversion,Browse the seperated layers directory
+				// and convert ..
+				
+		
 			
 			runOnUiThread(new Runnable() {
 			     public void run() {
@@ -271,6 +319,7 @@ public class MainActivity extends Activity {
 
 			    }
 			});
+			
 			applyColorFilterstoLayers();
 
 			return "";
@@ -332,6 +381,27 @@ public class MainActivity extends Activity {
 	    out.close();
 	}
 	
+	 // this is a canned method that should presumably work
+    private void writeStringToTextFile(String s, String f){
+    	
+    	Log.d("path",f);
+//    File sdCard = Environment.getExternalStorageDirectory();
+//    File dir = new File (sdCard.getAbsolutePath());
+//    dir.mkdirs();
+    File file = new File(f, "config.cfg");
+    try{
+       FileOutputStream f1 = new FileOutputStream(file,false); //True = Append to file, false = Overwrite
+       PrintStream p = new PrintStream(f1);
+       p.print(s);
+       p.close();
+       f1.close();
+    } catch (FileNotFoundException e) {
+    } catch (IOException e) {
+    }   }
+    
+    
+    
+    
 
 
 	// // /// / // / / / / / / / / / // / / / / / / / // / / /

@@ -120,9 +120,6 @@ public class CustomFileObserver
 								outputStream2 = new FileOutputStream (  sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles+"/img_left.jpg");
 								right_img.compress(CompressFormat.JPEG, 100, outputStream2);
 
-								
-
-
 							} catch (FileNotFoundException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -140,7 +137,7 @@ public class CustomFileObserver
 								{
 										
 									it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-									it.putExtra("browseButtonClicked", "false");
+									it.putExtra("browseButtonClicked", false);
 					        
 									activityContext.startActivity(it);
 									
