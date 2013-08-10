@@ -39,7 +39,7 @@
         android:text="" />
 
     <ImageView
-        android:id="@+id/imageView2"
+        android:id="@+id/browseButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/logoAnimation"
@@ -52,7 +52,8 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/cameraView"
         android:layout_alignTop="@+id/imageView3"
-        android:src="@drawable/placeholder_image" />
+        android:src="@drawable/settings_1gear" 
+        android:onClick="launchSettingsActivity"/>
 
     <ImageView
         android:id="@+id/cameraView"
@@ -68,8 +69,8 @@
         android:id="@+id/imageView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/imageView2"
-        android:layout_below="@+id/imageView2"
+        android:layout_alignRight="@+id/browseButton"
+        android:layout_below="@+id/browseButton"
         android:layout_marginTop="100dp"
         android:src="@drawable/sample" />
 
@@ -96,17 +97,6 @@
         android:textSize="18dp" />
 
     <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-   
-        android:layout_below="@+id/imageView4"
-        android:layout_marginTop="15dp"
-        android:text="    Last Session"
-        android:textColor="#FFFFFF"
-        android:textSize="18dp" />
-
-    <TextView
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -124,8 +114,19 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/cameratext"
         android:layout_alignBottom="@+id/cameratext"
-        android:layout_alignLeft="@+id/imageView2"
+        android:layout_alignLeft="@+id/browseButton"
         android:text="  Browse"
+        android:textColor="#FFFFFF"
+        android:textSize="18dp" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/imageView4"
+        android:layout_alignRight="@+id/cameratext"
+        android:layout_below="@+id/imageView4"
+        android:text="   Settings"
         android:textColor="#FFFFFF"
         android:textSize="18dp" />
    
@@ -139,6 +140,7 @@
         android:layout_alignParentTop="true"
         android:src="@drawable/settings_1gear"
         android:background="@color/transparent"
-		android:onClick="launchSettingsActivity"/>
+		android:onClick="launchSettingsActivity"
+		android:visibility="invisible"/>
 
 </RelativeLayout>

@@ -24,6 +24,7 @@ public class CustomFileObserver
 {
 
 	Context activityContext;
+	static int numFiles;
 
 	public CustomFileObserver(Context context)
 	{
@@ -95,6 +96,31 @@ public class CustomFileObserver
 								outputStreamFull = new FileOutputStream ( Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_full.jpg");
 								fullsize_bitmap.compress(CompressFormat.JPEG, 100, outputStreamFull);
 
+								
+								File sdCardDirectory = Environment.getExternalStorageDirectory();
+						        File storedImagesDir = new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images");
+						       
+						        if(!storedImagesDir.exists())
+						        	storedImagesDir.mkdirs();
+						        
+								to.renameTo(new File(Environment.getExternalStorageDirectory()+"/Studio3D/images/"+storedImagesDir.listFiles().length+".jpg"));
+								
+								File thumbsImagesDir = new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache");
+							       
+								 if(!thumbsImagesDir.exists())
+									 thumbsImagesDir.mkdirs();
+								
+								numFiles=thumbsImagesDir.listFiles().length;
+								File currentFolder=new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles);
+								currentFolder.mkdirs();
+							    
+								outputStreamFull = new FileOutputStream ( sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles+"/img_full.jpg");
+								fullsize_bitmap.compress(CompressFormat.JPEG, 100, outputStreamFull);
+								
+								outputStream2 = new FileOutputStream (  sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles+"/img_left.jpg");
+								right_img.compress(CompressFormat.JPEG, 100, outputStream2);
+
+								
 
 
 							} catch (FileNotFoundException e) {
@@ -114,6 +140,7 @@ public class CustomFileObserver
 								{
 										
 									it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+									it.putExtra("browseButtonClicked", "false");
 					        
 									activityContext.startActivity(it);
 									
@@ -135,5 +162,11 @@ public class CustomFileObserver
 
 		observer.startWatching(); // start the observer
 	}
+	
+	static public int getNumFiles()
+	{
+		return numFiles;
+	}
+	
 
 }

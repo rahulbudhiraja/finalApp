@@ -1,23 +1,16 @@
 package com.tesseract.studio3d.Animation;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Random;
 
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.MatOfDMatch;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfKeyPoint;
 import org.opencv.highgui.Highgui;
 
 import ColorFilters.ApplyFilterstoLayer;
@@ -36,14 +29,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.OnTouchListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.tesseract.studio3d.CustomFileObserver;
 import com.tesseract.studio3d.R;
 
 public class MainActivity extends Activity {
@@ -63,13 +59,14 @@ public class MainActivity extends Activity {
 	 public Mat foreground,background;
 	 
 	 
+	 
 
 	String[] imageFilters = { "sepia", "stark", "sunnyside", "cool", "worn",
 			"grayscale","vignette","crush","sunny","night" };
 
 	File seperatedLayersFolder;
 	
-	File leftimgFile;
+	File disparityFile;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +81,8 @@ public class MainActivity extends Activity {
 
 		mImageView = (ImageView) findViewById(R.id.customImageView);
 
+//		mImageView.setOnTouchListener(drawMagnifyingGlassonTouch);
+		
 		conversionProgress = new ProgressDialog(this);
 
 		IsolateButton = (ImageButton) findViewById(R.id.isolatebutton);
@@ -109,6 +108,7 @@ public class MainActivity extends Activity {
 
 	}
 
+	
 
 	public void ButtonOnClick(View v) {
 		switch (v.getId()) {
@@ -133,7 +133,8 @@ public class MainActivity extends Activity {
 
 	
 
-	 public  void initializeMats() {
+	 public  void initializeMats() 
+	 {
 			// TODO Auto-generated method stub
 		    mRgba = new Mat();
 			disp = new Mat();
@@ -215,9 +216,14 @@ public class MainActivity extends Activity {
 			
 			getDisparity(mRgba.getNativeObjAddr(), disp.getNativeObjAddr());
 			
+			try {
+				copy(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/disp.png",Environment.getExternalStorageDirectory().getPath()+"/Studio3D/images/cache/"+CustomFileObserver.getNumFiles()+"/disp.png");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
-			leftimgFile = new File(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg");
-	    				
+			
 			runOnUiThread(new Runnable() {
 			     public void run() {
 
@@ -239,6 +245,16 @@ public class MainActivity extends Activity {
 
 			    }
 			});
+			
+			try {
+				copy(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_bg.png",Environment.getExternalStorageDirectory().getPath()+"/Studio3D/images/cache/"+CustomFileObserver.getNumFiles()+"/img_bg.png");
+				copy(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png",Environment.getExternalStorageDirectory().getPath()+"/Studio3D/images/cache/"+CustomFileObserver.getNumFiles()+"/img_fg.png");
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			
 	 		// passing 0,0,-1 for now ..
 			PointsImageView.ContourPoints= getThreshold(mRgba.getNativeObjAddr(), disp.getNativeObjAddr(), finalImage.getNativeObjAddr(),background.getNativeObjAddr(),foreground.getNativeObjAddr(),0,0,-1);
@@ -296,7 +312,25 @@ public class MainActivity extends Activity {
 	}
 
 	
-	
+	public void copy(String src_loc,String dst_loc) throws IOException {
+	   
+		
+		
+		File src=new File(src_loc);
+		File dst=new File(dst_loc);
+		
+		InputStream in = new FileInputStream(src);
+	    OutputStream out = new FileOutputStream(dst);
+
+	    // Transfer bytes from in to out
+	    byte[] buf = new byte[1024];
+	    int len;
+	    while ((len = in.read(buf)) > 0) {
+	        out.write(buf, 0, len);
+	    }
+	    in.close();
+	    out.close();
+	}
 	
 
 
@@ -364,6 +398,8 @@ public class MainActivity extends Activity {
 		}
 
 	}
+	
+	
 
 	public void applySpecificFiltertoimage(String filterName,
 			Bitmap canvas_bitmap, Canvas canvas, ColorMatrix cm, Paint paint,

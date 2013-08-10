@@ -3,15 +3,21 @@ package com.tesseract.studio3d.social;
 import java.util.Arrays;
 import java.util.List;
 
+import com.facebook.FacebookRequestError;
+import com.facebook.Request;
+import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphObject;
 import com.tesseract.studio3d.R;
 
 
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
@@ -35,7 +41,8 @@ public class SocialSharing extends FragmentActivity
 	ImageButton postPhotoButton;
 	private PendingAction pendingAction = PendingAction.NONE;
 	private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
-	
+	Bitmap canvasBitmap;
+
 
     
 private enum PendingAction 
@@ -45,19 +52,6 @@ private enum PendingAction
         POST_STATUS_UPDATE
 }
 
-private void handlePendingAction() {
-    PendingAction previouslyPendingAction = pendingAction;
-    // These actions may re-set pendingAction if they are still pending, but we assume they
-    // will succeed.
-    pendingAction = PendingAction.NONE;
-
-    switch (previouslyPendingAction) {
-        case POST_PHOTO:
-      ;//      postPhoto();
-            break;
-        
-    }
-}
 
 protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -73,8 +67,7 @@ protected void onCreate(Bundle savedInstanceState)
 		
 	
 		String fileName=Environment.getExternalStorageDirectory().getAbsolutePath()+"/Studio3D/combined.png";
-		Bitmap canvasBitmap;
-
+		
 		canvasBitmap = BitmapFactory.decodeFile(fileName);
 		
 		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
@@ -127,9 +120,63 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	            }
 	        }
 	    }
+	  
+
+	    private void postPhoto() {
+	        if (hasPublishPermission()) {
+	          //  Bitmap image = BitmapFactory.decodeResource(this.getResources(), R.drawable.icon);
+	            Request request = Request.newUploadPhotoRequest(Session.getActiveSession(),canvasBitmap, new Request.Callback() {
+	                @Override
+	                public void onCompleted(Response response) {
+	                	
+	                    showPublishResult(getString(R.string.photo_post), response.getGraphObject(), response.getError());
+	                }
+	            });
+	            request.executeAsync();
+	        } else {
+	            pendingAction = PendingAction.POST_PHOTO;
+	        }
+	    }
 	  private boolean hasPublishPermission() {
 	        Session session = Session.getActiveSession();
 	        return session != null && session.getPermissions().contains("publish_actions");
 	    }
+	  private void handlePendingAction() {
+		    PendingAction previouslyPendingAction = pendingAction;
+		    // These actions may re-set pendingAction if they are still pending, but we assume they
+		    // will succeed.
+		    pendingAction = PendingAction.NONE;
+
+		    switch (previouslyPendingAction) {
+		        case POST_PHOTO:
+		           postPhoto();	
+		            break;
+		        
+		    }
+		}
+	  
+	    private void showPublishResult(String message, GraphObject result, FacebookRequestError error) {
+	        String title = null;
+	        String alertMessage = null;
+	        if (error == null) {
+	            title = getString(R.string.success);
+	            String id = result.cast(GraphObjectWithId.class).getId();
+	            alertMessage = getString(R.string.successfully_posted_post, message, id);
+	        } else {
+	            title = getString(R.string.error);
+	            alertMessage = error.getErrorMessage();
+	        }
+
+	        new AlertDialog.Builder(this)
+	                .setTitle(title)
+	                .setMessage(alertMessage)
+	                .setPositiveButton(R.string.ok, null)
+	                .show();
+	    }
+	    
+	    private interface GraphObjectWithId extends GraphObject {
+	        String getId();
+	    }
+
 	
 }

@@ -327,19 +327,6 @@ public class AnimationActivity extends Activity {
 
 
 
-	OnItemClickListener onItemClickListener = new OnItemClickListener() {
-
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position,
-				long id) {
-
-			// Toast.makeText(AnimationActivity.this, "Position "+position,
-			// Toast.LENGTH_SHORT).show();
-
-			applyFiltertoView(position);
-
-		}
-	};
 
 	private void startAnimation() {
 
@@ -926,23 +913,6 @@ public class AnimationActivity extends Activity {
 
 	};
 
-	public OnTouchListener filtersLayerTouchListener = new OnTouchListener() {
-
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
-
-			// change the filters ..
-
-			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				int id = v.getId() - 2000;
-				applyFiltertoView(id % imageFilters.length);
-
-				Log.d(TAG, "ID" + id);
-			}
-			return false;
-		}
-	};
 
 	public OnClickListener filtersLayerClickListener = new OnClickListener() {
 
@@ -1379,10 +1349,6 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
              Utils.matToBitmap(foreground, tempBitmap);
              
              CanvasImageViews.get(1).setImageBitmap(tempBitmap);
-             
-             
-             
-             
              
              
              

@@ -130,8 +130,5 @@ public class SettingsActivity extends FragmentActivity
 //	        }
 	    }
 	
-	public void facebookSetup()
-	{
-		
-	}
+
 }

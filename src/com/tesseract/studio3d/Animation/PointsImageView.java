@@ -15,6 +15,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import com.tesseract.studio3d.R;
+
 import ColorFilters.ApplyFilterstoLayer;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -34,6 +36,7 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 
 
 
@@ -60,12 +63,15 @@ public class PointsImageView extends ImageView {
 	public Mat finalImage;
 	public Mat limg;	
 	public Mat foreground,background;
-	int converted_xcoord=0,converted_ycoord=0;
+	float converted_xcoord=0,converted_ycoord=0;
 	int currentMode=-1;
 	
 	ProgressDialog conversionProgress;
 	
 	File leftimgFile;
+	private Bitmap magnifyingGlassBitmap,touchOverlay;
+	
+	
 	
 	public PointsImageView(Context context, AttributeSet set) {         
 		 super(context, set);     
@@ -78,7 +84,12 @@ public class PointsImageView extends ImageView {
 		 imageViewBitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/Studio3D/img_left.jpg");
 		 imageViewBitmap2=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/Studio3D/img_right.jpg"); 
 		 
-		 Log.d("passing","passing");
+		 InputStream is = context.getResources().openRawResource(R.drawable.magnifying_glass);
+    	 magnifyingGlassBitmap=BitmapFactory.decodeStream(is);  
+    	 is= context.getResources().openRawResource(R.drawable.touchoverlay);
+    	 touchOverlay=BitmapFactory.decodeStream(is);
+	
+    	 Log.d("passing","passing");
 		 
 		 Log.d(TAG,"bitmap dimensions:"+imageViewBitmap.getWidth()+imageViewBitmap.getHeight());
 		 
@@ -93,14 +104,29 @@ public class PointsImageView extends ImageView {
 	
 		 animationTime=0;
 		 
+		 this.setOnTouchListener(drawMagnifyingGlassonTouch);
+		 
 		 start_time=lastindex_time=System.currentTimeMillis();
 		 
 		} 
 	
-	static public void initializeMats()
-	{
+
+	public OnTouchListener drawMagnifyingGlassonTouch= new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) 
+		{
+			if (event.getAction() == MotionEvent.ACTION_DOWN||event.getAction()==MotionEvent.ACTION_MOVE) 
+			{
+				converted_xcoord=event.getX();
+				converted_ycoord=event.getY();
+			
+			}
+				return false;
+		}
 		
-	}
+	};
+	
 	 private void segmentImagesandgetContours() {
 		// TODO Auto-generated method stub
 		
@@ -339,8 +365,11 @@ public class PointsImageView extends ImageView {
     	super.onDraw(canvas);
       
     	
+    	
+    	
     	canvas.drawBitmap(imageViewBitmap, 0, 0,paint); 
 	    canvas.drawBitmap(imageViewBitmap2, 0, 0,paint);
+	    
 	    
 	    if(isAnimate)
 	    {
@@ -364,6 +393,18 @@ public class PointsImageView extends ImageView {
 		    
 	    }
 	    
+	    else 
+	    {
+	    	canvas.drawBitmap(touchOverlay, 0, 0,paint);
+	    	
+	    	if(converted_xcoord!=0&&converted_ycoord!=0&&converted_xcoord>80&&converted_xcoord<880&&converted_ycoord>80&&converted_ycoord<460)
+	    	{
+	    		
+	    		
+	    		canvas.drawBitmap(magnifyingGlassBitmap,converted_xcoord-magnifyingGlassBitmap.getWidth()/2,converted_ycoord-magnifyingGlassBitmap.getHeight()/2,paint);
+	    	}
+	    }
+	    
 	       
 //	    path.lineTo(points.get(currentindex).x, points.get(currentindex).y);
 	    
@@ -380,109 +421,7 @@ public class PointsImageView extends ImageView {
     	Log.d("X = "+event.getX(),"Y = "+event.getY());
     	   return true; //processed
     	  }
-    
-    public native void getDisparity(long matAddrRgba, long matAddrfinalImage);
-    public native void crop5(long matAddrRgba, long matAddrfinalImage);
-    public native float[] getThreshold(long matAddrRgba, long matAddrDisp, long matAddrfinalImage,long matAddrBackground, long matAddrForeground, int ji1, int ji2,int choice);
-   
-    
-    public class ProgressDialogClass extends AsyncTask<String, Void, String> {
 
-		@Override
-		protected String doInBackground(String... params) {
-
-			conversionProgress.setMessage("Processing Image - Computing Disparity ");
-			getDisparity(mRgba.getNativeObjAddr(), disp.getNativeObjAddr());
-			
-			mRgba = Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_full.jpg");
-			
-			
-			leftimgFile = new File(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_left.jpg");
-	    				
-			conversionProgress.setMessage("Processing Image - Cropping Image ");
-			crop5(mRgba.getNativeObjAddr(), limg.getNativeObjAddr());
-		    
-			conversionProgress.setMessage("Processing Image - Splitting Layers ");
-			ContourPoints= getThreshold(mRgba.getNativeObjAddr(), disp.getNativeObjAddr(), finalImage.getNativeObjAddr(),background.getNativeObjAddr(),foreground.getNativeObjAddr(), (int)converted_xcoord, (int)converted_ycoord,currentMode);
-	        			
-			// Instagram Filter conversion,Browse the seperated layers directory
-			// and convert ..
-			conversionProgress.setMessage("Processing Image - Applying Color Filters ");
-			
-			applyFilterstoLayers();
-			
-		
-			return "";
-
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-
-			conversionProgress.dismiss();
-			// startanimation
-
-			Log.d("done", "done");
-
-			PointsImageView.startAnimation(true);
-
-			// might want to change "executed" for the returned string passed
-			// into onPostExecute() but that is upto you
-		}
-
-		@Override
-		protected void onPreExecute() {
-		//	conversionProgress.setTitle("Processing Image");
-			conversionProgress.setMessage("Please wait while we process your image ...");
-			conversionProgress.show();
-		}
-
-		@Override
-		protected void onProgressUpdate(Void... values) {
-		}
-		
-		public void applyFilterstoLayers() {
-
-			File sdCard = Environment.getExternalStorageDirectory();
-			File filtersdir = new File(Environment.getExternalStorageDirectory()
-					+ "/Studio3D/Layers/Filters/");
-
-			File seperatedLayersFolder = new File(Environment.getExternalStorageDirectory()
-							+ "/Studio3D/Layers/");
-
-			// Find all the files in the folder..
-
-			File[] files = seperatedLayersFolder.listFiles();
-
-			Log.d(TAG, "Number of files:" + files.length);
-			int count = 0;
-
-			for (File file : files) {
-
-				// Log.d("File path:","Path="+file.getPath());
-
-				if (file.getName().toUpperCase().endsWith(("JPG"))
-						|| file.getName().toUpperCase().endsWith(("PNG"))) {
-					
-					File dir = new File(sdCard.getAbsolutePath()
-							+ "/Studio3D/Layers/Filters/" + count + "/");
-
-					Log.d(TAG, "path" + dir.getPath());
-					dir.mkdirs();
-
-					ApplyFilterstoLayer Filters;
-												
-			    	Filters=new ApplyFilterstoLayer(getContext(),leftimgFile.getAbsolutePath(),count);
-
-					count++;
-				}
-			}
-		}		
-		
-		
-		
-
-	}
-
+ 
     
 }

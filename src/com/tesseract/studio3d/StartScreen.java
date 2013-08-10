@@ -2,12 +2,15 @@ package com.tesseract.studio3d;
 
 import java.io.File;
 
+import com.tesseract.studio3d.Animation.AnimationActivity;
+import com.tesseract.studio3d.browseimages.BrowseImages;
 import com.tesseract.studio3d.social.SettingsActivity;
 import com.tesseract.studio3d.social.SocialSharing;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Typeface;
@@ -32,8 +35,10 @@ public class StartScreen extends Activity {
 	String TAG="Studio 3D";
 	private AnimationDrawable tesseractAnim;
 	private AnimationDrawable splashAnim;
-	private ImageView clickButton;
+	private ImageView clickButton,browseButton;
 	CustomFileObserver fileObserver;
+	Context context;
+	
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -45,7 +50,7 @@ public class StartScreen extends Activity {
 		
 		setContentView(R.layout.activity_start_screen);
 		
-		
+		context=this;
 		
 		
 //		RelativeLayout rLayout = (RelativeLayout) findViewById (R.id.mainlayout);
@@ -71,7 +76,6 @@ public class StartScreen extends Activity {
         if(!layersDir.exists())
 			layersDir.mkdirs();
         
-		fileObserver=new CustomFileObserver(getBaseContext());
 		
 		setupSplashAnim();
 		//setupLogo();
@@ -107,6 +111,10 @@ public class StartScreen extends Activity {
 
 	        @Override
 	        public void onClick(View v) {
+	        	
+	        	fileObserver=new CustomFileObserver(getBaseContext());
+	        	
+	        	
 	        	String packageName = "com.android.camera"; //Or whatever package should be launched
 
 	        	if(packageName.equals("com.android.camera")){ //Camera
@@ -134,7 +142,26 @@ public class StartScreen extends Activity {
 	        	}
 	        }
 	    });
+		
+		
+		browseButton=(ImageView)findViewById(R.id.browseButton);
+		
+		browseButton.setOnClickListener(new View.OnClickListener() {
+
+	        @Override
+	        public void onClick(View v) {
+	        	 
+	        	    	Intent intent = new Intent(context,BrowseImages.class);
+	        	    //	Intent camera_intent=new Intent(this,BrowseImages.class);
+	        	    	context.startActivity(intent);
+	        	    	 
+		
+		
+		
 	}
+	});
+	
+}
 		
 	
 

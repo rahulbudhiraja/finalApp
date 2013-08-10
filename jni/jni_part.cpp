@@ -229,7 +229,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDis
     cvtColor(img1, g1, CV_BGR2GRAY);
     cvtColor(img2, g2, CV_BGR2GRAY);
     getDisp(g1, g2, disp);
-   // imwrite("/mnt/sdcard/Studio3D/Layers/disp.png", disp);
+    imwrite("/mnt/sdcard/Studio3D/disp.png", disp);
 
     return;
 }

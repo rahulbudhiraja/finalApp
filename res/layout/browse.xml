@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/grid_view"
+    android:layout_width="wrap_content"
+    android:layout_height="fill_parent"
+    android:alwaysDrawnWithCache="true"
+    android:background="#000000"
+    android:clipChildren="true"
+    android:columnWidth="100dp"
+    android:gravity="center_horizontal"
+    android:horizontalSpacing="20dp"
+    android:numColumns="auto_fit"
+    android:padding="0dp"
+    android:scrollingCache="true"
+    android:smoothScrollbar="true"
+    android:stretchMode="columnWidth"
+    android:verticalSpacing="10dp"
+    android:adjustViewBounds="true" 
+    android:listSelector="@drawable/imageview_highlight_selector"
+     >
+ 
+</GridView>
