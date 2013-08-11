@@ -1249,17 +1249,17 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
 			{
 				
 				
-				Log.d(TAG,"X ="+(event.getRawX()-CanvasImageViews.get(0).getLeft())+"  Y= "+(event.getRawY()-CanvasImageViews.get(0).getTop())); // For landscape orientation,i.e max val of x is 800 and y max value is 480 ..
+				Log.d(TAG,"X ="+(event.getRawX()-CanvasImageViews.get(1).getLeft())+"  Y= "+(event.getRawY()-CanvasImageViews.get(1).getTop())); // For landscape orientation,i.e max val of x is 800 and y max value is 480 ..
 
  				
  				
  				// Pass these to the JNI function .. These will be the touch positions out of 500x500 .
- 				converted_xcoord=(event.getRawX()-CanvasImageViews.get(0).getLeft());
- 				converted_ycoord=(event.getRawY()-CanvasImageViews.get(0).getTop());
+ 				converted_xcoord=(event.getRawX()-CanvasImageViews.get(1).getLeft());
+ 				converted_ycoord=(event.getRawY()-CanvasImageViews.get(1).getTop());
  				
- 				backupBitmap=((BitmapDrawable)CanvasImageViews.get(0).getDrawable()).getBitmap();
+ 				backupBitmap=((BitmapDrawable)CanvasImageViews.get(1).getDrawable()).getBitmap();
  				
- 				CanvasImageViews.get(0).setImageBitmap(  addCircles( ((BitmapDrawable)CanvasImageViews.get(0).getDrawable()).getBitmap(),converted_xcoord,converted_ycoord));
+ 				CanvasImageViews.get(1).setImageBitmap(  addCircles( ((BitmapDrawable)CanvasImageViews.get(0).getDrawable()).getBitmap(),converted_xcoord,converted_ycoord));
  				
  			//	imageViewBitmap=backupBitmap; // not sure ?
 // 				
@@ -1272,26 +1272,26 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
  		            //finalImage = new Mat();
  		            
  		            currentMode=1;
- 		          
- 		            img1=new Mat();img2=new Mat();
- 					// Save the canvas image ..
- 					
-// 					Bitmap saveImageBitmap =Bitmap.createBitmap(CanvasImageViews.get(0).getWidth(), CanvasImageViews.get(0).getHeight(), Bitmap.Config.ARGB_8888);
- 					
- 					Drawable saveDrawable=CanvasImageViews.get(1).getDrawable();
- 					Bitmap	saveImageBitmap=((BitmapDrawable)saveDrawable).getBitmap();
- 					
- 					Utils.bitmapToMat(saveImageBitmap, img1);
- 					
- 				//	Bitmap mutableBitmap= saveImageBitmap.copy(Bitmap.Config.ARGB_8888, true);
- 					
- 					saveDrawable=CanvasImageViews.get(0).getDrawable();
- 					
- 					Utils.bitmapToMat( ((BitmapDrawable)saveDrawable).getBitmap(), img2);
- 					
- 					
- 					Core.add(img1, img2, mRgba);
- 					Imgproc.cvtColor(mRgba, mRgba, Imgproc.COLOR_RGBA2BGR);
+// 		          
+// 		            img1=new Mat();img2=new Mat();
+// 					// Save the canvas image ..
+// 					
+//// 					Bitmap saveImageBitmap =Bitmap.createBitmap(CanvasImageViews.get(0).getWidth(), CanvasImageViews.get(0).getHeight(), Bitmap.Config.ARGB_8888);
+// 					
+// 					Drawable saveDrawable=CanvasImageViews.get(1).getDrawable();
+// 					Bitmap	saveImageBitmap=((BitmapDrawable)saveDrawable).getBitmap();
+// 					
+// 					Utils.bitmapToMat(saveImageBitmap, img1);
+// 					
+// 				//	Bitmap mutableBitmap= saveImageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+// 					
+// 					saveDrawable=CanvasImageViews.get(0).getDrawable();
+// 					
+// 					Utils.bitmapToMat( ((BitmapDrawable)saveDrawable).getBitmap(), img2);
+// 					
+// 					
+// 					Core.add(img1, img2, mRgba);
+// 					Imgproc.cvtColor(mRgba, mRgba, Imgproc.COLOR_RGBA2BGR);
  					
 			    new ComputeDisparity().execute("");
 			   

@@ -334,8 +334,9 @@ public class MainActivity extends Activity {
 		
 			
 			// startanimation ..
-			PointsImageView.startAnimation(true);
+			//PointsImageView.startAnimation(true);
 
+			
 			
 			Log.d("done", "done");
 

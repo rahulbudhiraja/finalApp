@@ -8,17 +8,17 @@
     android:id="@+id/sharinglayout" >
 
     <ImageButton
-        android:id="@+id/imageButton2"
+        android:id="@+id/twitterButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="37dp"
-        android:layout_toRightOf="@+id/imageButton1"
+        android:layout_toRightOf="@+id/facebookButton"
         android:background="@color/transparent"
         android:src="@drawable/twitter_inactive" />
 
     <ImageButton
-        android:id="@+id/imageButton1"
+        android:id="@+id/facebookButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/editText1"
@@ -42,9 +42,18 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/imageButton2"
+        android:layout_alignTop="@+id/twitterButton"
         android:layout_marginRight="31dp"
         android:background="@color/transparent"
         android:src="@drawable/shareicon" />
+
+    <ImageButton
+        android:id="@+id/settingsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/postpic"
+        android:layout_alignTop="@+id/editText1"
+        android:background="@color/transparent"
+        android:src="@drawable/settings_1gear" />
 
 </RelativeLayout>

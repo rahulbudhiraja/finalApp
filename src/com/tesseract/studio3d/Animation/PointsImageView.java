@@ -236,7 +236,7 @@ public class PointsImageView extends ImageView {
     	Log.d(TAG,"size"+points.size());
 	  
      	path= new Path();
-  		path.reset();
+  		path.reset();  
   		path.moveTo(ContourPoints[0], ContourPoints[1]);
   		
  		Log.d(TAG,"Contour Point"+ContourPoints[0]+"  "+ContourPoints[1]);

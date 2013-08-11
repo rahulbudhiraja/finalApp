@@ -6,6 +6,11 @@ tmp/**
 tmp/**/*
 obj/**
 libs/*
+libs/**
+/libs/*
+*.so
+*.a
+
 libs/armeabi-v7a/*
 *.tmp
 *.bak

@@ -30,6 +30,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 public class SocialSharing extends FragmentActivity
 {
@@ -42,8 +43,10 @@ public class SocialSharing extends FragmentActivity
 	private PendingAction pendingAction = PendingAction.NONE;
 	private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
 	Bitmap canvasBitmap;
-
-
+	ImageButton facebookButton,twitterButton,settingsButton;
+	boolean fbButtonSelected=false,twButtonSelected=false;
+	
+	int buttonAlpha=40;
     
 private enum PendingAction 
 {	
@@ -89,12 +92,69 @@ protected void onCreate(Bundle savedInstanceState)
 		postPhotoButton=(ImageButton) findViewById(R.id.postpic);
 		postPhotoButton.setOnClickListener(new View.OnClickListener() {
 	            public void onClick(View view) {
+	            	if(fbButtonSelected)
 	                onClickPostPhoto();
 	            }
 	        });
 		
+		facebookButton=(ImageButton) findViewById(R.id.facebookButton);
+		twitterButton=(ImageButton)findViewById(R.id.twitterButton);
+		settingsButton=(ImageButton)findViewById(R.id.settingsButton);
 		
+		facebookButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+            	
+                updateFacebookButton();
+            }
+        });
+		
+		
+		twitterButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                updateTwitterButton();
+            }
+        });
+		
+		
+		settingsButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                launchSettingsActivity();
+            }
+        });
+		
+		postPhotoButton.setAlpha(buttonAlpha);
 	}
+
+protected void launchSettingsActivity() 
+{
+	Intent it=new Intent(this,SettingsActivity.class);
+	this.startActivity(it);
+	
+}
+protected void updateTwitterButton() {
+	// TODO Auto-generated method stub
+	twButtonSelected=!twButtonSelected;
+}
+
+protected void updateFacebookButton() {
+	// TODO Auto-generated method stub
+	
+	
+	fbButtonSelected=!fbButtonSelected;
+	if(fbButtonSelected&&hasPublishPermission())
+		{
+		facebookButton.setImageResource(R.drawable.facebookbutton);
+		//postPhotoButton.setVisibility(View.VISIBLE);
+		buttonAlpha=255;
+		}
+	else {
+		facebookButton.setImageResource(R.drawable.facebook_gray);
+		fbButtonSelected=false;
+		//postPhotoButton.setVisibility(View.INVISIBLE);
+		buttonAlpha=25;
+	}
+	postPhotoButton.setAlpha(buttonAlpha);
+}
 public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
      super.onActivityResult(requestCode, resultCode, data);
@@ -103,6 +163,7 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 	
 	  private void onClickPostPhoto() {
+
 	        performPublish(PendingAction.POST_PHOTO);
 	        Log.d("Clicked","clicked");
 	    }
@@ -119,6 +180,7 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	                session.requestNewPublishPermissions(new Session.NewPermissionsRequest(this, PERMISSIONS));
 	            }
 	        }
+	        
 	    }
 	  
 
