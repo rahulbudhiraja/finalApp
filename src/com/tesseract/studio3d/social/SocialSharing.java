@@ -3,21 +3,10 @@ package com.tesseract.studio3d.social;
 import java.util.Arrays;
 import java.util.List;
 
-import com.facebook.FacebookRequestError;
-import com.facebook.Request;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.UiLifecycleHelper;
-import com.facebook.model.GraphObject;
-import com.tesseract.studio3d.R;
-
-
-
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
@@ -25,12 +14,19 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
+
+import com.facebook.FacebookRequestError;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphObject;
+import com.tesseract.studio3d.R;
 
 public class SocialSharing extends FragmentActivity
 {
@@ -46,6 +42,14 @@ public class SocialSharing extends FragmentActivity
 	ImageButton facebookButton,twitterButton,settingsButton;
 	boolean fbButtonSelected=false,twButtonSelected=false;
 	
+	private UiLifecycleHelper uiHelper;
+    private Session.StatusCallback callback = new Session.StatusCallback() {
+        @Override
+        public void call(final Session session, final SessionState state, final Exception exception) {
+            onSessionStateChange(session, state, exception);
+        }
+    };
+	
 	int buttonAlpha=40;
     
 private enum PendingAction 
@@ -55,11 +59,67 @@ private enum PendingAction
         POST_STATUS_UPDATE
 }
 
+private void onSessionStateChange(Session session, SessionState state, Exception exception) {
+	// Check if the user is authenticated and
+    // a deep link needs to be handled.
+  if (state.isOpened()) {
+		// Make the recipe list visible
+	  buttonAlpha=255;		
+    } else if (state.isClosed()) {
+    	// Make the recipe list hidden
+      buttonAlpha=25;
+    }
+
+postPhotoButton.setAlpha(buttonAlpha);
+
+}
+
+public void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    uiHelper.onSaveInstanceState(outState);
+}
+
+
+public void onResume() {
+    super.onResume();
+    
+    // For scenarios where the main activity is launched and user
+	// session is not null, the session state change notification
+	// may not be triggered. Trigger it if it's open/closed.
+	Session session = Session.getActiveSession();
+	if (session != null &&
+			(session.isOpened() || session.isClosed()) ) {
+		onSessionStateChange(session, session.getState(), null);
+	}
+	
+    uiHelper.onResume();
+}
+
+@Override
+public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    uiHelper.onActivityResult(requestCode, resultCode, data);
+}
+
+@Override
+public void onPause() {
+    super.onPause();
+    uiHelper.onPause();
+}
+
+@Override
+public void onDestroy() {
+    super.onDestroy();
+    uiHelper.onDestroy();
+}
 
 protected void onCreate(Bundle savedInstanceState) 
 	{
 		super.onCreate(savedInstanceState);
 		
+		uiHelper = new UiLifecycleHelper(this, callback);
+	    uiHelper.onCreate(savedInstanceState);
+	    
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 	
@@ -141,7 +201,10 @@ protected void updateFacebookButton() {
 	
 	
 	fbButtonSelected=!fbButtonSelected;
-	if(fbButtonSelected&&hasPublishPermission())
+	Log.d("Button slected","selected:"+fbButtonSelected);
+	
+	Log.d("facebook api"," "+hasPublishPermission());
+	if(fbButtonSelected)
 		{
 		facebookButton.setImageResource(R.drawable.facebookbutton);
 		//postPhotoButton.setVisibility(View.VISIBLE);
@@ -155,11 +218,7 @@ protected void updateFacebookButton() {
 	}
 	postPhotoButton.setAlpha(buttonAlpha);
 }
-public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-     super.onActivityResult(requestCode, resultCode, data);
-     Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
- }
 
 	
 	  private void onClickPostPhoto() {
@@ -201,6 +260,7 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	    }
 	  private boolean hasPublishPermission() {
 	        Session session = Session.getActiveSession();
+	        Log.d("Values ","Session: "+session+session.getPermissions().contains("publish_actions"));
 	        return session != null && session.getPermissions().contains("publish_actions");
 	    }
 	  private void handlePendingAction() {

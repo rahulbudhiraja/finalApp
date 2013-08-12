@@ -13,10 +13,12 @@ import java.util.Random;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
 
 import ColorFilters.ApplyFilterstoLayer;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -54,7 +56,7 @@ public class MainActivity extends Activity {
      
 	ProgressDialog conversionProgress;
 
-	 private Mat mRgba;
+	public static Mat mRgba;
 		
 	 public static Mat disp;
 	 public Mat finalImage;
@@ -72,6 +74,7 @@ public class MainActivity extends Activity {
 	File disparityFile;
 	int converted_x=0,converted_y=0;
 	boolean buttonClicked;
+	Context mContext;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -121,6 +124,7 @@ public class MainActivity extends Activity {
 		// Tesseract/Layers
 		//seperatedLayersFolder = new File(Environment.getExternalStorageDirectory()+ "/Studio3DLayers/");
 
+	    mContext=this;
 	}
 
 	
@@ -299,6 +303,7 @@ public class MainActivity extends Activity {
 					//foreground=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png");
 					Log.d("disp"," "+disp.size());
 					// Assign the mRgba ,disp ..and other MAt's 
+					Imgproc.cvtColor(disp, disp, Imgproc.COLOR_BGR2GRAY);
 					
 				;
 				}
@@ -335,7 +340,8 @@ public class MainActivity extends Activity {
 			
 			// startanimation ..
 			//PointsImageView.startAnimation(true);
-
+			Intent camera_intent=new Intent(mContext,AnimationActivity.class);
+		    mContext.startActivity(camera_intent);
 			
 			
 			Log.d("done", "done");

@@ -14,6 +14,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -36,7 +37,7 @@ public class SettingsActivity extends FragmentActivity
 	 private Session.StatusCallback callback = new Session.StatusCallback() {
 	        @Override
 	        public void call(Session session, SessionState state, Exception exception) {
-	           ;// onSessionStateChange(session, state, exception);
+	            onSessionStateChange(session, state, exception);
 	        }
 	    };
 	    
@@ -67,6 +68,7 @@ public class SettingsActivity extends FragmentActivity
             
             public void onUserInfoFetched(GraphUser user) {
                SettingsActivity.this.user = user;
+               Log.d("User"," loggedin "+user);
                 updateUI();
                 // It's possible that we were waiting for this.user to be populated in order to post a
                 // status update.

@@ -683,7 +683,7 @@ public class AnimationActivity extends Activity {
 				RelativeLayout.LayoutParams.WRAP_CONTENT,
 				RelativeLayout.LayoutParams.WRAP_CONTENT);
 		layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL, 1);
-
+  
 		newimageView.setLayoutParams(layoutParams);
 
 		/* Bug in Android 2.3.If this is not set,a trail is left behind */
@@ -1259,7 +1259,7 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
  				
  				backupBitmap=((BitmapDrawable)CanvasImageViews.get(1).getDrawable()).getBitmap();
  				
- 				CanvasImageViews.get(1).setImageBitmap(  addCircles( ((BitmapDrawable)CanvasImageViews.get(0).getDrawable()).getBitmap(),converted_xcoord,converted_ycoord));
+ 			//	CanvasImageViews.get(1).setImageBitmap(  addCircles( ((BitmapDrawable)CanvasImageViews.get(0).getDrawable()).getBitmap(),converted_xcoord,converted_ycoord));
  				
  			//	imageViewBitmap=backupBitmap; // not sure ?
 // 				
@@ -1270,7 +1270,9 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
  		           Log.d(TAG, String.valueOf(converted_xcoord));
  		           Log.d(TAG, "converted");
  		            //finalImage = new Mat();
- 		            
+ 		      	Imgproc.cvtColor(disp, disp, Imgproc.COLOR_BGR2GRAY);
+ 		           if(disp.empty())
+				
  		            currentMode=1;
 // 		          
 // 		            img1=new Mat();img2=new Mat();
@@ -1305,7 +1307,7 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
     
     public  void initializeMats() {
 		// TODO Auto-generated method stub
-	    mRgba = new Mat();
+	    mRgba = MainActivity.mRgba;
 		disp = MainActivity.disp;
 		limg = new Mat();
 		foreground=new Mat();
