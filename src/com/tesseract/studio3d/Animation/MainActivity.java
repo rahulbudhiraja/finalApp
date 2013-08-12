@@ -303,7 +303,7 @@ public class MainActivity extends Activity {
 					//foreground=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png");
 					Log.d("disp"," "+disp.size());
 					// Assign the mRgba ,disp ..and other MAt's 
-					Imgproc.cvtColor(disp, disp, Imgproc.COLOR_BGR2GRAY);
+					//Imgproc.cvtColor(disp, disp, Imgproc.COLOR_BGR2GRAY);
 					
 				;
 				}

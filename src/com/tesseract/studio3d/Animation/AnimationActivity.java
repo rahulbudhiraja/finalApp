@@ -981,10 +981,13 @@ public class AnimationActivity extends Activity {
 		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
 		layoutParams.addRule(RelativeLayout.LEFT_OF, 54321);
+		
 
 		//layoutParams.setMargins(0, 0,40, 0);
 
 		Replace.setLayoutParams(layoutParams);
+		Replace.setId(987123);
+		
 		activityLayout.addView(Replace);
 
 		layoutParams=new RelativeLayout.LayoutParams(
@@ -1202,7 +1205,7 @@ public class AnimationActivity extends Activity {
 			
 			else if (v.getId()==11223)
 			{
-				// Change the button background ..
+				// Change the focus
 				
 				focusButtonClicked=!focusButtonClicked;
 				if(focusButtonClicked)
@@ -1210,6 +1213,13 @@ public class AnimationActivity extends Activity {
 				else focus.setImageDrawable(getResources().getDrawable(R.drawable.bluricon));
 				
 				// 
+				
+			
+			}
+			else if(v.getId()==987123)
+			{
+				// Replace the button 
+				
 				
 			}
 			
@@ -1270,9 +1280,9 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
  		           Log.d(TAG, String.valueOf(converted_xcoord));
  		           Log.d(TAG, "converted");
  		            //finalImage = new Mat();
- 		      	Imgproc.cvtColor(disp, disp, Imgproc.COLOR_BGR2GRAY);
- 		           if(disp.empty())
-				
+ 		        
+ 		           Log.d(TAG,"channels  "+mRgba.channels());
+ 		          Log.d(TAG,"channels  "+disp.channels());
  		            currentMode=1;
 // 		          
 // 		            img1=new Mat();img2=new Mat();
@@ -1394,3 +1404,4 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
 	public native void getThreshold(long matAddrRgba, long matAddrDisp, long matAddrfinalImage,long matAddrBackground, long matAddrForeground, int ji1, int ji2,int choice);
 	   
 }
+ 

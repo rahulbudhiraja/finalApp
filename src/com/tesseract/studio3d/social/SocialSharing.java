@@ -40,6 +40,7 @@ public class SocialSharing extends FragmentActivity
 	private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
 	Bitmap canvasBitmap;
 	ImageButton facebookButton,twitterButton,settingsButton;
+	
 	boolean fbButtonSelected=false,twButtonSelected=false;
 	
 	private UiLifecycleHelper uiHelper;
@@ -181,6 +182,8 @@ protected void onCreate(Bundle savedInstanceState)
                 launchSettingsActivity();
             }
         });
+		
+		
 		
 		postPhotoButton.setAlpha(buttonAlpha);
 	}

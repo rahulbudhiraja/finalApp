@@ -235,6 +235,8 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDis
 }
 JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode)
 {
+
+	String path;
   Mat& img = *(Mat*)addrBgr;
   Mat& disp = *(Mat*)addrDisp;
 
@@ -316,13 +318,43 @@ JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity
         bitwise_and(background, blurBackground, background);
   }
     else if(currentMode==2)
-    doOilPaint(img1, background);
+    {
+        doOilPaint(img1, background);
+        getMaskedImage(img1, foreground);
+    }
     else if(currentMode==3)
-    getMaskedGrayImage(img1, background);
+    {
+        getMaskedGrayImage(img1, background);
+        getMaskedImage(img1, foreground);
+    }
     else if(currentMode==4)
-    getSepia(img1, background);
-    else if(currentMode == -1)
+    {
+        getSepia(img1, background);
+        getMaskedImage(img1, foreground);
+    }
+    else if(currentMode == 5)
+    {
+        Mat stickimg;
+        stickimg = imread(path);
+        resize(stickimg, stickimg, Size(background.cols, background.rows));
+        bitwise_and(background, stickimg, stickimg);
+        stickimg.copyTo(background);
+        getMaskedImage(img1, foreground);
+    }
+    else if (currentMode == 6)
+    {
+        Mat stickimg;
+        stickimg = imread(path);
+        resize(stickimg, stickimg, Size(foreground.cols, foreground.rows));
+        bitwise_and(foreground, stickimg, stickimg);
+        stickimg.copyTo(foreground);
         getMaskedImage(img1, background);
+    }
+    else if(currentMode == -1)
+    {
+        getMaskedImage(img1, background);
+        getMaskedImage(img1, foreground);
+	}
 
     LOGD("Reached the end");
     getMaskedImage(img1, foreground);
