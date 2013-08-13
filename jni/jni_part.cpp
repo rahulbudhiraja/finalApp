@@ -133,12 +133,15 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
 
 	LOGD("Start");
   Mat& img = *(Mat*)addrBgr;
+  img = imread("/mnt/sdcard/Studio3D/img_full.jpg");
   Mat& disp = *(Mat*)addrDisp;
-
+  disp = imread("/mnt/sdcard/Studio3D/disp.png");
+  cvtColor(disp, disp, CV_BGR2GRAY);
   Mat& background = *(Mat*)addrBackground;
   Mat& foreground = *(Mat*)addrForeground;
 
   Mat& finImg = *(Mat*)finalImage;
+  finImg = Mat::zeros(finImg.rows, finImg.cols, CV_8UC3);
   LOGD("Initialize");
 
   jfloatArray contourPoints;
@@ -158,7 +161,9 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
     getThreshold(disp, point1, 10, foreground);
     LOGD("THREESH");
     segmentForeground(img1, foreground, background,contours);
-
+    imwrite("/mnt/sdcard/Studio3D/img_seg_img1.jpg", img1);
+    imwrite("/mnt/sdcard/Studio3D/img_seg_fg.jpg", foreground);
+    imwrite("/mnt/sdcard/Studio3D/img_seg_bg.jpg", background);
 
     LOGD ("Another breakpt");
     Mat layerAf, layerAb;
@@ -214,7 +219,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
 //       strcat(str,str3);
 
        LOGD(str);
-
+    currentMode=2;
     if(currentMode==1)
     {
     Mat blurBackground;
@@ -233,6 +238,9 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
     LOGD("Reached the end");
     getMaskedImage(img1, foreground);
 
+    imwrite("/mnt/sdcard/Studio3D/img_fg12_mid.png", foreground);
+    imwrite("/mnt/sdcard/Studio3D/img_bg12_mid.png", background);
+
     cvtColor(foreground, foreground, CV_BGR2RGBA);
     cvtColor(background, background, CV_BGR2RGBA);
 
@@ -247,11 +255,12 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
     merge(rgbam, background);
     rgbam.clear();
 
-    imwrite("/mnt/sdcard/Studio3D/img_fg22.png", foreground);
-   imwrite("/mnt/sdcard/Studio3D/img_bg22.png", background);
+    imwrite("/mnt/sdcard/Studio3D/layers/img_fg22.png", foreground);
+    imwrite("/mnt/sdcard/Studio3D/layers/img_bg22.png", background);
 
     addFgBg(foreground, background, finImg);
-//    imwrite("/mnt/sdcard/Studio3D/img_fin.png", finImg);
+    imwrite("/mnt/sdcard/Studio3D/img_fin22.png", finImg);
+    imwrite("/mnt/sdcard/Studio3D/layers/img_fin.png", finImg);
     //resize(finImg, finImg, Size(finImg.cols*2, finImg.rows));
 
 
@@ -291,8 +300,6 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDis
 }
 JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode)
 {
-
-	String path;
   Mat& img = *(Mat*)addrBgr;
   Mat& disp = *(Mat*)addrDisp;
 
@@ -364,7 +371,7 @@ JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity
   }
 
      LOGD ("Completed loop");
-
+     currentMode=4;
     if(currentMode==1)
     {
     	Mat blurBackground;
@@ -374,43 +381,13 @@ JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity
         bitwise_and(background, blurBackground, background);
   }
     else if(currentMode==2)
-    {
-        doOilPaint(img1, background);
-        getMaskedImage(img1, foreground);
-    }
+    doOilPaint(img1, background);
     else if(currentMode==3)
-    {
-        getMaskedGrayImage(img1, background);
-        getMaskedImage(img1, foreground);
-    }
+    getMaskedGrayImage(img1, background);
     else if(currentMode==4)
-    {
-        getSepia(img1, background);
-        getMaskedImage(img1, foreground);
-    }
-    else if(currentMode == 5)
-    {
-        Mat stickimg;
-        stickimg = imread(path);
-        resize(stickimg, stickimg, Size(background.cols, background.rows));
-        bitwise_and(background, stickimg, stickimg);
-        stickimg.copyTo(background);
-        getMaskedImage(img1, foreground);
-    }
-    else if (currentMode == 6)
-    {
-        Mat stickimg;
-        stickimg = imread(path);
-        resize(stickimg, stickimg, Size(foreground.cols, foreground.rows));
-        bitwise_and(foreground, stickimg, stickimg);
-        stickimg.copyTo(foreground);
-        getMaskedImage(img1, background);
-    }
+    getSepia(img1, background);
     else if(currentMode == -1)
-    {
         getMaskedImage(img1, background);
-        getMaskedImage(img1, foreground);
-	}
 
     LOGD("Reached the end");
     getMaskedImage(img1, foreground);
