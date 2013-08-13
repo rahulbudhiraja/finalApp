@@ -60,6 +60,62 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_crop5(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
 
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_reFocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2);
+
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_reFocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2)
+{
+	Mat& img = *(Mat*)addrBgr;
+	Mat& disp = *(Mat*)addrDisp;
+
+	Mat background;
+	Mat foreground;
+
+	Mat& finImg = *(Mat*)finalImage;
+	LOGD("Initialize");
+
+	vector<vector<Point> > contours;
+
+	Mat img1(img, Rect(0, 0, img.cols/2, img.rows));
+	Point point1;
+
+	int x, y;
+    x = ji1;
+    y = ji2;
+
+    point1 = Point(x, y); // to get from android
+    LOGD("Point initial");
+
+
+    getThreshold(disp, point1, 10, foreground);
+    LOGD("THREESH");
+    segmentForeground(img1, foreground, background, contours);
+
+	char str[10];
+	char str2[]={" Value"};
+	sprintf(str, "%d", tLen);
+	strcat(str,str2);
+
+	LOGD (str);
+    char str3[]={"dimensions"};
+
+    sprintf(str, "%d", img1.rows);
+    strcat(str,str3);
+    LOGD(str);
+
+    Mat blurBackground;
+    doMultiBlur(img1, blurBackground, disp, point1);
+    bitwise_and(background, blurBackground, background);
+    LOGD("Reached the end");
+    getMaskedImage(img1, foreground);
+
+    imwrite("/mnt/sdcard/Studio3D/img_refocus_fg22.png", foreground);
+	imwrite("/mnt/sdcard/Studio3D/img_refocus_bg22.png", background);
+
+    addFgBg(foreground, background, finImg);
+    imwrite("/mnt/sdcard/Studio3D/img_refocus_finImg.png", background);
+}
+
+
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_crop5(JNIEnv*, jobject, jlong addrRgba, jlong finalImage)
 {
   Mat& img = *(Mat*)addrRgba;
