@@ -1,9 +1,6 @@
 package com.tesseract.studio3d.Animation;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
@@ -21,7 +18,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -41,7 +37,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -50,8 +45,6 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -59,7 +52,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
 
 import com.tesseract.studio3d.CustomFileObserver;
 import com.tesseract.studio3d.R;

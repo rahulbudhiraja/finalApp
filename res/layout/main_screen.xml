@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/Black"
+     >
+
+    <ImageView
+        android:id="@+id/placeholderView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/placeholder"
+        android:layout_gravity="center_horizontal"/>
+
+    <ImageButton
+        android:id="@+id/photoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/transparent"
+        android:src="@drawable/photo_studio_icon" />
+
+    <ImageButton
+        android:id="@+id/focusButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="68dp"
+        android:background="@color/transparent"
+        android:src="@drawable/focus" />
+
+    <ImageButton
+        android:id="@+id/replaceButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/focusButton"
+        android:layout_marginRight="71dp"
+        android:background="@color/transparent"
+        android:src="@drawable/replace" />
+
+</RelativeLayout>

@@ -59,10 +59,13 @@ JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong addrBackground,jlong addrForeground,jlong finalImage, jint ji1, jint ji2,jint currentMode);
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_crop5(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_selectionscreen_MainScreen_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
 
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_reFocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2);
 
-JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_reFocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2)
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2);
+
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2)
 {
 	Mat& img = *(Mat*)addrBgr;
 	Mat& disp = *(Mat*)addrDisp;
@@ -89,7 +92,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_r
     getThreshold(disp, point1, 10, foreground);
     LOGD("THREESH");
     segmentForeground(img1, foreground, background, contours);
-
+    int tLen=0;
 	char str[10];
 	char str2[]={" Value"};
 	sprintf(str, "%d", tLen);
@@ -101,6 +104,19 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_r
     sprintf(str, "%d", img1.rows);
     strcat(str,str3);
     LOGD(str);
+
+    sprintf(str, "%d", img1.cols);
+    strcat(str,str3);
+    LOGD(str);
+
+    sprintf(str, "%d", disp.rows);
+    strcat(str,str3);
+    LOGD(str);
+
+    sprintf(str, "%d", disp.cols);
+    strcat(str,str3);
+    LOGD(str);
+
 
     Mat blurBackground;
     doMultiBlur(img1, blurBackground, disp, point1);
@@ -161,9 +177,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
     getThreshold(disp, point1, 10, foreground);
     LOGD("THREESH");
     segmentForeground(img1, foreground, background,contours);
-    imwrite("/mnt/sdcard/Studio3D/img_seg_img1.jpg", img1);
-    imwrite("/mnt/sdcard/Studio3D/img_seg_fg.jpg", foreground);
-    imwrite("/mnt/sdcard/Studio3D/img_seg_bg.jpg", background);
+
 
     LOGD ("Another breakpt");
     Mat layerAf, layerAb;
@@ -219,7 +233,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
 //       strcat(str,str3);
 
        LOGD(str);
-    currentMode=2;
+
     if(currentMode==1)
     {
     Mat blurBackground;
@@ -298,8 +312,27 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDis
 
     return;
 }
+
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_selectionscreen_MainScreen_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage)
+{
+    Mat& img = *(Mat*)addrRgba;
+    Mat g1, g2;
+    Mat& disp = *(Mat*)finalImage;
+    cvtColor(img, img, CV_RGBA2BGR);
+    Mat img1(img, Rect(0, 0, img.cols/2, img.rows));
+    Mat img2(img, Rect(img.cols/2, 0, img.cols/2, img.rows));
+    cvtColor(img1, g1, CV_BGR2GRAY);
+    cvtColor(img2, g2, CV_BGR2GRAY);
+    getDisp(g1, g2, disp);
+    imwrite("/mnt/sdcard/Studio3D/disp.png", disp);
+
+    return;
+}
+
 JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode)
 {
+
+	String path;
   Mat& img = *(Mat*)addrBgr;
   Mat& disp = *(Mat*)addrDisp;
 
@@ -371,7 +404,7 @@ JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity
   }
 
      LOGD ("Completed loop");
-     currentMode=4;
+
     if(currentMode==1)
     {
     	Mat blurBackground;
@@ -381,13 +414,43 @@ JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity
         bitwise_and(background, blurBackground, background);
   }
     else if(currentMode==2)
-    doOilPaint(img1, background);
+    {
+        doOilPaint(img1, background);
+        getMaskedImage(img1, foreground);
+    }
     else if(currentMode==3)
-    getMaskedGrayImage(img1, background);
+    {
+        getMaskedGrayImage(img1, background);
+        getMaskedImage(img1, foreground);
+    }
     else if(currentMode==4)
-    getSepia(img1, background);
-    else if(currentMode == -1)
+    {
+        getSepia(img1, background);
+        getMaskedImage(img1, foreground);
+    }
+    else if(currentMode == 5)
+    {
+        Mat stickimg;
+        stickimg = imread(path);
+        resize(stickimg, stickimg, Size(background.cols, background.rows));
+        bitwise_and(background, stickimg, stickimg);
+        stickimg.copyTo(background);
+        getMaskedImage(img1, foreground);
+    }
+    else if (currentMode == 6)
+    {
+        Mat stickimg;
+        stickimg = imread(path);
+        resize(stickimg, stickimg, Size(foreground.cols, foreground.rows));
+        bitwise_and(foreground, stickimg, stickimg);
+        stickimg.copyTo(foreground);
         getMaskedImage(img1, background);
+    }
+    else if(currentMode == -1)
+    {
+        getMaskedImage(img1, background);
+        getMaskedImage(img1, foreground);
+	}
 
     LOGD("Reached the end");
     getMaskedImage(img1, foreground);
@@ -669,6 +732,8 @@ int doMultiBlur(Mat img, Mat& retVal, Mat disp, Point p1)
 
 
     LOGD("a");
+    char str[10];
+    char str2[]={"blur"};
     dispval = disp.at<uchar>(p1.y, p1.x);
     range = dispval/10;
     //printf("%d %d\n", range, dispval);
@@ -724,6 +789,7 @@ int doMultiBlur(Mat img, Mat& retVal, Mat disp, Point p1)
     for(i=1; i<layers.size(); i++)
     {
         Mat bitwiseImg;
+        bitwise_and(layers[i], blurs[i], bitwiseImg);
         //printf("%d %d %d %d\n", layers[i].cols, layers[i].rows, blurs[i].rows, blurs[i].cols);
         //printf("%d %d\n", layers[i].channels(), blurs[i].channels());
 
@@ -746,10 +812,15 @@ int doMultiBlur(Mat img, Mat& retVal, Mat disp, Point p1)
     //waitKey(0);
     Mat blurImage;
     backLayer = Scalar(255, 255, 255) - backLayer;
+    LOGD("backLayer");
     GaussianBlur(img, blurImage, Size(19, 19), sigma);
+    LOGD("GaussianBlur");
     bitwise_and(blurImage, backLayer, backLayer);
+    LOGD("bitwise_and");
     finLayers.push_back(backLayer);
+    LOGD("stackUp begin");
     stackUp(finLayers, retVal);
+    LOGD("stackUp done");
 
     LOGD("e");
     return 1;
@@ -820,13 +891,30 @@ int getGaussianBlur(Mat img, Mat& retVal, int ksize)
 
 int stackUp(vector<Mat>& layers, Mat& retVal)
 {
+	LOGD("in stackup");
     int i;
     //Mat zerotemp;
     //zerotemp = Mat::zeros(layers[i].size(), CV_8UC3);
     //zerotemp.copyTo(retVal);
+    char str[10];
+    char str3[] = {"stackUp"};
+
     retVal = Mat::zeros(layers[i].size(), CV_8UC3);
     for(i=0; i<layers.size(); i++)
     {
+        sprintf(str, "%d", layers[i].channels());
+        strcat(str, str3);
+        LOGD(str);
+        sprintf(str, "%d", retVal.channels());
+        strcat(str, str3);
+        LOGD(str);
+        sprintf(str, "%d", layers[i].rows);
+        strcat(str, str3);
+        LOGD(str);
+        sprintf(str, "%d", retVal.rows);
+        strcat(str, str3);
+        LOGD(str);
+        LOGD("adding layer");
         add(retVal, layers[i], retVal);
     }
     if (retVal.size() == layers[0].size())
