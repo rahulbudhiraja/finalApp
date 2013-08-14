@@ -46,6 +46,7 @@ int doGraySingle(Mat img, Mat& retVal, Mat disp, Point p1);
 int getRange(Mat disp, Point p1);
 int histPick(Mat disp);
 int getThresholdHist(Mat img, int dispval, int range, Mat &foreground);
+int doMultiBlurHist(Mat img, Mat& retVal, Mat disp, int dispval);
 
 static jfloatArray gArray = NULL;
 static int width,height;
@@ -147,14 +148,6 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_AutoRe
     vector<vector<Point> > contours;
 
     Mat img1(img, Rect(0, 0, img.cols/2, img.rows));
-    Point point1;
-
-    int x, y;
-    x = ji1;
-    y = ji2;
-
-    point1 = Point(x, y); // to get from android
-    LOGD("Point initial");
 
     int dispval;
     dispval = histPick(disp);
@@ -165,7 +158,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_AutoRe
 
 
     Mat blurBackground;
-    doMultiBlur(img1, blurBackground, disp, point1);
+    doMultiBlurHist(img1, blurBackground, disp, dispval);
     bitwise_and(background, blurBackground, background);
     LOGD("Reached the end");
     getMaskedImage(img1, foreground);
@@ -1257,4 +1250,81 @@ int getThresholdHist(Mat img, int dispval, int range, Mat &foreground)
     inRange(img, dispval - range, dispval + range, foreground);
     medianBlur(foreground, foreground, 9);
     return 1;
+}
+
+int doMultiBlurHist(Mat img, Mat& retVal, Mat disp, int dispval)
+{
+    int range, i, lval, hval;
+    int l1, l2, h1, h2;
+    vector<Mat> layers, blurs, finLayers;
+    //Mat thresh, blur, bitwiseImg;
+    int threshVal;
+
+    range = dispval/10;
+    //printf("%d %d\n", range, dispval);
+    lval = dispval+1;
+    hval = dispval-1;
+    for(i=1; i<4; i++)
+    {
+        l1 = lval - range;
+        l2 = lval;
+        h1 = hval;
+        h2 = hval + range;
+        //printf("%d %d %d %d\n", l1, l2, h1, h2);
+        Mat thresh;
+        Mat seg;
+        threshVal = getThresh(disp, thresh, l1, l2, h1, h2);
+        if (!threshVal)
+        {
+            //printf("break\n");
+            break;
+        }
+        thresh.copyTo(seg);
+        segmentBlurs(thresh, seg);
+        //imshow("thresh", thresh);
+        //imshow("seg", seg);
+        //waitKey(0);
+        layers.push_back(seg);
+
+        lval = l1;
+        hval = h2;
+        range*=2;
+    }
+
+    blurs.push_back(img);
+    for(i=1; i<layers.size(); i++)
+    {
+        Mat blur;
+        GaussianBlur(img, blur, Size(19, 19), 2*i);
+        //doCircBlur(img, blur, 3*i);
+        //imshow("blur", blur);
+        //waitKey(0);
+        blurs.push_back(blur);
+    }
+    int sigma = 2*i;
+    Mat backLayer;
+    backLayer = Mat::zeros(img.rows, img.cols, CV_8UC3);
+    for(i=1; i<layers.size(); i++)
+    {
+        Mat bitwiseImg;
+        //printf("%d %d %d %d\n", layers[i].cols, layers[i].rows, blurs[i].rows, blurs[i].cols);
+        //printf("%d %d\n", layers[i].channels(), blurs[i].channels());
+        bitwise_and(layers[i], blurs[i], bitwiseImg);
+        //printf("%d %d %d %d\n", layers[i].cols, layers[i].rows, backLayer.rows, backLayer.cols);
+        add(backLayer, layers[i], backLayer);
+        //imshow("thresh", layers[i]);
+        
+        finLayers.push_back(bitwiseImg);
+    }
+    //imshow("backLayer", backLayer);
+    //waitKey(0);
+    Mat blurImage;
+    backLayer = Scalar(255, 255, 255) - backLayer;
+    GaussianBlur(img, blurImage, Size(19, 19), sigma);
+    bitwise_and(blurImage, backLayer, backLayer);
+    finLayers.push_back(backLayer);
+    stackUp(finLayers, retVal);
+
+    return 1;
+
 }
