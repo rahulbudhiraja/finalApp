@@ -7,6 +7,7 @@ public class Structs
 	public static String left_img_path;
 	public static Mat mRgba;
 	public static Mat mDisparity;
+	public static Mat mLeft;
 	
 	
 }

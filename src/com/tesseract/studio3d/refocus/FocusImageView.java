@@ -1,6 +1,11 @@
 package com.tesseract.studio3d.refocus;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,6 +14,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ImageView;
@@ -21,10 +27,18 @@ public class FocusImageView extends ImageView {
 	Bitmap leftImg;
 	Paint paint;
 	private int converted_ycoord,converted_xcoord;
-	public Mat finalImage;
+	public Mat finalImage,finalImageRGBA;
 	public Mat limg;	
 	public Mat foreground,background;
 	boolean drawCircles;
+	Context mContext;
+
+	Handler mHandler;
+	Timer circleUpdater;
+	long timePassed=0;
+	Bitmap tempBitmap;
+
+	
 	
 	  public FocusImageView(Context context) 
 	  {
@@ -34,7 +48,20 @@ public class FocusImageView extends ImageView {
 			leftImg=BitmapFactory.decodeFile(Structs.left_img_path);
 			finalImage=new Mat();
 			Log.d("Imageview","Image Loaded");
+			mContext=context;
 			
+			circleUpdater=new Timer();
+			
+			finalImageRGBA=new Mat();
+			
+			finalImage=Structs.mLeft.clone();
+			Imgproc.cvtColor(finalImage, finalImageRGBA, Imgproc.COLOR_BGR2RGBA);
+			
+			tempBitmap=Bitmap.createBitmap(finalImageRGBA.cols(),finalImageRGBA.rows(), 
+	         		 Bitmap.Config.ARGB_8888);
+	        
+			Utils.matToBitmap(finalImageRGBA,tempBitmap);
+	
 	  }
 	  
 	
@@ -58,14 +85,11 @@ public class FocusImageView extends ImageView {
     public void onDraw(Canvas canvas)
     {
     	super.onDraw(canvas);
-    	canvas.drawBitmap(leftImg, 0, 0,paint);
-    	
+    	canvas.drawBitmap(tempBitmap, 0, 0,paint);
+
     	if(drawCircles)
-    	{
-    		canvas.drawCircle(converted_xcoord, converted_ycoord, 20, paint); 
-    		canvas.drawCircle(converted_xcoord, converted_ycoord, 40, paint);
-    		canvas.drawCircle(converted_xcoord, converted_ycoord, 60, paint);
-    	}
+    	for(int i=0;i<=circleCount%4;i++)
+    		canvas.drawCircle(converted_xcoord, converted_ycoord, 20*i, paint);
     	
     	
     }
@@ -77,21 +101,22 @@ public class FocusImageView extends ImageView {
  	converted_xcoord=(int) event.getX();
  	converted_ycoord=(int) event.getY();
  	
- 	drawCircles=true;
+ 	if(!drawCircles)
+ 	{drawCircles=true;
  	
  	new ProgressDialogClass().execute("");
  	invalidate();   
+ 	
+ 	}
  	return true; //processed
- 	  }
+ 	}
 
 	class ProgressDialogClass extends AsyncTask<String, Void, String> {
-
-		
+	
 
 		@Override
 		protected String doInBackground(String... params) {
 			// TODO Auto-generated method stub
-			
 			
 			
 			Refocus(Structs.mRgba.getNativeObjAddr(), Structs.mDisparity.getNativeObjAddr(), finalImage.getNativeObjAddr(), (int)converted_xcoord, (int)converted_ycoord);
@@ -101,19 +126,16 @@ public class FocusImageView extends ImageView {
 		
 		
 		protected void onPostExecute(String result) {
-
-//			conversionProgress.dismiss();
-
-//			// startanimation ..
-//			//PointsImageView.startAnimation(true);
-//			Intent camera_intent=new Intent(mContext,AnimationActivity.class);
-//		    mContext.startActivity(camera_intent);
-//			
-			
+		
 			Log.d("done", "done");
 
 			drawCircles=false;	
+			circleCount=0;
+			mHandler.removeCallbacks(r);
 			
+			Imgproc.cvtColor(finalImage, finalImageRGBA, Imgproc.COLOR_BGR2RGBA);
+			Utils.matToBitmap(finalImageRGBA,tempBitmap);
+			invalidate();
 			
 			// might want to change "executed" for the returned string passed
 			// into onPostExecute() but that is upto you
@@ -121,16 +143,35 @@ public class FocusImageView extends ImageView {
 
 		@Override
 		protected void onPreExecute() {
-		//	conversionProgress.setTitle("Processing Image");
-//			conversionProgress
-//					.setMessage("Please wait while we process your image ...");
-//			conversionProgress.show();
-			//invalidate();
+
+			circleCount=0;
+			mHandler=new Handler();
+			mHandler.postDelayed(r, 500);
+			invalidate();
 		}
 
 		@Override
-		protected void onProgressUpdate(Void... values) {
+		protected void onProgressUpdate(Void... values) 
+		{
+			
 		}
+		
+		final Runnable r = new Runnable()
+		{
+		    public void run() 
+		    {
+		    	if(System.currentTimeMillis()-timePassed>500)
+		    	{
+			    	timePassed=System.currentTimeMillis();
+			        circleCount++;
+			       
+		    	}
+		    	 mHandler.postDelayed(this, 500);
+		        invalidate();
+		        Log.d("Running !","running: "+circleCount);
+		        
+		    }
+		};
 	}
 	
 	 
@@ -142,5 +183,7 @@ public class FocusImageView extends ImageView {
 	 
 	 public native void Refocus(long matAddrRgba, long matAddrDisp, long matAddrfinalImage, int ji1, int ji2);
 		
+	 
+	 
 	
 }

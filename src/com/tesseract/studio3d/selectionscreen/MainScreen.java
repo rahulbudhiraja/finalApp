@@ -64,6 +64,7 @@ public class MainScreen extends Activity
 		Structs.mRgba=new Mat();
 		Structs.mRgba = Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_full.jpg");	
 		Structs.mDisparity=new Mat();
+		Structs.mLeft=Highgui.imread(Structs.left_img_path);
 		
 		Log.d(TAG,"width"+clickedImage.cols());
 		Log.d(TAG,"height"+clickedImage.rows());
