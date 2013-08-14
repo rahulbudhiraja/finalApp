@@ -98,11 +98,13 @@ public class FocusImageView extends ImageView {
  	   // TODO Auto-generated method stub
  	   
  	Log.d("X = "+event.getX(),"Y = "+event.getY());
- 	converted_xcoord=(int) event.getX();
- 	converted_ycoord=(int) event.getY();
  	
  	if(!drawCircles)
- 	{drawCircles=true;
+ 	{
+ 		converted_xcoord=(int) event.getX();
+ 	 	converted_ycoord=(int) event.getY();
+ 	 	
+ 		drawCircles=true;
  	
  	new ProgressDialogClass().execute("");
  	invalidate();   
