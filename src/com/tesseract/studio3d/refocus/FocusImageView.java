@@ -24,7 +24,7 @@ public class FocusImageView extends ImageView {
 	public Mat finalImage;
 	public Mat limg;	
 	public Mat foreground,background;
-	 
+	boolean drawCircles;
 	
 	  public FocusImageView(Context context) 
 	  {
@@ -60,6 +60,13 @@ public class FocusImageView extends ImageView {
     	super.onDraw(canvas);
     	canvas.drawBitmap(leftImg, 0, 0,paint);
     	
+    	if(drawCircles)
+    	{
+    		canvas.drawCircle(converted_xcoord, converted_ycoord, 20, paint); 
+    		canvas.drawCircle(converted_xcoord, converted_ycoord, 40, paint);
+    		canvas.drawCircle(converted_xcoord, converted_ycoord, 60, paint);
+    	}
+    	
     	
     }
 	
@@ -67,11 +74,13 @@ public class FocusImageView extends ImageView {
  	   // TODO Auto-generated method stub
  	   
  	Log.d("X = "+event.getX(),"Y = "+event.getY());
- 	converted_ycoord=(int) event.getX();
- 	converted_xcoord=(int) event.getY();
+ 	converted_xcoord=(int) event.getX();
+ 	converted_ycoord=(int) event.getY();
+ 	
+ 	drawCircles=true;
  	
  	new ProgressDialogClass().execute("");
-
+ 	invalidate();   
  	return true; //processed
  	  }
 
@@ -83,7 +92,10 @@ public class FocusImageView extends ImageView {
 		protected String doInBackground(String... params) {
 			// TODO Auto-generated method stub
 			
+			
+			
 			Refocus(Structs.mRgba.getNativeObjAddr(), Structs.mDisparity.getNativeObjAddr(), finalImage.getNativeObjAddr(), (int)converted_xcoord, (int)converted_ycoord);
+			
 			return null;
 		}
 		
@@ -100,7 +112,7 @@ public class FocusImageView extends ImageView {
 			
 			Log.d("done", "done");
 
-			
+			drawCircles=false;	
 			
 			
 			// might want to change "executed" for the returned string passed
@@ -113,6 +125,7 @@ public class FocusImageView extends ImageView {
 //			conversionProgress
 //					.setMessage("Please wait while we process your image ...");
 //			conversionProgress.show();
+			//invalidate();
 		}
 
 		@Override
