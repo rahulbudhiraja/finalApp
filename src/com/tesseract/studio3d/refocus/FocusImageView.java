@@ -135,6 +135,8 @@ public class FocusImageView extends ImageView {
 			circleCount=0;
 			mHandler.removeCallbacks(r);
 			
+			tempBitmap=Bitmap.createBitmap(finalImageRGBA.cols(),finalImageRGBA.rows(), 
+	         		 Bitmap.Config.ARGB_8888);
 			Imgproc.cvtColor(finalImage, finalImageRGBA, Imgproc.COLOR_BGR2RGBA);
 			Utils.matToBitmap(finalImageRGBA,tempBitmap);
 			invalidate();

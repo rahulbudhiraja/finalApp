@@ -140,7 +140,7 @@
         android:layout_alignParentTop="true"
         android:src="@drawable/settings_1gear"
         android:background="@color/transparent"
-		android:onClick="launchSettingsActivity"
-		android:visibility="invisible"/>
+    android:onClick="launchSettingsActivity"
+    android:visibility="invisible"/>
 
 </RelativeLayout>
