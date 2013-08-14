@@ -44,7 +44,8 @@ int segmentBlurs(Mat img, Mat &foreground);
 int doOilPaint(Mat src, Mat& foreground);
 int doGraySingle(Mat img, Mat& retVal, Mat disp, Point p1);
 int getRange(Mat disp, Point p1);
-
+int histPick(Mat disp);
+int getThresholdHist(Mat img, int dispval, int range, Mat &foreground);
 
 static jfloatArray gArray = NULL;
 static int width,height;
@@ -64,6 +65,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_selectionscreen_MainScreen_ge
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_reFocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2);
 
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2);
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_AutoRefocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage);
 
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2)
 {
@@ -128,7 +130,51 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocu
 	imwrite("/mnt/sdcard/Studio3D/img_refocus_bg22.png", background);
 
     addFgBg(foreground, background, finImg);
-    imwrite("/mnt/sdcard/Studio3D/img_refocus_finImg.png", background);
+    imwrite("/mnt/sdcard/Studio3D/img_refocus_finImg.png", finImg);
+}
+
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_AutoRefocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage)
+{
+    Mat& img = *(Mat*)addrBgr;
+    Mat& disp = *(Mat*)addrDisp;
+
+    Mat background;
+    Mat foreground;
+
+    Mat& finImg = *(Mat*)finalImage;
+    LOGD("Initialize");
+
+    vector<vector<Point> > contours;
+
+    Mat img1(img, Rect(0, 0, img.cols/2, img.rows));
+    Point point1;
+
+    int x, y;
+    x = ji1;
+    y = ji2;
+
+    point1 = Point(x, y); // to get from android
+    LOGD("Point initial");
+
+    int dispval;
+    dispval = histPick(disp);
+    getThresholdHist(disp, dispval, 10, foreground);
+
+    LOGD("THREESH");
+    segmentForeground(img1, foreground, background, contours);
+
+
+    Mat blurBackground;
+    doMultiBlur(img1, blurBackground, disp, point1);
+    bitwise_and(background, blurBackground, background);
+    LOGD("Reached the end");
+    getMaskedImage(img1, foreground);
+
+    imwrite("/mnt/sdcard/Studio3D/img_refocus_fg22.png", foreground);
+    imwrite("/mnt/sdcard/Studio3D/img_refocus_bg22.png", background);
+
+    addFgBg(foreground, background, finImg);
+    imwrite("/mnt/sdcard/Studio3D/img_refocus_finImg.png", finImg);
 }
 
 
@@ -1174,4 +1220,41 @@ int getRange(Mat disp, Point p1)
     contours.clear();
     hierarchy.clear();
     return (maxVal - dispval);
+}
+
+int histPick(Mat disp)
+{
+    
+    int pxv[256] = {0};
+
+    for(int i=0; i<disp.rows; i++)
+    {
+        for(int j=0; j<disp.cols; j++)
+        {
+            pxv[disp.at<uchar>(j, i)] += 1;
+        }
+    }
+
+    int maxval=0;
+    int val;
+    int maxindex = 255;
+
+    for(int i=230; i>100; i--)
+    {
+        val = pxv[i];
+        if (val > maxval)
+        {
+            maxval = val;
+            maxindex = i;
+        }
+    }
+    return (maxindex);
+}
+
+int getThresholdHist(Mat img, int dispval, int range, Mat &foreground)
+{
+    range = dispval/10;
+    inRange(img, dispval - range, dispval + range, foreground);
+    medianBlur(foreground, foreground, 9);
+    return 1;
 }
