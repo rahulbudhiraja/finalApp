@@ -59,6 +59,65 @@ JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong addrBackground,jlong addrForeground,jlong finalImage, jint ji1, jint ji2,jint currentMode);
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_crop5(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_selectionscreen_MainScreen_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
+
+
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2);
+
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2)
+{
+  Mat& img = *(Mat*)addrBgr;
+  Mat& disp = *(Mat*)addrDisp;
+
+  Mat background;
+  Mat foreground;
+
+  Mat& finImg = *(Mat*)finalImage;
+  LOGD("Initialize");
+
+  vector<vector<Point> > contours;
+
+  Mat img1(img, Rect(0, 0, img.cols/2, img.rows));
+  Point point1;
+
+  int x, y;
+    x = ji1;
+    y = ji2;
+
+    point1 = Point(x, y); // to get from android
+    LOGD("Point initial");
+
+
+    getThreshold(disp, point1, 10, foreground);
+    LOGD("THREESH");
+    segmentForeground(img1, foreground, background, contours);
+
+  int tLen=0;
+  char str[10];
+  char str2[]={" Value"};
+  sprintf(str, "%d", tLen);
+  strcat(str,str2);
+
+  LOGD (str);
+    char str3[]={"dimensions"};
+
+    sprintf(str, "%d", img1.rows);
+    strcat(str,str3);
+    LOGD(str);
+
+    Mat blurBackground;
+    doMultiBlur(img1, blurBackground, disp, point1);
+    bitwise_and(background, blurBackground, background);
+    LOGD("Reached the end");
+    getMaskedImage(img1, foreground);
+
+    imwrite("/mnt/sdcard/Studio3D/img_refocus_fg22.png", foreground);
+  imwrite("/mnt/sdcard/Studio3D/img_refocus_bg22.png", background);
+
+    addFgBg(foreground, background, finImg);
+    imwrite("/mnt/sdcard/Studio3D/img_refocus_finImg.png", background);
+}
+
 
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_crop5(JNIEnv*, jobject, jlong addrRgba, jlong finalImage)
 {
@@ -199,12 +258,12 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
     merge(rgbam, background);
     rgbam.clear();
 
-    imwrite("/mnt/sdcard/Studio3D/Layers/img_fg.png", foreground);
-    imwrite("/mnt/sdcard/Studio3D/Layers/img_bg.png", background);
+    imwrite("/mnt/sdcard/Studio3D/layers/img_fg22.png", foreground);
+    imwrite("/mnt/sdcard/Studio3D/layers/img_bg22.png", background);
 
     addFgBg(foreground, background, finImg);
     imwrite("/mnt/sdcard/Studio3D/img_fin22.png", finImg);
-   // imwrite("/mnt/sdcard/Studio3D/layers/img_fin.png", finImg);
+    imwrite("/mnt/sdcard/Studio3D/layers/img_fin.png", finImg);
     //resize(finImg, finImg, Size(finImg.cols*2, finImg.rows));
 
 
@@ -242,6 +301,23 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDis
 
     return;
 }
+
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_selectionscreen_MainScreen_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage)
+{
+    Mat& img = *(Mat*)addrRgba;
+    Mat g1, g2;
+    Mat& disp = *(Mat*)finalImage;
+    cvtColor(img, img, CV_RGBA2BGR);
+    Mat img1(img, Rect(0, 0, img.cols/2, img.rows));
+    Mat img2(img, Rect(img.cols/2, 0, img.cols/2, img.rows));
+    cvtColor(img1, g1, CV_BGR2GRAY);
+    cvtColor(img2, g2, CV_BGR2GRAY);
+    getDisp(g1, g2, disp);
+    imwrite("/mnt/sdcard/Studio3D/disp.png", disp);
+
+    return;
+}
+
 JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode)
 {
   Mat& img = *(Mat*)addrBgr;

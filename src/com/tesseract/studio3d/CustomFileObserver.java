@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.tesseract.studio3d.Animation.MainActivity;
+import com.tesseract.studio3d.selectionscreen.MainScreen;
 
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -131,7 +132,7 @@ public class CustomFileObserver
 							Log.d("yp", "blah");
 
 							//Intent it = new Intent("com.tesseract.studio3d.Animation.MainActivity");
-							Intent it = new Intent(activityContext,MainActivity.class);
+							Intent it = new Intent(activityContext,MainScreen.class);
 	
 							if (null != it)
 								{
