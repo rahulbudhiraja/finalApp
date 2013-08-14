@@ -154,10 +154,7 @@ public class StartScreen extends Activity {
 	        	    	Intent intent = new Intent(context,BrowseImages.class);
 	        	    //	Intent camera_intent=new Intent(this,BrowseImages.class);
 	        	    	context.startActivity(intent);
-	        	    	 
-		
-		
-		
+	        	
 	}
 	});
 	
