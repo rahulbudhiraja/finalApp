@@ -16,6 +16,7 @@ import org.opencv.imgproc.Imgproc;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -55,6 +56,7 @@ import android.widget.TextView;
 
 import com.tesseract.studio3d.CustomFileObserver;
 import com.tesseract.studio3d.R;
+import com.tesseract.studio3d.selectionscreen.MainScreen;
 import com.tesseract.studio3d.social.SocialSharing;
 
 public class AnimationActivity extends Activity {
@@ -114,6 +116,8 @@ public class AnimationActivity extends Activity {
 	 
 	 Vector<Integer> selectedFilters; 
 	 
+	 Context activityContext;
+	 
 
 
 	protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +128,8 @@ public class AnimationActivity extends Activity {
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+		activityContext=this;
+		
 		activityLayout = new RelativeLayout(this);
 		activityLayout.setBackgroundColor(Color.BLACK);
 		activityLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.animationactivity));
@@ -149,6 +155,7 @@ public class AnimationActivity extends Activity {
 
 		System.gc();
 		selectedFilters=new Vector<Integer>();
+		
 		LoadFiles(seperatedLayersFolder);
 
 		hs = new HorizontalScrollView(this);
@@ -208,7 +215,7 @@ public class AnimationActivity extends Activity {
 
 		// layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL, 1);
 		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 1);
-		layoutParams.setMargins(185, 0, 0, 0);
+		layoutParams.setMargins(183, 0, 0, 0);
 
 		// scroller.setLayoutParams(layoutParams);
 
@@ -328,6 +335,7 @@ public class AnimationActivity extends Activity {
 		int[] loc = new int[2];
 		float xPos, yPos;
 
+		
 		// This will make the small layer icons ...
 
 		for (int i = 0; i < mimageViews.size(); i++) {
@@ -394,17 +402,19 @@ public class AnimationActivity extends Activity {
 		}
 
 		// This will animate the Canvas Views in the middle ..
+		
+		
 
 		for (int i = 0; i < CanvasImageViews.size(); i++) {
 			AnimationSet tempAnimation = new AnimationSet(true);
 
-			TranslateAnimation anim = new TranslateAnimation(0, 75, 0, 0);
+			TranslateAnimation anim = new TranslateAnimation(0,90, 0, -60); // probably -130
 
 			anim.setFillAfter(true);
 			anim.setFillEnabled(true);
 
-			ScaleAnimation scaleanimation = new ScaleAnimation(1, (float) 0.5,
-					1, (float) 0.5, Animation.RELATIVE_TO_SELF, (float) 0.5,
+			ScaleAnimation scaleanimation = new ScaleAnimation(1, (float) 0.81,
+					1, (float) 0.77, Animation.RELATIVE_TO_SELF, (float) 0.5,
 					Animation.RELATIVE_TO_SELF, (float) 0.5);
 
 			scaleanimation.setDuration(1000);
@@ -936,82 +946,87 @@ public class AnimationActivity extends Activity {
 	
 	protected void addButtonstoActivity() {
 		// TODO Auto-generated method stub
+//
+//		full_screen=new ImageButton(this);
+//		full_screen.setImageDrawable(getResources().getDrawable(R.drawable.fullscreen));
+//		full_screen.setBackgroundColor(Color.TRANSPARENT);
+//		RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(
+//				RelativeLayout.LayoutParams.WRAP_CONTENT,
+//				RelativeLayout.LayoutParams.WRAP_CONTENT);
+//		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+//		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//
+//		layoutParams.setMargins(0, 120,20, 0);
+//		full_screen.setLayoutParams(layoutParams);
+//		full_screen.setId(54345);
+//		activityLayout.addView(full_screen);
+//		full_screen.setOnClickListener(buttonClickListener);
+//
+//		layoutParams=new RelativeLayout.LayoutParams(
+//				RelativeLayout.LayoutParams.WRAP_CONTENT,
+//				RelativeLayout.LayoutParams.WRAP_CONTENT);
+//		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//		layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+//
+//		TextView valueTV = new TextView(this);
+//		valueTV.setText("h");
+//		valueTV.setId(54321);
+//		valueTV.setLayoutParams(layoutParams);
+//		valueTV.setVisibility(View.INVISIBLE);
+//		activityLayout.addView(valueTV);
+//
+//		
+		/* commenting these out .. */
+		
+//		Replace=new ImageButton(this);
+//		Replace.setImageDrawable(getResources().getDrawable(R.drawable.replace));
+//		Replace.setBackgroundColor(Color.TRANSPARENT);
+//		layoutParams=new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+//				RelativeLayout.LayoutParams.WRAP_CONTENT);
+//		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//		layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+//		layoutParams.addRule(RelativeLayout.LEFT_OF, 54321);
+//		
+//
+//		//layoutParams.setMargins(0, 0,40, 0);
+//
+//		Replace.setLayoutParams(layoutParams);
+//		Replace.setId(987123);
+//		
+//		activityLayout.addView(Replace);
 
-		full_screen=new ImageButton(this);
-		full_screen.setImageDrawable(getResources().getDrawable(R.drawable.fullscreen));
-		full_screen.setBackgroundColor(Color.TRANSPARENT);
+//		layoutParams=new RelativeLayout.LayoutParams(
+//				RelativeLayout.LayoutParams.WRAP_CONTENT,
+//				RelativeLayout.LayoutParams.WRAP_CONTENT);
+//		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//		layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+//		layoutParams.addRule(RelativeLayout.RIGHT_OF, 54321);
+//
+//		layoutParams.setMargins(175, 0,0, 0);
+//
+//		focus=new ImageButton(this);
+//		focus.setImageDrawable(getResources().getDrawable(R.drawable.bluricon));
+//		focus.setLayoutParams(layoutParams);
+//		focus.setBackgroundColor(Color.TRANSPARENT);
+//		focus.setId(11223);
+//		focus.setOnClickListener(buttonClickListener);	
+//		activityLayout.addView(focus);
+		
 		RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(
 				RelativeLayout.LayoutParams.WRAP_CONTENT,
 				RelativeLayout.LayoutParams.WRAP_CONTENT);
-		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 
-		layoutParams.setMargins(0, 120,20, 0);
-		full_screen.setLayoutParams(layoutParams);
-		full_screen.setId(54345);
-		activityLayout.addView(full_screen);
-		full_screen.setOnClickListener(buttonClickListener);
-
-		layoutParams=new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
-		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-
-		TextView valueTV = new TextView(this);
-		valueTV.setText("h");
-		valueTV.setId(54321);
-		valueTV.setLayoutParams(layoutParams);
-		valueTV.setVisibility(View.INVISIBLE);
-		activityLayout.addView(valueTV);
-
-		Replace=new ImageButton(this);
-		Replace.setImageDrawable(getResources().getDrawable(R.drawable.replace));
-		Replace.setBackgroundColor(Color.TRANSPARENT);
-		layoutParams=new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
-		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-		layoutParams.addRule(RelativeLayout.LEFT_OF, 54321);
+		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		
-
-		//layoutParams.setMargins(0, 0,40, 0);
-
-		Replace.setLayoutParams(layoutParams);
-		Replace.setId(987123);
-		
-		activityLayout.addView(Replace);
-
-		layoutParams=new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
-		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-		layoutParams.addRule(RelativeLayout.RIGHT_OF, 54321);
-
-		layoutParams.setMargins(175, 0,0, 0);
-
-		focus=new ImageButton(this);
-		focus.setImageDrawable(getResources().getDrawable(R.drawable.bluricon));
-		focus.setLayoutParams(layoutParams);
-		focus.setBackgroundColor(Color.TRANSPARENT);
-		focus.setId(11223);
-		focus.setOnClickListener(buttonClickListener);	
-		activityLayout.addView(focus);
-
-
-
-		layoutParams=new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT);
-
-		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 		//layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 
-		layoutParams.addRule(RelativeLayout.BELOW, 54345);
+		//layoutParams.addRule(RelativeLayout.BELOW, 54345);
 
-		layoutParams.setMargins(0, 90,20, 0);
+		layoutParams.setMargins(40,0,0,20);
 
+		
+		
 		reset=new ImageButton(this);
 
 		reset.setId(9876);
@@ -1044,15 +1059,15 @@ public class AnimationActivity extends Activity {
 		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 		layoutParams.setMargins(0, 0,20,0);		
 		
-		accept=new ImageButton(this);
-		
-		accept.setOnClickListener(buttonClickListener);
-		accept.setImageDrawable(getResources().getDrawable(R.drawable.greencheck));
-		accept.setLayoutParams(layoutParams);
-		accept.setBackgroundColor(Color.TRANSPARENT);
-		accept.setId(12012);
-		
-		activityLayout.addView(accept);
+//		accept=new ImageButton(this);
+//		
+//		accept.setOnClickListener(buttonClickListener);
+//		accept.setImageDrawable(getResources().getDrawable(R.drawable.greencheck));
+//		accept.setLayoutParams(layoutParams);
+//		accept.setBackgroundColor(Color.TRANSPARENT);
+//		accept.setId(12012);
+//		
+//		activityLayout.addView(accept);
 	}
 
 	public OnClickListener buttonClickListener = new OnClickListener() {
@@ -1117,81 +1132,43 @@ public class AnimationActivity extends Activity {
 			else if(v.getId()==12021)
 			{
 				
-				fileObserver=new CustomFileObserver(getBaseContext());
+				Intent it=new Intent(activityContext,MainScreen.class);
+				activityContext.startActivity(it);
 				
-			  	String packageName = "com.android.camera"; //Or whatever package should be launched
-
-	        	if(packageName.equals("com.android.camera")){ //Camera
-	        	    try
-	        	    {
-	        	       
-	        	    	Intent intent = getPackageManager().getLaunchIntentForPackage("com.android.camera");
-
-	        	    	intent.putExtra("android.intent.extras.CAMERA_FACING", 2);
-	        	    	intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-	        	        //Log.d("Test","num"+Camera.getNumberOfCameras());
-	        	        startActivity(intent);
-
-	        	    }
-	        	    catch(ActivityNotFoundException e){
-	        	        Intent intent = new Intent();
-	        	        ComponentName comp = new ComponentName("com.android.camera", "com.android.camera.CameraEntry");
-	        	        intent.setComponent(comp);
-	        	        startActivity(intent);
-	        	    }
-	        	}
-	        	else{ //Any other
-	        	    Intent intent = getPackageManager().getLaunchIntentForPackage(packageName);
-	        	    startActivity(intent);
-	        	}
+//				fileObserver=new CustomFileObserver(getBaseContext());
+//				
+//			  	String packageName = "com.android.camera"; //Or whatever package should be launched
+//
+//	        	if(packageName.equals("com.android.camera")){ //Camera
+//	        	    try
+//	        	    {
+//	        	       
+//	        	    	Intent intent = getPackageManager().getLaunchIntentForPackage("com.android.camera");
+//
+//	        	    	intent.putExtra("android.intent.extras.CAMERA_FACING", 2);
+//	        	    	intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+//	        	        //Log.d("Test","num"+Camera.getNumberOfCameras());
+//	        	        startActivity(intent);
+//
+//	        	    }
+//	        	    catch(ActivityNotFoundException e){
+//	        	        Intent intent = new Intent();
+//	        	        ComponentName comp = new ComponentName("com.android.camera", "com.android.camera.CameraEntry");
+//	        	        intent.setComponent(comp);
+//	        	        startActivity(intent);
+//	        	    }
+//	        	}
+//	        	else{ //Any other
+//	        	    Intent intent = getPackageManager().getLaunchIntentForPackage(packageName);
+//	        	    startActivity(intent);
+//	        	}
 			}
 			
 			else if (v.getId()==12012)
 			{
 				
 				
-				img1=new Mat();img2=new Mat();
-				// Save the canvas image ..
-				Canvas saveImageCanvas;
-//				Bitmap saveImageBitmap =Bitmap.createBitmap(CanvasImageViews.get(0).getWidth(), CanvasImageViews.get(0).getHeight(), Bitmap.Config.ARGB_8888);
-				
-				Drawable saveDrawable=CanvasImageViews.get(1).getDrawable();
-				Bitmap	saveImageBitmap=((BitmapDrawable)saveDrawable).getBitmap();
-				
-				Utils.bitmapToMat(saveImageBitmap, img1);
-				
-				Bitmap mutableBitmap= saveImageBitmap.copy(Bitmap.Config.ARGB_8888, true);
-				
-				saveImageCanvas = new Canvas(mutableBitmap);
-				
-				saveDrawable=CanvasImageViews.get(0).getDrawable();
-				
-				Utils.bitmapToMat( ((BitmapDrawable)saveDrawable).getBitmap(), img2);
-				
-				saveImageCanvas.drawBitmap(((BitmapDrawable)saveDrawable).getBitmap(), 0, 0, null);
-				
-				saveImageCanvas.save();
-				
-				Mat addition = new Mat();
-				
-				Core.add(img1, img2, addition);
-				Mat modified_mat=new Mat();
-			//	
-				Size dimensions = new Size();
-				dimensions.width=0.6*addition.cols();
-				dimensions.height=0.6*addition.rows();
-				
-				//Highgui.imwrite("/mnt/sdcard/Studio3D/combined.png",addition);
-				Imgproc.cvtColor(addition, addition, Imgproc.COLOR_BGR2RGBA);
-				Highgui.imwrite("/mnt/sdcard/Studio3D/combined_orig.png",addition);
-				Imgproc.resize(addition, addition,dimensions);
-				Highgui.imwrite("/mnt/sdcard/Studio3D/combined.png",addition);
-				
-				
-
-				
-				Intent intent = new Intent(getBaseContext(),SocialSharing.class);
-				startActivity(intent);
+			
 				
 			}
 			
@@ -1212,7 +1189,7 @@ public class AnimationActivity extends Activity {
 			{
 				// Replace the button 
 				
-				
+				saveImgandSharePic();
 			}
 			
 			
@@ -1242,40 +1219,96 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
 	
 	
 	  
-    class TouchListener implements View.OnTouchListener{
+    protected void saveImgandSharePic() {
+	// TODO Auto-generated method stub
+	
+    	img1=new Mat();img2=new Mat();
+		// Save the canvas image ..
+		Canvas saveImageCanvas;
+//		Bitmap saveImageBitmap =Bitmap.createBitmap(CanvasImageViews.get(0).getWidth(), CanvasImageViews.get(0).getHeight(), Bitmap.Config.ARGB_8888);
+		
+		Drawable saveDrawable=CanvasImageViews.get(1).getDrawable();
+		Bitmap	saveImageBitmap=((BitmapDrawable)saveDrawable).getBitmap();
+		
+		Utils.bitmapToMat(saveImageBitmap, img1);
+		
+		Bitmap mutableBitmap= saveImageBitmap.copy(Bitmap.Config.ARGB_8888, true);
+		
+		saveImageCanvas = new Canvas(mutableBitmap);
+		
+		saveDrawable=CanvasImageViews.get(0).getDrawable();
+		
+		Utils.bitmapToMat( ((BitmapDrawable)saveDrawable).getBitmap(), img2);
+		
+		saveImageCanvas.drawBitmap(((BitmapDrawable)saveDrawable).getBitmap(), 0, 0, null);
+		
+		saveImageCanvas.save();
+		
+		Mat addition = new Mat();
+		
+		Core.add(img1, img2, addition);
+		Mat modified_mat=new Mat();
+	//	
+		Size dimensions = new Size();
+		dimensions.width=0.6*addition.cols();
+		dimensions.height=0.6*addition.rows();
+		
+		//Highgui.imwrite("/mnt/sdcard/Studio3D/combined.png",addition);
+		Imgproc.cvtColor(addition, addition, Imgproc.COLOR_BGR2RGBA);
+		Highgui.imwrite("/mnt/sdcard/Studio3D/combined_orig.png",addition);
+		Imgproc.resize(addition, addition,dimensions);
+		Highgui.imwrite("/mnt/sdcard/Studio3D/combined.png",addition);
+		
+		
+
+		
+		Intent intent = new Intent(getBaseContext(),SocialSharing.class);
+		startActivity(intent);
+}
+
+
+
+	class TouchListener implements View.OnTouchListener{
 
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 
-			if(event.getAction() == MotionEvent.ACTION_DOWN&&focusButtonClicked) 
+		//	if(event.getAction() == MotionEvent.ACTION_DOWN&&focusButtonClicked) 
+			if(event.getAction() == MotionEvent.ACTION_DOWN)
 			{
 				
 				
-				Log.d(TAG,"X ="+(event.getRawX()-CanvasImageViews.get(1).getLeft())+"  Y= "+(event.getRawY()-CanvasImageViews.get(1).getTop())); // For landscape orientation,i.e max val of x is 800 and y max value is 480 ..
-
- 				
- 				
- 				// Pass these to the JNI function .. These will be the touch positions out of 500x500 .
- 				converted_xcoord=(event.getRawX()-CanvasImageViews.get(1).getLeft());
- 				converted_ycoord=(event.getRawY()-CanvasImageViews.get(1).getTop());
- 				
- 				backupBitmap=((BitmapDrawable)CanvasImageViews.get(1).getDrawable()).getBitmap();
- 				
+				saveImgandSharePic();
+				
+//				Log.d(TAG,"X ="+(event.getRawX()-CanvasImageViews.get(1).getLeft())+"  Y= "+(event.getRawY()-CanvasImageViews.get(1).getTop())); // For landscape orientation,i.e max val of x is 800 and y max value is 480 ..
+//
+// 				
+// 				
+// 				// Pass these to the JNI function .. These will be the touch positions out of 500x500 .
+// 				converted_xcoord=(event.getRawX()-CanvasImageViews.get(1).getLeft());
+// 				converted_ycoord=(event.getRawY()-CanvasImageViews.get(1).getTop());
+// 				
+// 				backupBitmap=((BitmapDrawable)CanvasImageViews.get(1).getDrawable()).getBitmap();
+// 				
  			//	CanvasImageViews.get(1).setImageBitmap(  addCircles( ((BitmapDrawable)CanvasImageViews.get(0).getDrawable()).getBitmap(),converted_xcoord,converted_ycoord));
  				
  			//	imageViewBitmap=backupBitmap; // not sure ?
 // 				
  				// These will be the corresponding touch positions for the original image i.e touch positions in 500x500 are converted into 640x720 ..
- 				   converted_xcoord=(converted_xcoord/CanvasImageViews.get(0).getWidth())*500;
- 		           converted_ycoord=(converted_ycoord/CanvasImageViews.get(0).getHeight())*500;
- 		           Log.d(TAG, String.valueOf(converted_ycoord));
- 		           Log.d(TAG, String.valueOf(converted_xcoord));
- 		           Log.d(TAG, "converted");
- 		            //finalImage = new Mat();
- 		        
- 		           Log.d(TAG,"channels  "+mRgba.channels());
- 		          Log.d(TAG,"channels  "+disp.channels());
- 		            currentMode=1;
+// 				   converted_xcoord=(converted_xcoord/CanvasImageViews.get(0).getWidth())*500;
+// 		           converted_ycoord=(converted_ycoord/CanvasImageViews.get(0).getHeight())*500;
+// 		           Log.d(TAG, String.valueOf(converted_ycoord));
+// 		           Log.d(TAG, String.valueOf(converted_xcoord));
+// 		           Log.d(TAG, "converted");
+// 		            //finalImage = new Mat();
+// 		        
+// 		           Log.d(TAG,"channels  "+mRgba.channels());
+// 		          Log.d(TAG,"channels  "+disp.channels());
+// 		            currentMode=1;
+// 		            
+// 		           new ComputeDisparity().execute("");
+// 				   
+// 					
 // 		          
 // 		            img1=new Mat();img2=new Mat();
 // 					// Save the canvas image ..
@@ -1297,9 +1330,7 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
 // 					Core.add(img1, img2, mRgba);
 // 					Imgproc.cvtColor(mRgba, mRgba, Imgproc.COLOR_RGBA2BGR);
  					
-			    new ComputeDisparity().execute("");
 			   
-				
 			}
 			return false;
 			
@@ -1309,8 +1340,8 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
     
     public  void initializeMats() {
 		// TODO Auto-generated method stub
-	    mRgba = MainActivity.mRgba;
-		disp = MainActivity.disp;
+	    mRgba = PhotoActivity.mRgba;
+		disp = PhotoActivity.disp;
 		limg = new Mat();
 		foreground=new Mat();
 		background=new Mat();

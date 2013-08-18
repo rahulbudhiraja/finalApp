@@ -12,7 +12,7 @@ import java.io.PrintStream;
 import com.tesseract.studio3d.CustomFileObserver;
 import com.tesseract.studio3d.R;
 import com.tesseract.studio3d.StartScreen;
-import com.tesseract.studio3d.Animation.MainActivity;
+import com.tesseract.studio3d.Animation.PhotoActivity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -90,7 +90,7 @@ public class BrowseImages extends Activity {
 				}
 			
             // Sending image id to FullScreenActivity
-            Intent it = new Intent(getApplicationContext(), MainActivity.class);
+            Intent it = new Intent(getApplicationContext(), PhotoActivity.class);
             // passing array index
             it.putExtra("browseButtonClicked", true);
 	        it.putExtra("foldernum", position);

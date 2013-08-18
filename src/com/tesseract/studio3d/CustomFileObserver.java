@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.tesseract.studio3d.Animation.MainActivity;
+import com.tesseract.studio3d.Animation.PhotoActivity;
 import com.tesseract.studio3d.selectionscreen.MainScreen;
 
 import android.content.ActivityNotFoundException;

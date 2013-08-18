@@ -55,15 +55,17 @@ int getGray(Mat& img)
   return 1;
 }
 extern "C" {
-JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong addrBackground,jlong addrForeground,jlong finalImage, jint ji1, jint ji2,jint currentMode);
+JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_PhotoActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong addrBackground,jlong addrForeground,jlong finalImage, jint ji1, jint ji2,jint currentMode);
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong addrBackground,jlong addrForeground,jlong finalImage, jint ji1, jint ji2,jint currentMode);
-JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
-JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_crop5(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_PhotoActivity_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_PhotoActivity_crop5(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_selectionscreen_MainScreen_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage);
 
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_reFocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2);
 
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2);
+
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode,jstring imgPath);
 
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2)
 {
@@ -125,14 +127,16 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocu
     getMaskedImage(img1, foreground);
 
     imwrite("/mnt/sdcard/Studio3D/img_refocus_fg22.png", foreground);
-  imwrite("/mnt/sdcard/Studio3D/img_refocus_bg22.png", background);
+    imwrite("/mnt/sdcard/Studio3D/img_refocus_bg22.png", background);
 
     addFgBg(foreground, background, finImg);
+    cvtColor(finImg, finImg,CV_BGR2RGBA);
+
     imwrite("/mnt/sdcard/Studio3D/img_refocus_finImg.png", background);
 }
 
 
-JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_crop5(JNIEnv*, jobject, jlong addrRgba, jlong finalImage)
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_PhotoActivity_crop5(JNIEnv*, jobject, jlong addrRgba, jlong finalImage)
 {
   Mat& img = *(Mat*)addrRgba;
   Mat& retVal = *(Mat*)finalImage;
@@ -269,12 +273,12 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
     merge(rgbam, background);
     rgbam.clear();
 
-    imwrite("/mnt/sdcard/Studio3D/layers/img_fg22.png", foreground);
-    imwrite("/mnt/sdcard/Studio3D/layers/img_bg22.png", background);
+   // imwrite("/mnt/sdcard/Studio3D/layers/img_fg22.png", foreground);
+    //imwrite("/mnt/sdcard/Studio3D/layers/img_bg22.png", background);
 
     addFgBg(foreground, background, finImg);
     imwrite("/mnt/sdcard/Studio3D/img_fin22.png", finImg);
-    imwrite("/mnt/sdcard/Studio3D/layers/img_fin.png", finImg);
+   // imwrite("/mnt/sdcard/Studio3D/layers/img_fin.png", finImg);
     //resize(finImg, finImg, Size(finImg.cols*2, finImg.rows));
 
 
@@ -290,14 +294,201 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
 }
 
 
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode,jstring path)
+{
+
+
+  const char *cparam = env->GetStringUTFChars(path, 0);
+  string imgPath=cparam;
+  LOGD("Start");
+  Mat& img = *(Mat*)addrBgr;
+  img = imread("/mnt/sdcard/Studio3D/img_full.jpg");
+  Mat& disp = *(Mat*)addrDisp;
+  disp = imread("/mnt/sdcard/Studio3D/disp.png");
+  cvtColor(disp, disp, CV_BGR2GRAY);
+  Mat& background = *(Mat*)addrBackground;
+  Mat& foreground = *(Mat*)addrForeground;
+
+  Mat& finImg = *(Mat*)finalImage;
+  finImg = Mat::zeros(finImg.rows, finImg.cols, CV_8UC3);
+  LOGD("Initialize");
+
+  jfloatArray contourPoints;
+  vector<vector<Point> > contours;
+
+  Mat img1(img, Rect(0, 0, img.cols/2, img.rows));
+  Point point1;
+
+    int x, y;
+    x = ji1;
+    y = ji2;
+
+    point1 = Point(x, y); // to get from android
+    LOGD("Point initial");
+
+
+    getThreshold(disp, point1, 10, foreground);
+    LOGD("THREESH");
+    segmentForeground(img1, foreground, background,contours);
+
+
+    LOGD ("Another breakpt");
+    Mat layerAf, layerAb;
+    cvtColor(foreground, layerAf, CV_BGR2GRAY);
+    cvtColor(background, layerAb, CV_BGR2GRAY);
+
+    LOGD ("Segmented");
+
+    int tLen=0;
+
+  for(int i=0; i<contours.size(); i++)
+  {
+    for(int j=0; j<contours[i].size(); j++)
+    {
+      tLen++;
+    }
+  }
+//LOGD("Size"+tLen);
+
+     LOGD ("Start contour points");
+  contourPoints = env->NewFloatArray(2*tLen);
+  jfloat cPoints[2*tLen];
+
+  char str[10];
+  char str2[]={" Value"};
+  sprintf(str, "%d", tLen);
+  strcat(str,str2);
+
+   LOGD (str);
+
+  tLen=0;
+  for(int i=0; i<contours.size(); i++)
+  {
+    for(int j=0; j<contours[i].size(); j++)
+    {
+      cPoints[tLen] = contours[i][j].x;
+      tLen++;
+      cPoints[tLen] = contours[i][j].y;
+      tLen++;
+    }
+  }
+
+     LOGD ("Completed loop");
+
+     char str3[]={"dimensions"};
+
+       sprintf(str, "%d", img1.rows);
+       strcat(str,str3);
+
+       imwrite("/mnt/sdcard/Studio3D/img_jni_img.png", finImg);
+//       sprintf(str3, "%d  ", img1.cols);
+//       strcat(str,"  ");
+//       strcat(str,str3);
+
+       LOGD(str);
+
+       if(currentMode==1)
+         {
+             Mat blurBackground;
+             doMultiBlur(img1, blurBackground, disp, point1);
+             bitwise_and(background, blurBackground, background);
+             getMaskedImage(img1, foreground);
+         }
+         else if(currentMode==2)
+         {
+             doOilPaint(img1, background);
+             getMaskedImage(img1, foreground);
+         }
+         else if(currentMode==3)
+         {
+             getMaskedGrayImage(img1, background);
+             getMaskedImage(img1, foreground);
+         }
+         else if(currentMode==4)
+         {
+             getSepia(img1, background);
+             getMaskedImage(img1, foreground);
+         }
+         else if(currentMode == 5)
+         {
+             Mat stickimg;
+             stickimg = imread(imgPath);
+             resize(stickimg, stickimg, Size(background.cols, background.rows));
+             bitwise_and(background, stickimg, stickimg);
+             stickimg.copyTo(background);
+             getMaskedImage(img1, foreground);
+         }
+         else if (currentMode == 6)
+         {
+             Mat stickimg;
+           //  imgPath="/mnt/sdcard/download/bungee/A1.jpg";
+             LOGD(cparam);
+             stickimg = imread(imgPath);
+
+             sprintf(str, "%d", stickimg.rows);
+             strcat(str,str2);
+
+             LOGD(str);
+
+             resize(stickimg, stickimg, Size(foreground.cols, foreground.rows));
+             bitwise_and(foreground, stickimg, stickimg);
+             stickimg.copyTo(foreground);
+             getMaskedImage(img1, background);
+         }
+         else if(currentMode == -1)
+         {
+             getMaskedImage(img1, background);
+             getMaskedImage(img1, foreground);
+       }
+
+    LOGD("Reached the end");
+    getMaskedImage(img1, foreground);
+
+    imwrite("/mnt/sdcard/Studio3D/img_fg12_mid.png", foreground);
+    imwrite("/mnt/sdcard/Studio3D/img_bg12_mid.png", background);
+
+    cvtColor(foreground, foreground, CV_BGR2RGBA);
+    cvtColor(background, background, CV_BGR2RGBA);
+
+    vector<Mat> rgbam;
+    split(foreground, rgbam);
+    rgbam[3] = layerAf;
+    merge(rgbam, foreground);
+    rgbam.clear();
+
+    split(background, rgbam);
+    rgbam[3] = layerAb;
+    merge(rgbam, background);
+    rgbam.clear();
+
+   // imwrite("/mnt/sdcard/Studio3D/layers/img_fg22.png", foreground);
+    //imwrite("/mnt/sdcard/Studio3D/layers/img_bg22.png", background);
+
+    addFgBg(foreground, background, finImg);
+    imwrite("/mnt/sdcard/Studio3D/img_fin22.png", finImg);
+   // imwrite("/mnt/sdcard/Studio3D/layers/img_fin.png", finImg);
+    //resize(finImg, finImg, Size(finImg.cols*2, finImg.rows));
+
+
+//    env->SetFloatArrayRegion(contourPoints, 0, tLen, cPoints);
+
+   // jsize arraylen=env->GetArrayLength( contourPoints);
+  //  sprintf(str, "%d", arraylen);
+
+    LOGD(str);
+
+	// .. do something with it
+  env->ReleaseStringUTFChars(path, cparam);
+
+
+}
 
 
 
 
 
 
-
-JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage)
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_PhotoActivity_getDisparity(JNIEnv*, jobject, jlong addrRgba, jlong finalImage)
 {
     Mat& img = *(Mat*)addrRgba;
     Mat g1, g2;
@@ -329,7 +520,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_selectionscreen_MainScreen_ge
     return;
 }
 
-JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_MainActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode)
+JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_PhotoActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode)
 {
 
   String path;

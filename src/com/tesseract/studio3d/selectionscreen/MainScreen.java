@@ -23,7 +23,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.tesseract.studio3d.R;
+import com.tesseract.studio3d.Animation.PhotoActivity;
 import com.tesseract.studio3d.refocus.Refocus;
+import com.tesseract.studio3d.replace.ReplaceActivity;
 import com.tesseract.studio3d.utils.Structs;
 
 public class MainScreen extends Activity
@@ -35,6 +37,8 @@ public class MainScreen extends Activity
 	ProgressDialog conversionProgress;
 	private Mat mRgba;
 	private Mat disp;
+	Bitmap tempBitmap;	
+	Size desiredSize;
 	
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -68,14 +72,15 @@ public class MainScreen extends Activity
 		
 		Log.d(TAG,"width"+clickedImage.cols());
 		Log.d(TAG,"height"+clickedImage.rows());
-		Size desiredSize=new Size();
+		
+		desiredSize=new Size();
 		desiredSize.width=tempWidth;
 		desiredSize.height=tempHeight;
 		
 		Imgproc.resize(clickedImage, clickedImage, desiredSize);
 		Imgproc.cvtColor(clickedImage, clickedImage, Imgproc.COLOR_BGR2RGBA);
 		
-		Bitmap tempBitmap=Bitmap.createBitmap(tempWidth,tempHeight, 
+		tempBitmap=Bitmap.createBitmap(tempWidth,tempHeight, 
          		 Bitmap.Config.ARGB_8888);
         
 		Utils.matToBitmap(clickedImage,tempBitmap);
@@ -93,12 +98,59 @@ public class MainScreen extends Activity
 			}
 			 
 		});
+		
+		startPhotoActivity=(ImageButton)findViewById(R.id.photoButton);
+		startPhotoActivity.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				Intent i=new Intent(getBaseContext(),PhotoActivity.class);
+				startActivity(i);
+			}
+			 
+		});
 	
+		startReplaceActivity=(ImageButton)findViewById(R.id.replaceButton);
+		startReplaceActivity.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				Intent i=new Intent(getBaseContext(),ReplaceActivity.class);
+				startActivity(i);
+			}
+			 
+		});
 		conversionProgress = new ProgressDialog(this);
 
 		new ComputeDisparityDialog().execute("");
 
 		
+	}
+	
+	
+	protected void onStart() {
+	    super.onStart();  // Always call the superclass method first
+	    Log.d(TAG,"start");
+	   
+	    if(Structs.finalImgRgba!=null)
+	    {
+	    Mat convertedMat=new Mat();
+		Imgproc.resize(Structs.finalImgRgba, convertedMat, desiredSize);
+		
+	    Utils.matToBitmap(convertedMat,tempBitmap);
+		placeholderImage.setImageBitmap(tempBitmap);
+	    }	
+	    //
+	}
+	
+	protected void onResume() {
+	    super.onResume();  // Always call the superclass method first
+	    
+	    Log.d(TAG,"resume");
 	}
 	
 	 static {
@@ -144,7 +196,7 @@ public class MainScreen extends Activity
 			
 				return null;
 			}
-			
+		
 			@Override
 			protected void onPreExecute() {
 			//	conversionProgress.setTitle("Processing Image");

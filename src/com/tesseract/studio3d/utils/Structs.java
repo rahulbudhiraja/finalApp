@@ -8,6 +8,8 @@ public class Structs
 	public static Mat mRgba;
 	public static Mat mDisparity;
 	public static Mat mLeft;
+	public static Mat finalImgRgba;
+
 	
 	
 }

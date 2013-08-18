@@ -77,11 +77,9 @@ public class FocusImageView extends ImageView {
 	        paint.setStrokeCap(Paint.Cap.ROUND);      // set the paint cap to round too
 	      
 	        paint.setAntiAlias(true);  
-	        
-	        
-	       
-	        
+	        	        
 	    }
+	  
     public void onDraw(Canvas canvas)
     {
     	super.onDraw(canvas);
@@ -91,7 +89,7 @@ public class FocusImageView extends ImageView {
     	for(int i=0;i<=circleCount%4;i++)
     		canvas.drawCircle(converted_xcoord, converted_ycoord, 20*i, paint);
     	
-    	
+    	canvas.save();
     }
 	
     public boolean onTouchEvent(MotionEvent event) {
@@ -137,9 +135,13 @@ public class FocusImageView extends ImageView {
 			
 			tempBitmap=Bitmap.createBitmap(finalImageRGBA.cols(),finalImageRGBA.rows(), 
 	         		 Bitmap.Config.ARGB_8888);
+			
+			//finalImageRGBA=finalImage.clone();
 			Imgproc.cvtColor(finalImage, finalImageRGBA, Imgproc.COLOR_BGR2RGBA);
 			Utils.matToBitmap(finalImageRGBA,tempBitmap);
 			invalidate();
+			
+			Structs.finalImgRgba=finalImageRGBA.clone();
 			
 			// might want to change "executed" for the returned string passed
 			// into onPostExecute() but that is upto you
