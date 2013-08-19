@@ -11,6 +11,7 @@ import com.tesseract.studio3d.utils.Structs;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -20,6 +21,8 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 public class ReplaceActivity extends Activity
@@ -29,7 +32,10 @@ public class ReplaceActivity extends Activity
 	private String selectedImagePath;
 	public Mat foreground,background;
 	public Mat finalImage;
+	RelativeLayout mainLayout;
+	LoaderImageView customView;
 	 
+	
 	protected void onCreate(Bundle savedInstanceState) 
 	{
 		
@@ -38,23 +44,37 @@ public class ReplaceActivity extends Activity
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-	  
-	    setContentView(R.layout.replacelayout);
-	    replaceButton=(Button)findViewById(R.id.browsetoReplace);
-	    replaceButton.setOnClickListener(new OnClickListener(){
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				
-				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-			    intent.setType("image/*");
-			    startActivityForResult(intent, 1337);
-			  
-			}
-	    	
-	    });
+		
+		
+	    customView=new LoaderImageView(this);
+	   
+	    mainLayout=new RelativeLayout(this);
+	    //mainLayout.setBackgroundColor(Color.BLACK);
+	    
+	    RelativeLayout.LayoutParams llayoutParams = new RelativeLayout.LayoutParams(
+	    		RelativeLayout.LayoutParams.WRAP_CONTENT,
+	    		RelativeLayout.LayoutParams.WRAP_CONTENT);
+	    //mainLayout=(RelativeLayout)findViewById(R.id.replacelayout);
+	    mainLayout.setLayoutParams(llayoutParams);
+	    mainLayout.addView(customView);
+	    
+	   // replaceButton=(Button)findViewById(R.id.browsetoReplace);
+//	    replaceButton.setOnClickListener(new OnClickListener(){
+//
+//			@Override
+//			public void onClick(View v) {
+//				// TODO Auto-generated method stub
+//				 
+//				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//			    intent.setType("image/*");
+//			    startActivityForResult(intent, 1337);
+//			  
+//			}
+//	    	
+//	    });
+	    
+	   
+	    setContentView(mainLayout);
 		
 	    initializeMats();
 	}
