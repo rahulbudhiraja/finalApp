@@ -73,28 +73,6 @@ public class ReplaceActivity extends Activity
 	   
 	}
 	
-	private boolean listAssetFiles(String path) {
-
-	    String [] list;
-	    try {
-	        list = getAssets().list(path);
-	        if (list.length > 0) {
-	            // This is a folder
-	            for (String file : list) {
-	                if (!listAssetFiles(path + "/" + file))
-	                    return false;
-	            }
-	        } else {
-	            // This is a file
-	            // TODO: add file name to an array list
-	    }
-	        } catch (IOException e) {
-	        return false;
-	    }
-
-	    return true; 
-	} 
-	
 	public  void initializeMats() {
 		// TODO Auto-generated method stub
 	    foreground=new Mat();
@@ -162,36 +140,46 @@ public class ReplaceActivity extends Activity
 		
 		
 		/// Count the number of files and create that many image views ...
-		for(int i=0;i<totalPlaces/2;i++)
+		for(int i=0;i<totalPlaces;i++)
 		{
 			
 			Log.d("File names","name"+placesArray[i]);
 			
-		    tempLayout=new RelativeLayout(this);
-		    tempLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-			
-			
+		    
+		    customLayoutParams= new RelativeLayout.LayoutParams(
+		    		RelativeLayout.LayoutParams.WRAP_CONTENT,
+		    		RelativeLayout.LayoutParams.WRAP_CONTENT);
+		  
+		    
+		    if(i%2==0)
+		    {
+		    	tempLayout=new RelativeLayout(this);
+			    tempLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+				
 			  customView=new LoaderImageView(this);
 			  customView.setBackgroundResource(R.drawable.border);
 			  customView.setId(startingIndex+i);
 			  
-			  customLayoutParams= new RelativeLayout.LayoutParams(
-			    		RelativeLayout.LayoutParams.WRAP_CONTENT,
-			    		RelativeLayout.LayoutParams.WRAP_CONTENT);
 			  
 			  customView.setLayoutParams(customLayoutParams);
 			  tempLayout.addView(customView);
-
-			  customView=new LoaderImageView(this);
-			  customView.setBackgroundResource(R.drawable.border);
-			  customView.setId(startingIndex+i+1);
-			  
-			  customLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-			  
-			  tempLayout.addView(customView);
-			  tempLayout.invalidate();
 			  parentLayout.addView(tempLayout);
 			  
+		    }
+		    
+		    else
+		    {
+			  customView=new LoaderImageView(this);
+			  customView.setBackgroundResource(R.drawable.border);
+			  customView.setId(startingIndex+i);
+			  
+			  customLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+			  customView.setLayoutParams(customLayoutParams);
+			  tempLayout.addView(customView);
+		    }
+			  
+			  tempLayout.invalidate();
+			 
 		}
 		
 		// Start loading the modified images in a thread and keep updating the layout ..
@@ -216,7 +204,10 @@ public class ReplaceActivity extends Activity
 				
 				Imgproc.cvtColor(imgToLoad, imgToLoad, Imgproc.COLOR_RGBA2BGR);
 		           
-				Log.d("ReplaceActivity","val:  "+imgToLoad.rows()+"  "+imgToLoad.cols());
+				Log.d("ReplaceActivity","val:  "+imgToLoad.cols()+"  "+imgToLoad.rows());
+				Log.d("File name","i value:  "+i+"place :"+ placesArray[i]);
+				
+				
 				// Take this mat and pass it to getThresholdFunction
 				getThreshold(Structs.mRgba.getNativeObjAddr(), Structs.mDisparity.getNativeObjAddr(), finalImage.getNativeObjAddr(), background.getNativeObjAddr(),foreground.getNativeObjAddr(),0,0,6,imgToLoad.getNativeObjAddr());
 				
@@ -232,21 +223,23 @@ public class ReplaceActivity extends Activity
 	            		 Bitmap.Config.ARGB_8888);
 	             
 	            Utils.matToBitmap(finalImage, tempBitmap);
-	             
-	            Highgui.imwrite("/mnt/sdcard/blahblah.png",finalImage);
-				
-				
+	  
 				// Update the UI and assign the bitmap tp cusomview  
 				customView=(LoaderImageView) findViewById(startingIndex+i);
 				
+				if(customView!=null)
+				{
 				runOnUiThread(new Runnable() {
 				     public void run() {
 				    	 customView.setImage(tempBitmap);
 							
 				//stuff that updates ui
+				    	 
 
 				    }
 				});
+				
+				}
 				
 				// invalidate ;;
 				

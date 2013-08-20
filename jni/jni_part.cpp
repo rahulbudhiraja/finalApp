@@ -449,7 +449,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getTh
        }
 
     LOGD("Reached the end");
-    getMaskedImage(img1, foreground);
+//    getMaskedImage(img1, foreground);
 
     imwrite("/mnt/sdcard/Studio3D/img_fg12_mid.png", foreground);
     imwrite("/mnt/sdcard/Studio3D/img_bg12_mid.png", background);
@@ -472,6 +472,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getTh
     //imwrite("/mnt/sdcard/Studio3D/layers/img_bg22.png", background);
 
     addFgBg(foreground, background, finImg);
+    cvtColor(finImg, finImg,CV_BGR2RGBA);
     imwrite("/mnt/sdcard/Studio3D/img_fin22.png", finImg);
    // imwrite("/mnt/sdcard/Studio3D/layers/img_fin.png", finImg);
     //resize(finImg, finImg, Size(finImg.cols*2, finImg.rows));
