@@ -25,7 +25,7 @@ import android.widget.ImageView;
 import com.tesseract.studio3d.R;
 import com.tesseract.studio3d.Animation.PhotoActivity;
 import com.tesseract.studio3d.refocus.Refocus;
-import com.tesseract.studio3d.replace.ReplaceActivity;
+import com.tesseract.studio3d.replace.MainListViewActivity;
 import com.tesseract.studio3d.utils.Structs;
 
 public class MainScreen extends Activity
@@ -39,6 +39,7 @@ public class MainScreen extends Activity
 	private Mat disp;
 	Bitmap tempBitmap;	
 	Size desiredSize;
+	Boolean computeDisparity=false;
 	
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -119,13 +120,19 @@ public class MainScreen extends Activity
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				
-				Intent i=new Intent(getBaseContext(),ReplaceActivity.class);
+				Intent i=new Intent(getBaseContext(),MainListViewActivity.class);
 				startActivity(i);
 			}
 			 
 		});
 		conversionProgress = new ProgressDialog(this);
 
+		 Intent i = getIntent();
+		 
+		   
+		computeDisparity=i.getExtras().getBoolean("computeDisparity");
+		    
+		if(computeDisparity)   
 		new ComputeDisparityDialog().execute("");
 
 		

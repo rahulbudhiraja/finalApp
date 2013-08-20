@@ -607,32 +607,43 @@ public class AnimationActivity extends Activity {
 
 	public void onBackPressed() {
 
-		String packageName = "com.android.camera"; //Or whatever package should be launched
-
-    	if(packageName.equals("com.android.camera")){ //Camera
-    	    try
-    	    {
-    	       
-    	    	Intent intent = getPackageManager().getLaunchIntentForPackage("com.android.camera");
-
-    	    	intent.putExtra("android.intent.extras.CAMERA_FACING", 2);
-    	    	intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-    	        //Log.d("Test","num"+Camera.getNumberOfCameras());
-    	        startActivity(intent);
-
-    	    }
-    	    catch(ActivityNotFoundException e){
-    	        Intent intent = new Intent();
-    	        ComponentName comp = new ComponentName("com.android.camera", "com.android.camera.CameraEntry");
-    	        intent.setComponent(comp);
-    	        startActivity(intent);
-    	    }
-    	}
-    	else{ //Any other
-    	    Intent intent = getPackageManager().getLaunchIntentForPackage(packageName);
-    	    startActivity(intent);
-    	}
-    	
+//		String packageName = "com.android.camera"; //Or whatever package should be launched
+//
+//    	if(packageName.equals("com.android.camera")){ //Camera
+//    	    try
+//    	    {
+//    	       
+//    	    	Intent intent = getPackageManager().getLaunchIntentForPackage("com.android.camera");
+//
+//    	    	intent.putExtra("android.intent.extras.CAMERA_FACING", 2);
+//    	    	intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+//    	        //Log.d("Test","num"+Camera.getNumberOfCameras());
+//    	        startActivity(intent);
+//
+//    	    }
+//    	    catch(ActivityNotFoundException e){
+//    	        Intent intent = new Intent();
+//    	        ComponentName comp = new ComponentName("com.android.camera", "com.android.camera.CameraEntry");
+//    	        intent.setComponent(comp);
+//    	        startActivity(intent);
+//    	    }
+//    	}
+//    	else{ //Any other
+//    	    Intent intent = getPackageManager().getLaunchIntentForPackage(packageName);
+//    	    startActivity(intent);
+//    	}
+		
+		Intent it = new Intent(this,MainScreen.class);
+		
+		if (null != it)
+			{
+			
+			it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			
+			it.putExtra("computeDisparity", false);
+    
+				this.startActivity(it);
+			}   	
 }
 	
 	public void onWindowFocusChanged(boolean hasFocus) {
@@ -1394,12 +1405,7 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
              
              CanvasImageViews.get(1).setImageBitmap(tempBitmap);
              
-             
-             
-          //   Utils.matToBitmap(, bmp)
-             
-             
-	            System.gc();
+	         System.gc();
 	    	  
 		   //  mImageView.setImageBitmap(myBitmap);
 		    

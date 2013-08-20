@@ -43,6 +43,7 @@ public class ReplaceActivity extends Activity
 	int startingIndex=111222,totalPlaces;
 	ScrollView mainScrollView;
 	String[] placesArray;
+	String subFolder;
 	
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -62,6 +63,11 @@ public class ReplaceActivity extends Activity
 		mainScrollView=new ScrollView(this);
 		mainScrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		mainScrollView.addView(parentLayout);
+		
+		Intent i = getIntent();
+		
+		subFolder=i.getExtras().getString("Category");
+		Log.d("ReplaceActivity","Sub folder: "+subFolder);
 		
 		addPlacesCards();
 		 
@@ -128,10 +134,10 @@ public class ReplaceActivity extends Activity
 		RelativeLayout.LayoutParams customLayoutParams;
 		
 		try {
-			totalPlaces=getAssets().list("images/Places").length;
-			Log.d("List","number: "+getAssets().list("images/Places").length);
+			totalPlaces=getAssets().list("images/"+subFolder).length;
+			Log.d("List","number: "+getAssets().list("images/"+subFolder).length);
 			
-			placesArray=getAssets().list("images/Places");
+			placesArray=getAssets().list("images/"+subFolder);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -194,7 +200,7 @@ public class ReplaceActivity extends Activity
 		 for (int i=0;i<totalPlaces;i++)
 		 {
 			 try {
-				InputStream is=getAssets().open("images/Places/"+placesArray[i]);
+				InputStream is=getAssets().open("images/"+subFolder+"/"+placesArray[i]);
 				// Get bitmap...
 				
 				Bitmap Img=BitmapFactory.decodeStream(is);

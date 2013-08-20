@@ -1,7 +1,6 @@
 package com.tesseract.studio3d.refocus;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -23,7 +22,7 @@ import com.tesseract.studio3d.utils.Structs;
 
 public class FocusImageView extends ImageView {
 
-	int circleCount=0;
+	int circleCount=599; // start with a number that is %4 =3 ..so that 3 circles will be drawn first,then 2 etc ...
 	Bitmap leftImg;
 	Paint paint;
 	private int converted_ycoord,converted_xcoord;
@@ -38,8 +37,6 @@ public class FocusImageView extends ImageView {
 	long timePassed=0;
 	Bitmap tempBitmap;
 
-	
-	
 	  public FocusImageView(Context context) 
 	  {
 	        super(context);
@@ -130,8 +127,10 @@ public class FocusImageView extends ImageView {
 			Log.d("done", "done");
 
 			drawCircles=false;	
-			circleCount=0;
-			mHandler.removeCallbacks(r);
+			circleCount=599;
+			
+			// circleCount is set at 3 ,so we start drawing 3 circles then 
+			mHandler.removeCallbacksAndMessages(r);
 			
 			tempBitmap=Bitmap.createBitmap(finalImageRGBA.cols(),finalImageRGBA.rows(), 
 	         		 Bitmap.Config.ARGB_8888);
@@ -150,7 +149,7 @@ public class FocusImageView extends ImageView {
 		@Override
 		protected void onPreExecute() {
 
-			circleCount=0;
+			circleCount=599;
 			mHandler=new Handler();
 			mHandler.postDelayed(r, 500);
 			invalidate();
@@ -169,7 +168,7 @@ public class FocusImageView extends ImageView {
 		    	if(System.currentTimeMillis()-timePassed>500)
 		    	{
 			    	timePassed=System.currentTimeMillis();
-			        circleCount++;
+			        circleCount--;
 			       
 		    	}
 		    	 mHandler.postDelayed(this, 500);

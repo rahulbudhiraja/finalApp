@@ -138,7 +138,7 @@ public class CustomFileObserver
 								{
 										
 									it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-									it.putExtra("browseButtonClicked", false);
+									it.putExtra("computeDisparity", true);
 					        
 									activityContext.startActivity(it);
 									
