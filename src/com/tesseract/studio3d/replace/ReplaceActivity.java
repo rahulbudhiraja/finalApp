@@ -7,7 +7,6 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
-import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
@@ -15,6 +14,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -59,7 +59,8 @@ public class ReplaceActivity extends Activity
 	    
 	    parentLayout=new LinearLayout(this);
 	    parentLayout.setOrientation(LinearLayout.VERTICAL);
-	    
+	    parentLayout.setBackgroundColor(Color.BLACK);
+
 		mainScrollView=new ScrollView(this);
 		mainScrollView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		mainScrollView.addView(parentLayout);
@@ -156,18 +157,26 @@ public class ReplaceActivity extends Activity
 		    		RelativeLayout.LayoutParams.WRAP_CONTENT,
 		    		RelativeLayout.LayoutParams.WRAP_CONTENT);
 		  
+		    customLayoutParams.setMargins(3,3,3,3);
 		    
 		    if(i%2==0)
 		    {
-		    	tempLayout=new RelativeLayout(this);
-			    tempLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-				
+		      tempLayout=new RelativeLayout(this);
+			  
+//			  RelativeLayout.LayoutParams rlayoutParams = new RelativeLayout.LayoutParams(
+//			    		RelativeLayout.LayoutParams.MATCH_PARENT, 
+//			    		RelativeLayout.LayoutParams.WRAP_CONTENT);
+//			    
+		      
+			  tempLayout.setLayoutParams(customLayoutParams);
+			    
 			  customView=new LoaderImageView(this);
 			  customView.setBackgroundResource(R.drawable.border);
 			  customView.setId(startingIndex+i);
-			  
-			  
+			 
 			  customView.setLayoutParams(customLayoutParams);
+			  
+//			  customView.setLayoutParams(customLayoutParams);
 			  tempLayout.addView(customView);
 			  parentLayout.addView(tempLayout);
 			  
@@ -219,8 +228,8 @@ public class ReplaceActivity extends Activity
 				
 				// Get recomputed bitmap 
 				Size dimensions = new Size();
-				dimensions.width=960/2;
-				dimensions.height=540/2;
+				dimensions.width=940/2;
+				dimensions.height=510/2;
 				
 				Imgproc.cvtColor(finalImage, finalImage, Imgproc.COLOR_BGR2RGBA);
 	            

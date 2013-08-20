@@ -42,7 +42,9 @@ class CustomListAdapter extends ArrayAdapter {
         	text.setTextSize(20);
             text.setTextColor(Color.WHITE);
             text.setText(items.get(position));
-            text.setBackgroundColor(Color.RED); 
+            text.setBackgroundColor(Color.RED);
+            
+            
             int color = Color.argb( 200, 255, 64, 64 );
                 text.setBackgroundColor( color );
 

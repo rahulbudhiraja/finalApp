@@ -1144,6 +1144,8 @@ public class AnimationActivity extends Activity {
 			{
 				
 				Intent it=new Intent(activityContext,MainScreen.class);
+				it.putExtra("computeDisparity", false);
+			   
 				activityContext.startActivity(it);
 				
 //				fileObserver=new CustomFileObserver(getBaseContext());

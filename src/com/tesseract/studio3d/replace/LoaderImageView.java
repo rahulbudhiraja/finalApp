@@ -1,10 +1,14 @@
 package com.tesseract.studio3d.replace;
 
+import com.tesseract.studio3d.utils.Structs;
+
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.view.Gravity;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -13,6 +17,7 @@ public class LoaderImageView extends RelativeLayout {
     private Context     context;
     private ProgressBar progressBar;
     private ImageView   imageView;
+    private Bitmap bmp;
 
     public LoaderImageView(final Context context) {
     super(context);
@@ -24,11 +29,11 @@ public class LoaderImageView extends RelativeLayout {
        
        imageView = new ImageView(context);
        
-       final int w = 960/2;
-	   final int h = 540/2;
+       final int w = 940/2;
+	   final int h = 510/2;
 
        Bitmap.Config conf = Bitmap.Config.ARGB_8888; // see other conf types
-       Bitmap bmp = Bitmap.createBitmap(w, h, conf); // this creates a MUTABLE bitmap
+       bmp = Bitmap.createBitmap(w, h, conf); // this creates a MUTABLE bitmap
        imageView.setImageBitmap(bmp);
        
        progressBar = new ProgressBar(context);
@@ -49,21 +54,41 @@ public class LoaderImageView extends RelativeLayout {
        addView(imageView);
 
        this.setGravity(Gravity.CENTER);
+       
+       imageView.setOnClickListener(imageViewClickListener);
+       
    }
 
+   
    // ...
 
-   // Then, play with this method to show or hide your progressBar
-   public void toggleVisibilty(boolean imgVisibility,boolean barVisibility) {
-    
-    
-   }
-   
+  
    public void setImage(Bitmap img)
    {
+	   bmp=img;
 	   imageView.setImageBitmap(img);
 	   progressBar.setVisibility(View.INVISIBLE);
 	   
    }
+   
+   public OnClickListener imageViewClickListener = new OnClickListener() {
+
+	@Override
+	public void onClick(View v) 
+	{
+		// TODO Auto-generated method stub
+		if(Structs.selectedBitmap==null)
+		Structs.selectedBitmap=Bitmap.createBitmap(bmp.getWidth(),bmp.getHeight(),Bitmap.Config.ARGB_8888);
+		
+		Structs.selectedBitmap=bmp;
+		
+		  Intent i=new Intent(context,FullScreenLayoutActivity.class);
+		  		  
+		  context.startActivity(i);
+		
+		
+	}
+
+   };
 
 }
