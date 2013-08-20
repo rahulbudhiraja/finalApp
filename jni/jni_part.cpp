@@ -65,7 +65,8 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_r
 
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2);
 
-JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode,jstring imgPath);
+//JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode,jstring imgPath);
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode,jlong loadedImgMat);
 
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2)
 {
@@ -294,12 +295,13 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
 }
 
 
-JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode,jstring path)
+JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getThreshold(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp, jlong finalImage,jlong addrBackground,jlong addrForeground, jint ji1, jint ji2,jint currentMode,jlong addrLoadedImage)
 {
 
 
-  const char *cparam = env->GetStringUTFChars(path, 0);
-  string imgPath=cparam;
+//  const char *cparam = env->GetStringUTFChars(path, 0);
+//  string imgPath=cparam;
+
   LOGD("Start");
   Mat& img = *(Mat*)addrBgr;
   img = imread("/mnt/sdcard/Studio3D/img_full.jpg");
@@ -308,6 +310,8 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getTh
   cvtColor(disp, disp, CV_BGR2GRAY);
   Mat& background = *(Mat*)addrBackground;
   Mat& foreground = *(Mat*)addrForeground;
+
+
 
   Mat& finImg = *(Mat*)finalImage;
   finImg = Mat::zeros(finImg.rows, finImg.cols, CV_8UC3);
@@ -412,7 +416,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getTh
          else if(currentMode == 5)
          {
              Mat stickimg;
-             stickimg = imread(imgPath);
+             //stickimg = imread(imgPath);
              resize(stickimg, stickimg, Size(background.cols, background.rows));
              bitwise_and(background, stickimg, stickimg);
              stickimg.copyTo(background);
@@ -420,10 +424,13 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getTh
          }
          else if (currentMode == 6)
          {
-             Mat stickimg;
+            // Mat stickimg;
            //  imgPath="/mnt/sdcard/download/bungee/A1.jpg";
-             LOGD(cparam);
-             stickimg = imread(imgPath);
+            // LOGD(cparam);
+
+             //stickimg = imread(imgPath);
+
+             Mat& stickimg = *(Mat*)addrLoadedImage;
 
              sprintf(str, "%d", stickimg.rows);
              strcat(str,str2);
@@ -478,7 +485,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getTh
     LOGD(str);
 
 	// .. do something with it
-  env->ReleaseStringUTFChars(path, cparam);
+ // env->ReleaseStringUTFChars(path, cparam);
 
 
 }
