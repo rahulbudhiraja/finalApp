@@ -225,15 +225,15 @@ public class ReplaceActivity extends Activity
 				dimensions.width=960/2;
 				dimensions.height=540/2;
 				
-				Imgproc.cvtColor(imgToLoad, imgToLoad, Imgproc.COLOR_BGR2RGBA);
+				Imgproc.cvtColor(finalImage, finalImage, Imgproc.COLOR_BGR2RGBA);
 	            
-				Imgproc.resize(imgToLoad, imgToLoad,dimensions);
-				final Bitmap tempBitmap=Bitmap.createBitmap(imgToLoad.cols(),imgToLoad.rows(), 
+				Imgproc.resize(finalImage, finalImage,dimensions);
+				final Bitmap tempBitmap=Bitmap.createBitmap(finalImage.cols(),finalImage.rows(), 
 	            		 Bitmap.Config.ARGB_8888);
 	             
-	            Utils.matToBitmap(imgToLoad, tempBitmap);
+	            Utils.matToBitmap(finalImage, tempBitmap);
 	             
-	            Highgui.imwrite("/mnt/sdcard/blahblah.png",imgToLoad);
+	            Highgui.imwrite("/mnt/sdcard/blahblah.png",finalImage);
 				
 				
 				// Update the UI and assign the bitmap tp cusomview  
