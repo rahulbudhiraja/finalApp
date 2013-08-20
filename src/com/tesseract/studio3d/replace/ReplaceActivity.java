@@ -6,6 +6,8 @@ import java.io.InputStream;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
@@ -212,27 +214,40 @@ public class ReplaceActivity extends Activity
 				Mat imgToLoad=new Mat();
 				Utils.bitmapToMat(Img, imgToLoad);
 				
-				
+				Imgproc.cvtColor(imgToLoad, imgToLoad, Imgproc.COLOR_RGBA2BGR);
+		           
 				Log.d("ReplaceActivity","val:  "+imgToLoad.rows()+"  "+imgToLoad.cols());
 				// Take this mat and pass it to getThresholdFunction
 				getThreshold(Structs.mRgba.getNativeObjAddr(), Structs.mDisparity.getNativeObjAddr(), finalImage.getNativeObjAddr(), background.getNativeObjAddr(),foreground.getNativeObjAddr(),0,0,6,imgToLoad.getNativeObjAddr());
 				
 				// Get recomputed bitmap 
+				Size dimensions = new Size();
+				dimensions.width=960/2;
+				dimensions.height=540/2;
 				
 				Imgproc.cvtColor(imgToLoad, imgToLoad, Imgproc.COLOR_BGR2RGBA);
 	            
-				Bitmap tempBitmap=Bitmap.createBitmap(background.cols(),background.rows(), 
+				Imgproc.resize(imgToLoad, imgToLoad,dimensions);
+				final Bitmap tempBitmap=Bitmap.createBitmap(imgToLoad.cols(),imgToLoad.rows(), 
 	            		 Bitmap.Config.ARGB_8888);
 	             
-	            Utils.matToBitmap(background, tempBitmap);
+	            Utils.matToBitmap(imgToLoad, tempBitmap);
 	             
-	             
+	            Highgui.imwrite("/mnt/sdcard/blahblah.png",imgToLoad);
 				
 				
 				// Update the UI and assign the bitmap tp cusomview  
 				customView=(LoaderImageView) findViewById(startingIndex+i);
 				
-				customView.setImage(tempBitmap);
+				runOnUiThread(new Runnable() {
+				     public void run() {
+				    	 customView.setImage(tempBitmap);
+							
+				//stuff that updates ui
+
+				    }
+				});
+				
 				// invalidate ;;
 				
 			} catch (IOException e) {

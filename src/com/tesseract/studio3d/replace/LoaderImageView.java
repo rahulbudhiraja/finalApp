@@ -24,7 +24,8 @@ public class LoaderImageView extends RelativeLayout {
        
        imageView = new ImageView(context);
        
-       int w = 960/2, h = 540/2;
+       final int w = 960/2;
+	   final int h = 540/2;
 
        Bitmap.Config conf = Bitmap.Config.ARGB_8888; // see other conf types
        Bitmap bmp = Bitmap.createBitmap(w, h, conf); // this creates a MUTABLE bitmap
