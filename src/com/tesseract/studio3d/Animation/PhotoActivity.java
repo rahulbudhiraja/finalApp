@@ -64,8 +64,6 @@ public class PhotoActivity extends Activity {
 	 public Mat limg;	
 	 public Mat foreground,background;
 	 
-	 
-	 
 
 	String[] imageFilters = { "sepia", "stark", "sunnyside", "cool", "worn",
 			"grayscale","vignette","crush","sunny","night" };
