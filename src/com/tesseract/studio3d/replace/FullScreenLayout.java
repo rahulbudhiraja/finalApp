@@ -26,7 +26,7 @@ public class FullScreenLayout extends ImageView {
 	static Bitmap leftImg,imgMask,leftImgModified;
 //	Bitmap imgMask;
 	Xfermode xfermode[]={new PorterDuffXfermode(PorterDuff.Mode.DST_IN),new PorterDuffXfermode(PorterDuff.Mode.DST_OVER),new PorterDuffXfermode(PorterDuff.Mode.SRC_IN),new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)};
-	static Canvas BitmapCanvas,leftImgCanvas;
+	static Canvas BitmapCanvas,leftImgCanvas,imgMaskCanvas;
 	static Paint p;
 	
 	  public FullScreenLayout(Context context,Bitmap selectedBitmap) 
@@ -81,15 +81,20 @@ public class FullScreenLayout extends ImageView {
  // draw the src/dst example into our offscreen bitmap
   	// canvas.drawBitmap(tempBitmap, 0, 0,paint);   // dest 
   
-  	canvas.drawBitmap(leftImg, 0, 0, paint);
-  	paint.setXfermode(xfermode[0]);
-  	canvas.drawBitmap(imgMask, 0, 0, paint); // src 
+//  	canvas.drawBitmap(leftImg, 0, 0, paint);
+//  	paint.setXfermode(xfermode[0]);
+//  	canvas.drawBitmap(imgMask, 0, 0, paint); // src 
   	
 //    paint.setXfermode(xfermode[1]);
 //    canvas.drawBitmap(tempBitmap, 0, 0,paint);
 //    
- paint.setXfermode(null);
+// paint.setXfermode(null);
  
+  	
+  	 canvas.drawBitmap(leftImgModified, 0, 0, paint);
+     
+  	
+  	
   	invalidate();
   	canvas.save();
   }
@@ -98,6 +103,7 @@ public class FullScreenLayout extends ImageView {
   {
 	  imgMask = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
       BitmapCanvas = new Canvas(imgMask);
+//      imgMaskCanvas=new Canvas(imgMask);
    
       BitmapCanvas.drawColor(0, Mode.CLEAR);
       p = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -115,7 +121,7 @@ public class FullScreenLayout extends ImageView {
 	Log.d("X = "+event.getX(),"Y = "+event.getY());
 	
 	BitmapCanvas.drawCircle(event.getX(),event.getY(),20,p);
-	//applyMasktoBitmap();
+	applyMasktoBitmap();
 	invalidate();
 	return true;
   }
@@ -125,9 +131,11 @@ public class FullScreenLayout extends ImageView {
 	    leftImgModified=leftImg;
 	    leftImgCanvas=new Canvas(leftImgModified);
 	    
+	    leftImgCanvas.drawBitmap(leftImg, 0, 0, paint);
 	    paint.setXfermode(xfermode[0]);
 	    leftImgCanvas.drawBitmap(imgMask, 0, 0, paint);
-      invalidate();
+        
+	    invalidate();
       
 
   }
