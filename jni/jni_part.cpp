@@ -264,9 +264,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
     cvtColor(background, background, CV_BGR2RGBA);
 
     vector<Mat> rgbam;
-    split(foreground, rgbam);
-    rgbam[3] = layerAf;
-    merge(rgbam, foreground);
+
     rgbam.clear();
 
     split(background, rgbam);
@@ -563,6 +561,9 @@ JNIEXPORT jfloatArray JNICALL Java_com_tesseract_studio3d_Animation_PhotoActivit
     getThreshold(disp, point1, 10, foreground);
     segmentForeground(img1, foreground, background,contours);
 
+    imwrite("/mnt/sdcard/Studio3D/img_mask_fg.png",foreground);
+    imwrite("/mnt/sdcard/Studio3D/img_mask_bg.png",background);
+
     Mat layerAf, layerAb;
     cvtColor(foreground, layerAf, CV_BGR2GRAY);
     cvtColor(background, layerAb, CV_BGR2GRAY);
@@ -692,14 +693,14 @@ int getDisp(Mat g1, Mat g2, Mat &disp)
 {
     Mat disp16;
     StereoSGBM sbm;
-    sbm.SADWindowSize = 5; // 5
-    sbm.numberOfDisparities = 192;
-    sbm.preFilterCap = 4;
-    sbm.minDisparity = -32; // -64
+    sbm.SADWindowSize = 7; // 5
+    sbm.numberOfDisparities = 112;
+    sbm.preFilterCap = 20;
+    sbm.minDisparity = -64; // -64
     sbm.uniquenessRatio = 1; // 1
-    sbm.speckleWindowSize = 150; //150
+    sbm.speckleWindowSize = 120; //150
     sbm.speckleRange = 2;
-    sbm.disp12MaxDiff = 10; // 10
+    sbm.disp12MaxDiff = 20; // 10
     sbm.fullDP = false;
     sbm.P1 = 600;
     sbm.P2 = 2400;
@@ -768,7 +769,7 @@ int segmentForeground(Mat img, Mat &foreground, Mat &background, vector<vector<P
     }
     dilate(drawing, drawing, kernel, Point(-1, -1), 1);
     foreground = drawing.clone();
-    background = Scalar(255, 255, 255) - foreground;
+    background = Scalar(255, 255, 255) - foreground; // USE THIS FOR GETTING THE INVERSE ...
     return 1;
 }
 

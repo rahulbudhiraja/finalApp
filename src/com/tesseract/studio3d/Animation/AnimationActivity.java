@@ -33,6 +33,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -118,7 +120,8 @@ public class AnimationActivity extends Activity {
 	 
 	 Context activityContext;
 	 
-
+	 int menuSettings=Menu.FIRST;
+		private int group1Id = 1;
 
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -1429,7 +1432,42 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
         protected void onProgressUpdate(Void... values) {
         }
         
-  }   
+  } 
+ 
+ public boolean onCreateOptionsMenu(Menu menu) {
+
+	    menu.add(group1Id, menuSettings, menuSettings, "Edit Layers");
+	  
+	    return super.onCreateOptionsMenu(menu); 
+	    }
+
+	   @Override
+public boolean onOptionsItemSelected(MenuItem item) {
+
+	    switch (item.getItemId()) {
+
+	case 1:
+	    //write your code here
+
+		Intent it = new Intent(this,FullScreenEditorActivity.class);
+		
+		if (null != it)
+			{
+			
+			it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//			it.putExtra("computeDisparity", false);
+ 
+			this.startActivity(it);
+			}   
+		break;
+
+	default:
+	    break;
+
+	       }
+	    return super.onOptionsItemSelected(item);
+	}
+
     
     
 	public native void getThreshold(long matAddrRgba, long matAddrDisp, long matAddrfinalImage,long matAddrBackground, long matAddrForeground, int ji1, int ji2,int choice);

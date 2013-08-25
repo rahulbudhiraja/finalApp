@@ -34,7 +34,7 @@
             </intent-filter>
             </activity>
    <activity android:name=".Animation.PhotoActivity" android:label="@string/app_name" android:screenOrientation="landscape" />
- 
+ <activity android:name=".Animation.FullScreenEditorActivity" android:label="@string/app_name" android:screenOrientation="landscape" />
    <activity android:name=".social.SocialSharing" android:label="@string/app_name" android:screenOrientation="landscape" /> 
     <intent-filter>
             <action android:name="android.intent.action.VIEW" />
