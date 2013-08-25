@@ -264,6 +264,9 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
     cvtColor(background, background, CV_BGR2RGBA);
 
     vector<Mat> rgbam;
+    split(foreground, rgbam);
+    rgbam[3] = layerAf;
+    merge(rgbam, foreground);
 
     rgbam.clear();
 
@@ -700,7 +703,7 @@ int getDisp(Mat g1, Mat g2, Mat &disp)
     sbm.uniquenessRatio = 1; // 1
     sbm.speckleWindowSize = 120; //150
     sbm.speckleRange = 2;
-    sbm.disp12MaxDiff = 20; // 10
+    sbm.disp12MaxDiff = 10; // 10
     sbm.fullDP = false;
     sbm.P1 = 600;
     sbm.P2 = 2400;
@@ -1153,7 +1156,7 @@ int getDisparity(Mat g1, Mat g2, Mat &disp)
     sbm.uniquenessRatio = 9; // 1
     sbm.speckleWindowSize = 180; //150
     sbm.speckleRange = 2;
-    sbm.disp12MaxDiff = 20; // 10
+    sbm.disp12MaxDiff = 10; // 10
     sbm.fullDP = false;
     sbm.P1 = 600;
     sbm.P2 = 2400;

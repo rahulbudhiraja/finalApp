@@ -14,6 +14,10 @@ public class FullScreenEditorActivity extends Activity
 	int menuSettings=Menu.FIRST;
 	private int group1Id = 1;
 	
+	String[] imageFilters = { "sepia", "stark", "sunnyside", "cool", "worn",
+			"grayscale","vignette","crush","sunny","night" };
+
+	
 	protected void onCreate(Bundle savedInstanceState) 
 	{
 
@@ -23,7 +27,12 @@ public class FullScreenEditorActivity extends Activity
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		
-		setContentView(new FullScreenEditorView(this));
+		Intent i = getIntent();
+		 
+		   
+//	    buttonClicked=i.getExtras().getBoolean("browseButtonClicked");
+//	    
+		setContentView(new FullScreenEditorView(this,i.getExtras().getString("filter_fg"),i.getExtras().getString("filter_bg")));
 
 	}
 	

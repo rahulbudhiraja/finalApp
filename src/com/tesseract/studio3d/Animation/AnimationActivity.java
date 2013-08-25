@@ -1455,8 +1455,10 @@ public boolean onOptionsItemSelected(MenuItem item) {
 			{
 			
 			it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//			it.putExtra("computeDisparity", false);
- 
+			
+			it.putExtra("filter_fg", imageFilters[selectedFilters.get(0)]);
+			it.putExtra("filter_bg", imageFilters[selectedFilters.get(1)]);
+			
 			this.startActivity(it);
 			}   
 		break;
