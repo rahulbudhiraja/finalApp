@@ -1,17 +1,19 @@
 package com.tesseract.studio3d.Animation;
 
 import java.util.Random;
+import java.util.Vector;
 
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.highgui.Highgui;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.CornerPathEffect;
@@ -19,6 +21,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Environment;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.widget.ImageView;
 
 import com.tesseract.studio3d.R;
@@ -30,13 +33,20 @@ public class FullScreenEditorView extends ImageView
 	String bg_filter,fg_filter;
 	
 	Bitmap fgBmp,bgBmp;
+	
 	Paint paint;
 	
 	String[] imageFilters = { "sepia", "stark", "sunnyside", "cool", "worn",
 			"grayscale","vignette","crush","sunny","night" };
 	private String TAG="FullScreenEditor";
 
+	
+	// Conversion Mats initialization as discussed with Jay ...
+	
+	Mat fg_gray,bg_gray;
 
+	Vector<Mat> rgbaMats_fg,rgbaMats_bg;
+	Mat fg_alpha,bg_alpha;
 	public FullScreenEditorView(Context context,String filter1,String filter2)
 	{
 		super(context);
@@ -49,35 +59,55 @@ public class FullScreenEditorView extends ImageView
 		
 		Log.d(TAG,"selected "+fg_filter);
 		Log.d(TAG,"selected "+bg_filter);
+	/** aint working 	
+//		// Load the mats from disk
+//		
+//		fgMat=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png");
+//		bgMat=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_bg.png");
+//		
+//		// Convert it into RGBA
+//		Imgproc.cvtColor(fgMat, converted_fgMat, Imgproc.COLOR_BGR2RGBA);
+//		Imgproc.cvtColor(bgMat, converted_bgMat, Imgproc.COLOR_BGR2RGBA);
+//		// Show it into the view ..
+//		
+//		fgBmp=Bitmap.createBitmap(fgMat.cols(),fgMat.rows(),Bitmap.Config.ARGB_8888);
+//		
+//		bgBmp=Bitmap.createBitmap(bgMat.cols(),bgMat.rows(),Bitmap.Config.ARGB_8888);
+//		
+//		Utils.matToBitmap(converted_fgMat, fgBmp,true);
+//	    Utils.matToBitmap(converted_bgMat, bgBmp,true);
+//	    
+	*/
+	    
+	    bgBmp=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_bg.png");
+	    fgBmp=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png");
+	    
+	    // getting the mats ..
+
+		Utils.bitmapToMat(fgBmp,fgMat);
+		Utils.bitmapToMat(bgBmp,bgMat);
 		
-		// Load the mats from disk
-		fgMat=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png");
-		bgMat=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_bg.png");
-		
-		// Convert it into RGBA
+		// Converting bgrmats to rgba ...
 		Imgproc.cvtColor(fgMat, converted_fgMat, Imgproc.COLOR_BGR2RGBA);
 		Imgproc.cvtColor(bgMat, converted_bgMat, Imgproc.COLOR_BGR2RGBA);
-		// Show it into the view ..
+	    
+	    // Loading alpha .
 		
-		fgBmp=Bitmap.createBitmap(fgMat.cols(),fgMat.rows(), 
-        		 Bitmap.Config.ARGB_8888);
+		Imgproc.cvtColor(fgMat, fg_gray, Imgproc.COLOR_BGR2GRAY);
+		Imgproc.cvtColor(bgMat, bg_gray, Imgproc.COLOR_BGR2GRAY);
 		
-		bgBmp=Bitmap.createBitmap(bgMat.cols(),bgMat.rows(), 
-       		 Bitmap.Config.ARGB_8888);
+		// Splitting the rgba ..
 		
-		Utils.matToBitmap(converted_fgMat, fgBmp);
-	    Utils.matToBitmap(converted_bgMat, bgBmp);
+		Core.split(converted_fgMat, rgbaMats_fg);
+		fg_alpha=rgbaMats_fg.get(3);
+		Core.split(converted_bgMat, rgbaMats_bg);
+		bg_alpha=rgbaMats_bg.get(3);
+		
+	    fgBmp=applyFiltertoBitmap(fgBmp,fg_filter);
+	    bgBmp=applyFiltertoBitmap(bgBmp,bg_filter);
 	    
-	    applyFiltertoBitmap(fgBmp,fg_filter);
-	    applyFiltertoBitmap(bgBmp,bg_filter);
 	    
-	    fgBmp=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png");
-	    bgBmp=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_bg.png");
-	    
-	    
-	    applyFiltertoBitmap(fgBmp,fg_filter);
-	    applyFiltertoBitmap(bgBmp,bg_filter);
-	    
+	     
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -104,7 +134,14 @@ public class FullScreenEditorView extends ImageView
 		bgMat=new Mat();
 		converted_fgMat=new Mat();
 		converted_bgMat=new Mat();
+		fg_gray=new Mat();
+		bg_gray=new Mat();
 		
+		fg_alpha=new Mat();
+		bg_alpha=new Mat();
+		
+		rgbaMats_fg=new Vector<Mat>();
+		rgbaMats_bg=new Vector<Mat>();
 	}
 	
 	 public void onDraw(Canvas canvas)
@@ -117,14 +154,28 @@ public class FullScreenEditorView extends ImageView
 		    
 	    }
 	
-		public void applyFiltertoBitmap(Bitmap imgViewBitmap,String filtName) 
+	 
+	 public boolean onTouchEvent(MotionEvent event) {
+	 	   // TODO Auto-generated method stub
+	 	   
+	 	Log.d("X = "+event.getX(),"Y = "+event.getY());
+	 	
+	 	Core.circle(fg_alpha, new Point(event.getX(),event.getY()), 10,new Scalar(255,255,255) ,-1);
+	 	
+	 	Core.merge(rgbaMats_fg, converted_fgMat);
+	 	Utils.matToBitmap(converted_fgMat, fgBmp);
+		return false;
+	 	
+	 	
+	 	
+	 }
+		public Bitmap applyFiltertoBitmap(Bitmap imgViewBitmap,String filtName) 
 		{
 			// Bitmap
 			// imgViewBitmap=((BitmapDrawable)CanvasImageViews.get(currentSelectedLayer).getDrawable()).getBitmap();
 			//Bitmap imgViewBitmap = layerBitmaps.get(currentSelectedLayer);
 
-			Bitmap modifiedBitmap = Bitmap.createScaledBitmap(imgViewBitmap,
-					imgViewBitmap.getWidth(), imgViewBitmap.getHeight(), true);
+			Bitmap modifiedBitmap = Bitmap.createScaledBitmap(imgViewBitmap,imgViewBitmap.getWidth(), imgViewBitmap.getHeight(), true);
 			Canvas imageViewCanvas = new Canvas(modifiedBitmap);
 
 			imageViewCanvas.drawBitmap(modifiedBitmap, 0, 0, new Paint());
@@ -273,7 +324,7 @@ public class FullScreenEditorView extends ImageView
 				imageViewCanvas.drawBitmap(modifiedBitmap, matrix, paint);
 
 			
-	
+			return modifiedBitmap;
 		}
 
 }
