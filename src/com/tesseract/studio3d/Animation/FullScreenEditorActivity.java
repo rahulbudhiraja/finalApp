@@ -28,6 +28,7 @@ public class FullScreenEditorActivity extends Activity
 	
 	ImageButton layer1Button,layer2Button;
 	ImageView layersView;
+	boolean layer1Butselected=false,layer2Butselected=false;
 	
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -57,8 +58,76 @@ public class FullScreenEditorActivity extends Activity
 		layersView.setLayoutParams(layoutParams2);
 		activityLayout.addView(layersView);
 		
+//		
+//		layer1Button=new ImageButton(this);
+//		
+//		
+//		layer1Button.setImageDrawable(getResources().getDrawable(R.drawable.brush_ntpressed));
+//		layer1Button.setBackgroundColor(Color.TRANSPARENT);
+//		
+//		RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(
+//				RelativeLayout.LayoutParams.WRAP_CONTENT,
+//				RelativeLayout.LayoutParams.WRAP_CONTENT);
+//		
+//		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+//		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//
+//		layoutParams.setMargins(0, 120,20, 0);
+//		layer1Button.setLayoutParams(layoutParams);
+//		layer1Button.setId(998877);
+//		
+//		activityLayout.addView(layer1Button);
+//		layer1Button.setOnClickListener(buttonClickListener);
+//		
+//		layer2Button=new ImageButton(this);
+//		
+//		layer2Button.setImageDrawable(getResources().getDrawable(R.drawable.erase_ntpressed));
+//		layer2Button.setBackgroundColor(Color.TRANSPARENT);
+//		layoutParams.setMargins(0, 220,20, 0);
+//		layer2Button.setLayoutParams(layoutParams);
+//		layer2Button.setId(998878);
+//		activityLayout.addView(layer2Button);
+//		
+//		layer1Button.setOnClickListener(buttonClickListener);
+//		
+		initializeButtons();
+		setContentView(activityLayout);
+
+	}
+	
+	public OnClickListener buttonClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			// TODO Auto-generated method stub
+       
+			if(v.getId()==998877)
+			{
+				layer1Butselected=!layer1Butselected;
+				
+				if(layer1Butselected)
+					layer1Button.setImageDrawable(getResources().getDrawable(R.drawable.brush_pressed));
+				else 
+					layer1Button.setImageDrawable(getResources().getDrawable(R.drawable.brush_ntpressed));
+			}
+			
+			else if(v.getId()==998878)
+			{	
+				layer2Butselected=!layer2Butselected;
+				
+				if(layer2Butselected)
+					layer2Button.setImageDrawable(getResources().getDrawable(R.drawable.eraser_pressed));
+				else 
+					layer2Button.setImageDrawable(getResources().getDrawable(R.drawable.erase_ntpressed));
+			}
+		}
 		
-		layer1Button=new ImageButton(this);
+	};
+	
+	public void initializeButtons()
+	{
+		
+layer1Button=new ImageButton(this);
 		
 		
 		layer1Button.setImageDrawable(getResources().getDrawable(R.drawable.brush_ntpressed));
@@ -78,34 +147,28 @@ public class FullScreenEditorActivity extends Activity
 		activityLayout.addView(layer1Button);
 		layer1Button.setOnClickListener(buttonClickListener);
 		
+		
+		layoutParams=new RelativeLayout.LayoutParams(
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT);
+		
+		layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		
+		
 		layer2Button=new ImageButton(this);
 		
 		layer2Button.setImageDrawable(getResources().getDrawable(R.drawable.erase_ntpressed));
 		layer2Button.setBackgroundColor(Color.TRANSPARENT);
-		layoutParams.setMargins(0, 220,20, 0);
+		
+		layoutParams.addRule(RelativeLayout.BELOW, 998877);
+		layoutParams.setMargins(0, 50,0, 50);
 		layer2Button.setLayoutParams(layoutParams);
-		layer2Button.setId(998877);
+		layer2Button.setId(998878);
 		activityLayout.addView(layer2Button);
 		
+		layer2Button.setOnClickListener(buttonClickListener);
 		
-		setContentView(activityLayout);
-
 	}
-	
-	public OnClickListener buttonClickListener = new OnClickListener() {
-
-		@Override
-		public void onClick(View v) {
-			// TODO Auto-generated method stub
-       
-			if(v.getId()==998877)
-			{
-			
-				;
-			}
-		}
-		
-	};
 		
 	
 	

@@ -8,6 +8,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
@@ -103,10 +104,12 @@ public class FullScreenEditorView extends ImageView
 		Core.split(converted_bgMat, rgbaMats_bg);
 		bg_alpha=rgbaMats_bg.get(3);
 		
+
+		fg_alpha=fg_gray;
+		bg_alpha=bg_gray;
+		
 	    fgBmp=applyFiltertoBitmap(fgBmp,fg_filter);
 	    bgBmp=applyFiltertoBitmap(bgBmp,bg_filter);
-	    
-	    
 	     
 		// TODO Auto-generated constructor stub
 	}
@@ -160,10 +163,14 @@ public class FullScreenEditorView extends ImageView
 	 	   
 	 	Log.d("X = "+event.getX(),"Y = "+event.getY());
 	 	
-	 	Core.circle(fg_alpha, new Point(event.getX(),event.getY()), 10,new Scalar(255,255,255) ,-1);
+	 	Core.circle(fg_alpha, new Point(event.getX(),event.getY()), 20,new Scalar(255,255,255) ,-1);
+	 	rgbaMats_fg.set(3,fg_alpha);
 	 	
 	 	Core.merge(rgbaMats_fg, converted_fgMat);
+	 	Highgui.imwrite("/mnt/sdcard/Studio3D/img_mask_1122.png",converted_fgMat);
 	 	Utils.matToBitmap(converted_fgMat, fgBmp);
+	 	invalidate();
+	 	
 		return false;
 	 	
 	 	
