@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -31,7 +32,9 @@ public class FullScreenEditorView extends ImageView
 {
 	Mat fgMat,bgMat;
 	Mat converted_fgMat,converted_bgMat;
+	Mat temporary_ones,fg_bandw_mask,bg_bandw_mask;
 	String bg_filter,fg_filter;
+	
 	
 	Bitmap fgBmp,bgBmp;
 	
@@ -48,6 +51,8 @@ public class FullScreenEditorView extends ImageView
 
 	Vector<Mat> rgbaMats_fg,rgbaMats_bg;
 	Mat fg_alpha,bg_alpha;
+	Mat leftImgMat;
+	
 	public FullScreenEditorView(Context context,String filter1,String filter2)
 	{
 		super(context);
@@ -88,27 +93,43 @@ public class FullScreenEditorView extends ImageView
 		Utils.bitmapToMat(fgBmp,fgMat);
 		Utils.bitmapToMat(bgBmp,bgMat);
 		
+		temporary_ones=Mat.ones(fgMat.rows(), fgMat.cols(), CvType.CV_8UC4);
+		//temporary_ones.mul(temporary_ones, 255);
+		temporary_ones.setTo(new Scalar(255,255,255,255));
+		Highgui.imwrite("/mnt/sdcard/Studio3D/img_mask_temporary_ones.png",temporary_ones);
+		
+		
 		// Converting bgrmats to rgba ...
 		Imgproc.cvtColor(fgMat, converted_fgMat, Imgproc.COLOR_BGR2RGBA);
 		Imgproc.cvtColor(bgMat, converted_bgMat, Imgproc.COLOR_BGR2RGBA);
 	    
 	    // Loading alpha .
 		
-		Imgproc.cvtColor(fgMat, fg_gray, Imgproc.COLOR_BGR2GRAY);
-		Imgproc.cvtColor(bgMat, bg_gray, Imgproc.COLOR_BGR2GRAY);
+		//Imgproc.cvtColor(fgMat, fg_gray, Imgproc.COLOR_BGR2GRAY);
+		//Imgproc.cvtColor(bgMat, bg_gray, Imgproc.COLOR_BGR2GRAY);
+		
+		//converted_fgMat.copyTo(fg_alpha);
+		//converted_bgMat.copyTo(bg_alpha);
 		
 		// Splitting the rgba ..
 		
-		Core.split(converted_fgMat, rgbaMats_fg);
-		fg_alpha=rgbaMats_fg.get(3);
-		Core.split(converted_bgMat, rgbaMats_bg);
-		bg_alpha=rgbaMats_bg.get(3);
+//		Core.split(converted_fgMat, rgbaMats_fg);
+		//fg_alpha=rgbaMats_fg.get(3);
+ 
+//		rgbaMats_fg.set(3,rgbaMats_fg.get(0));
+//		Core.merge(rgbaMats_fg, fg_alpha);
 		
+		//		
+//		
+//		Core.split(converted_bgMat, rgbaMats_bg);
+//		
+//		rgbaMats_bg.set(3,rgbaMats_bg.get(0));
+//		Core.merge(rgbaMats_bg, bg_alpha);
+	
+		//bg_alpha=rgbaMats_bg.get(3);
+//		
 
-		fg_alpha=fg_gray;
-		bg_alpha=bg_gray;
-		
-	    fgBmp=applyFiltertoBitmap(fgBmp,fg_filter);
+		fgBmp=applyFiltertoBitmap(fgBmp,fg_filter);
 	    bgBmp=applyFiltertoBitmap(bgBmp,bg_filter);
 	     
 		// TODO Auto-generated constructor stub
@@ -145,6 +166,34 @@ public class FullScreenEditorView extends ImageView
 		
 		rgbaMats_fg=new Vector<Mat>();
 		rgbaMats_bg=new Vector<Mat>();
+		
+		fg_bandw_mask=new Mat();
+		bg_bandw_mask=new Mat();
+		
+		fg_bandw_mask=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_fg.png");
+		bg_bandw_mask=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_fg.png");
+		
+		Imgproc.cvtColor(fg_bandw_mask, fg_bandw_mask, Imgproc.COLOR_BGR2RGBA);
+		Imgproc.cvtColor(bg_bandw_mask, bg_bandw_mask, Imgproc.COLOR_BGR2RGBA);
+		
+		Core.split(fg_bandw_mask,rgbaMats_fg);
+		rgbaMats_fg.set(3,rgbaMats_fg.get(0));
+		Core.merge(rgbaMats_fg, fg_bandw_mask);
+		
+		
+//		Core.split(bg_bandw_mask,rgbaMats_bg);
+//		rgbaMats_bg.set(3,rgbaMats_bg.get(0));
+//		Core.merge(rgbaMats_bg, bg_bandw_mask);
+		
+		rgbaMats_fg=new Vector<Mat>();
+		rgbaMats_bg=new Vector<Mat>();
+		
+		leftImgMat=new Mat();
+		leftImgMat=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_left.jpg");
+		
+		Imgproc.cvtColor(leftImgMat, leftImgMat, Imgproc.COLOR_BGR2RGBA);
+		
+		
 	}
 	
 	 public void onDraw(Canvas canvas)
@@ -163,15 +212,33 @@ public class FullScreenEditorView extends ImageView
 	 	   
 	 	Log.d("X = "+event.getX(),"Y = "+event.getY());
 	 	
-	 	Core.circle(fg_alpha, new Point(event.getX(),event.getY()), 20,new Scalar(255,255,255) ,-1);
-	 	rgbaMats_fg.set(3,fg_alpha);
+	 	Core.circle(fg_bandw_mask, new Point(event.getX(),event.getY()), 20,new Scalar(255,255,255,255) ,-1);
+	 	//rgbaMats_fg.set(3,fg_alpha);
 	 	
-	 	Core.merge(rgbaMats_fg, converted_fgMat);
-	 	Highgui.imwrite("/mnt/sdcard/Studio3D/img_mask_1122.png",converted_fgMat);
-	 	Utils.matToBitmap(converted_fgMat, fgBmp);
-	 	invalidate();
+	 	 
+	 	//Core.subtract(src1, src2, dst)
 	 	
-		return false;
+	 	Core.subtract(temporary_ones,fg_bandw_mask, bg_bandw_mask);
+	 	
+	 	Core.bitwise_and(fg_bandw_mask, leftImgMat,converted_fgMat);
+	 	Core.bitwise_and(bg_bandw_mask, leftImgMat,converted_bgMat);
+	 	
+	 	//Core.merge(rgbaMats_fg, converted_fgMat);
+	
+		Utils.matToBitmap(converted_fgMat, fgBmp);
+		Utils.matToBitmap(converted_bgMat, bgBmp);
+		
+		fgBmp=applyFiltertoBitmap(fgBmp,fg_filter);
+		bgBmp=applyFiltertoBitmap(bgBmp,bg_filter);
+	    
+	 	Highgui.imwrite("/mnt/sdcard/Studio3D/img_mask_converted_fgmat.png",converted_fgMat);
+	 	Highgui.imwrite("/mnt/sdcard/Studio3D/img_mask_converted_bgmat.png",converted_bgMat);
+		 
+	 	// Note : Change the way the color filter is applied ..
+	 	
+	 	invalidate(); 
+	 	
+		return true;
 	 	
 	 	
 	 	
