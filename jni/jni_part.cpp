@@ -1150,13 +1150,13 @@ int getDisparity(Mat g1, Mat g2, Mat &disp)
     Mat disp16;
     StereoSGBM sbm;
     sbm.SADWindowSize = 7; // 5
-    sbm.numberOfDisparities = 112;
-    sbm.preFilterCap = 20;
-    sbm.minDisparity = -64; // -64
-    sbm.uniquenessRatio = 1; // 1
-    sbm.speckleWindowSize = 120; //150
+    sbm.numberOfDisparities = 128;
+    sbm.preFilterCap = 4;
+    sbm.minDisparity = -39; // -64
+    sbm.uniquenessRatio = 9; // 1
+    sbm.speckleWindowSize = 180; //150
     sbm.speckleRange = 2;
-    sbm.disp12MaxDiff = 10; // 10
+    sbm.disp12MaxDiff = 20; // 10
     sbm.fullDP = false;
     sbm.P1 = 600;
     sbm.P2 = 2400;

@@ -37,6 +37,7 @@ public class FullScreenEditorView extends ImageView
 	
 	
 	Bitmap fgBmp,bgBmp;
+
 	
 	Paint paint;
 	
@@ -52,6 +53,10 @@ public class FullScreenEditorView extends ImageView
 	Vector<Mat> rgbaMats_fg,rgbaMats_bg;
 	Mat fg_alpha,bg_alpha;
 	Mat leftImgMat;
+	
+	// New overlay bitmaps experiments ..
+	
+	Bitmap overlayBitmap;
 	
 	public FullScreenEditorView(Context context,String filter1,String filter2)
 	{
@@ -131,7 +136,10 @@ public class FullScreenEditorView extends ImageView
 
 		fgBmp=applyFiltertoBitmap(fgBmp,fg_filter);
 	    bgBmp=applyFiltertoBitmap(bgBmp,bg_filter);
-	     
+	    
+	    
+	    overlayBitmap=Bitmap.createBitmap(fgBmp.getWidth(),fgBmp.getHeight(),Bitmap.Config.ARGB_8888);
+	    
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -239,8 +247,6 @@ public class FullScreenEditorView extends ImageView
 	 	invalidate(); 
 	 	
 		return true;
-	 	
-	 	
 	 	
 	 }
 		public Bitmap applyFiltertoBitmap(Bitmap imgViewBitmap,String filtName) 
