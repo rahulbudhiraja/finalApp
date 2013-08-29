@@ -65,9 +65,9 @@ public class AnimationActivity extends Activity {
 
 	Vector<ImageView> mimageViews;
 	Vector<ImageView> layerViews;
-	Vector<ImageView> CanvasImageViews;
+	 static Vector<ImageView> CanvasImageViews;
 	Vector<AnimationSet> mAnimations;
-	Vector<Bitmap> layerBitmaps;
+	static Vector<Bitmap> layerBitmaps;
 	Vector<int[]> sizes;
 	RelativeLayout activityLayout,fullScreenLayout;
 	File seperatedLayersFolder;
@@ -1426,6 +1426,7 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
 //        	   progress.setTitle("Processing Image");
 //               progress.setMessage("Please wait while we process your image ...");
 //               progress.show();
+        	System.gc();
         }
 
         @Override

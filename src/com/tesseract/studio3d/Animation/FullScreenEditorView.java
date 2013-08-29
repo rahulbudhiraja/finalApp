@@ -14,13 +14,19 @@ import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.CornerPathEffect;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.os.Environment;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -33,19 +39,16 @@ public class FullScreenEditorView extends ImageView
 	Mat fgMat,bgMat;
 	Mat converted_fgMat,converted_bgMat;
 	Mat temporary_ones,fg_bandw_mask,bg_bandw_mask;
-	String bg_filter,fg_filter;
+	static String bg_filter,fg_filter;
 	
-	
-	Bitmap fgBmp,bgBmp;
+	static Bitmap fgBmp,bgBmp;
 
-	
 	Paint paint;
 	
 	String[] imageFilters = { "sepia", "stark", "sunnyside", "cool", "worn",
 			"grayscale","vignette","crush","sunny","night" };
-	private String TAG="FullScreenEditor";
+	private static String TAG="FullScreenEditor";
 
-	
 	// Conversion Mats initialization as discussed with Jay ...
 	
 	Mat fg_gray,bg_gray;
@@ -57,6 +60,19 @@ public class FullScreenEditorView extends ImageView
 	// New overlay bitmaps experiments ..
 	
 	Bitmap overlayBitmap;
+	Paint layer1Paint,layer2Paint;
+	ColorMatrix layer1cm,layer2cm;
+	Canvas overlayCanvas,fgBmpCanvas,bgBmpCanvas;
+	
+	Bitmap temporaryMask,temporaryMask2;
+	static Context ctxt;
+	Paint maskPaint,blackPaint;
+	Bitmap filteredBitmap,filteredCopy;
+	Bitmap customCircleBitmap;
+	Canvas c,c2,temporaryCanvas,temporaryCanvas2;
+	int layerID;
+	
+	
 	
 	public FullScreenEditorView(Context context,String filter1,String filter2)
 	{
@@ -64,13 +80,15 @@ public class FullScreenEditorView extends ImageView
 		
 		initializeMats();
 		
+		ctxt=context;
 		
 		fg_filter=filter1;
 		bg_filter=filter2;
-		
+		layerID=1;
 		Log.d(TAG,"selected "+fg_filter);
 		Log.d(TAG,"selected "+bg_filter);
-	/** aint working 	
+
+/** aint working 	
 //		// Load the mats from disk
 //		
 //		fgMat=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png");
@@ -90,8 +108,9 @@ public class FullScreenEditorView extends ImageView
 //	    
 	*/
 	    
-	    bgBmp=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_bg.png");
-	    fgBmp=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png");
+	    bgBmp=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg");
+	    fgBmp=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg");
+	    
 	    
 	    // getting the mats ..
 
@@ -134,30 +153,110 @@ public class FullScreenEditorView extends ImageView
 		//bg_alpha=rgbaMats_bg.get(3);
 //		
 
-		fgBmp=applyFiltertoBitmap(fgBmp,fg_filter);
-	    bgBmp=applyFiltertoBitmap(bgBmp,bg_filter);
+	   fgBmp=applyFiltertoBitmap(fgBmp,fg_filter);
+	   bgBmp=applyFiltertoBitmap(bgBmp,bg_filter);
 	    
 	    
-	    overlayBitmap=Bitmap.createBitmap(fgBmp.getWidth(),fgBmp.getHeight(),Bitmap.Config.ARGB_8888);
+	  // overlayBitmap=Bitmap.createBitmap(fgBmp.getWidth(),fgBmp.getHeight(),Bitmap.Config.ARGB_8888);
+	  // overlayBitmap.isMutable();
+	   
+	   makeBitmapTransparent();
+	   
+	   layer1Paint=findPaint(fg_filter);
+	   layer2Paint=findPaint(bg_filter);
 	    
+//	   overlayCanvas=new Canvas(overlayBitmap);
+//	   overlayCanvas.drawColor(Color.BLACK);
+	   
+	   
+	   fgBmpCanvas=new Canvas(fgBmp);
+	   bgBmpCanvas=new Canvas(bgBmp);
+	   
+	 //  temporaryMask= BitmapFactory.decodeResource(context.getResources(), R.drawable.temp_mask);
+	   temporaryMask=Bitmap.createBitmap(fgBmp.getWidth(),fgBmp.getHeight(),Bitmap.Config.ARGB_8888);
+	   temporaryMask2=Bitmap.createBitmap(fgBmp.getWidth(),fgBmp.getHeight(),Bitmap.Config.ARGB_8888);
+	   Paint p=new Paint();
+	   p.setColor(Color.WHITE);
+	  
+	   
+	   temporaryCanvas=new Canvas(temporaryMask);
+	   temporaryCanvas.drawColor(Color.BLACK);
+	   
+
+	   temporaryCanvas2=new Canvas(temporaryMask2);
+	   temporaryCanvas2.drawColor(Color.BLACK);
+	    
+	   float[] src = {
+			    0, 0, 0, 0, 255,
+			    0, 0, 0, 0, 255,
+			    0, 0, 0, 0, 255,
+			    1, 1, 1, -1, 0,
+			};
+		ColorMatrix cm = new ColorMatrix(src);
+		ColorMatrixColorFilter filter = new ColorMatrixColorFilter(cm);
+		
+		maskPaint = new Paint();
+		maskPaint.setColorFilter(filter);
+		maskPaint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
+	   
+		filteredBitmap = Bitmap.createBitmap(fgBmp.getWidth(), fgBmp.getHeight(), Config.ARGB_8888);
+		
+		filteredCopy=Bitmap.createScaledBitmap(filteredBitmap, fgBmp.getWidth(), fgBmp.getHeight(),true);
+		configurePaint();
+		
+//		temporaryCanvas.drawCircle(300, 300,100,paint);
+//		temporaryCanvas2.drawCircle(600, 300,50,paint);
+		
+		c = new Canvas(filteredBitmap);
+		c2 = new Canvas(filteredCopy);
+		
+		
+		c.drawBitmap(fgBmp, 0, 0, layer1Paint);
+	    c.drawBitmap(temporaryMask, 0, 0, maskPaint);
+		
+	    c2.drawBitmap(fgBmp, 0,0,layer2Paint);
+	    c2.drawBitmap(temporaryMask2, 0, 0, maskPaint);
+		
+	    
+		c.save();
+		
+		
+		
 		// TODO Auto-generated constructor stub
 	}
 	
+	private void makeBitmapTransparent() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	
 	public void configurePaint()
     {
-    	paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		
-     //   paint.setColor(Color.RED);                    // set the color
-        paint.setStrokeWidth(3);               // set the size
-        paint.setDither(true);                    // set the dither to true
-        paint.setStyle(Paint.Style.STROKE);       // set to STOKE
-        paint.setStrokeJoin(Paint.Join.ROUND);    // set the join to round you want
-        paint.setStrokeCap(Paint.Cap.ROUND);      // set the paint cap to round too
-        paint.setPathEffect(new CornerPathEffect(20) );   // set the path effect when they join.
-        paint.setAntiAlias(true);  
+    	  paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    	  paint.setColor(Color.WHITE);
+		  paint.setStrokeWidth(3);  
+		  paint.setStyle(Paint.Style.FILL);   
+		  
+   //   paint.setColor(Color.RED);                    // set the color
+         
+// set the size        paint.setDither(true);                    // set the dither to true
+              // set to STOKE
+//        paint.setStrokeJoin(Paint.Join.ROUND);    // set the join to round you want
+//        paint.setStrokeCap(Paint.Cap.ROUND);      // set the paint cap to round too
+//        paint.setPathEffect(new CornerPathEffect(20) );   // set the path effect when they join.
+//        paint.setAntiAlias(true);  
         
         
+		  blackPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
+		  blackPaint.setColor(Color.BLACK);
+		  blackPaint.setStrokeWidth(3);
+		  blackPaint.setStyle(Paint.Style.FILL);
         
+//        blackPaint.setColor(Color.BLACK);
+//        blackPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+//        blackPaint.setStyle(Paint.Style.FILL);
     }
 	public void initializeMats()
 	{
@@ -207,11 +306,20 @@ public class FullScreenEditorView extends ImageView
 	 public void onDraw(Canvas canvas)
 	    {
 	    	super.onDraw(canvas);
-	      
+	        canvas.save();
 	    	
-	    	canvas.drawBitmap(fgBmp, 0, 0,paint); 
-		    canvas.drawBitmap(bgBmp, 0, 0,paint);
-		    
+//	    	canvas.drawBitmap(fgBmp, 0, 0,paint); 
+//		    canvas.drawBitmap(bgBmp, 0, 0,paint);
+//		    canvas.drawBitmap(overlayBitmap, 0, 0,paint);
+//		    
+//		    canvas.drawBitmap(filteredBitmap,0,0,paint);
+		    //canvas.drawBitmap(fgBmp, 0, 0, layer1Paint);
+		    //canvas.drawBitmap(temporaryMask, 0, 0, maskPaint);
+	        
+	        canvas.drawBitmap(filteredBitmap, 0,0, null);
+	        canvas.drawBitmap(filteredCopy, 0,0, null);
+	        
+		  //  canvas.restore();
 	    }
 	
 	 
@@ -220,36 +328,248 @@ public class FullScreenEditorView extends ImageView
 	 	   
 	 	Log.d("X = "+event.getX(),"Y = "+event.getY());
 	 	
-	 	Core.circle(fg_bandw_mask, new Point(event.getX(),event.getY()), 20,new Scalar(255,255,255,255) ,-1);
-	 	//rgbaMats_fg.set(3,fg_alpha);
+	 	Log.d(TAG,"Timings -- 1:"+System.currentTimeMillis());
 	 	
-	 	 
-	 	//Core.subtract(src1, src2, dst)
 	 	
-	 	Core.subtract(temporary_ones,fg_bandw_mask, bg_bandw_mask);
+	 	switch (event.getAction())
+	 	{
 	 	
-	 	Core.bitwise_and(fg_bandw_mask, leftImgMat,converted_fgMat);
-	 	Core.bitwise_and(bg_bandw_mask, leftImgMat,converted_bgMat);
+	 	case MotionEvent.ACTION_DOWN:
+	 	case MotionEvent.ACTION_MOVE:
+	 	case MotionEvent.ACTION_POINTER_DOWN:
+	 		
+	 	if(layerID==FullScreenEditorActivity.activeLayer)	
+	 		{
+	 			temporaryCanvas.drawCircle(event.getX(), event.getY(), 60, paint);
+	 			temporaryCanvas2.drawCircle(event.getX(), event.getY(), 60, blackPaint);
+	 		
+	 		}
+	 	else {
+	 		temporaryCanvas.drawCircle(event.getX(), event.getY(), 60, blackPaint);
+	 		temporaryCanvas2.drawCircle(event.getX(), event.getY(), 60, paint);
+	 	}
 	 	
-	 	//Core.merge(rgbaMats_fg, converted_fgMat);
-	
-		Utils.matToBitmap(converted_fgMat, fgBmp);
-		Utils.matToBitmap(converted_bgMat, bgBmp);
+	 	temporaryCanvas.save();
+	 	temporaryCanvas2.save();
+	 	
+	 	
+ 		c = new Canvas(filteredBitmap);
+ 		c2 = new Canvas(filteredCopy);
 		
-		fgBmp=applyFiltertoBitmap(fgBmp,fg_filter);
-		bgBmp=applyFiltertoBitmap(bgBmp,bg_filter);
+ 		c.drawBitmap(fgBmp, 0, 0, layer1Paint);
+	    c.drawBitmap(temporaryMask, 0, 0, maskPaint);
 	    
-	 	Highgui.imwrite("/mnt/sdcard/Studio3D/img_mask_converted_fgmat.png",converted_fgMat);
-	 	Highgui.imwrite("/mnt/sdcard/Studio3D/img_mask_converted_bgmat.png",converted_bgMat);
-		 
+		c2.drawBitmap(fgBmp, 0, 0, layer2Paint);
+	    c2.drawBitmap(temporaryMask2, 0, 0, maskPaint);
+
+	 
+	 	break;
+		
+	 	}
+//	 	if(FullScreenEditorActivity.activeLayer==1)
+//	 		
+//	 		fgBmpCanvas.drawCircle(event.getX(), event.getY(), 20, layer1Paint);
+//	 	else if(FullScreenEditorActivity.activeLayer==2)
+////	 		
+//	 		bgBmpCanvas.drawCircle(event.getX(), event.getY(), 20, layer2Paint);
+//	 		
+//	 	overlayCanvas.drawCircle(event.getX(), event.getY(), 20, layer2Paint);
+	 	//createCorrespondingMask(event.getX(),event.getY());
+	 	
+	 	
+	 	
+	 	// Alternative ..With the current Paint selected ,just draw the circle on the bitmap ... 
+	 	 
+	 	
+	 	// Once the user clicks the save button 
+	 	
+	 	
 	 	// Note : Change the way the color filter is applied ..
+	 	
 	 	
 	 	invalidate(); 
 	 	
 		return true;
 	 	
 	 }
-		public Bitmap applyFiltertoBitmap(Bitmap imgViewBitmap,String filtName) 
+	 
+		public Paint findPaint(String filterName)
+		{
+			
+			ColorMatrix cm = new ColorMatrix();
+			
+			if (filterName.equalsIgnoreCase("stark")) {
+
+				Paint spaint = new Paint();
+				ColorMatrix scm = new ColorMatrix();
+
+				scm.setSaturation(0);
+				final float m[] = scm.getArray();
+				final float c = 1;
+				scm.set(new float[] { m[0] * c, m[1] * c, m[2] * c, m[3] * c,
+						m[4] * c + 15, m[5] * c, m[6] * c, m[7] * c, m[8] * c,
+						m[9] * c + 8, m[10] * c, m[11] * c, m[12] * c, m[13] * c,
+						m[14] * c + 10, m[15], m[16], m[17], m[18], m[19] });
+
+				spaint.setColorFilter(new ColorMatrixColorFilter(scm));
+				Matrix smatrix = new Matrix();
+//				imageViewCanvas.drawBitmap(modifiedBitmap, smatrix, spaint);
+
+				cm.set(new float[] { 1, 0, 0, 0, -90, 0, 1, 0, 0, -90, 0, 0, 1, 0,
+						-90, 0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("sunnyside")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, 10, 0, 1, 0, 0, 10, 0, 0, 1, 0,
+						-60, 0, 0, 0, 1, 0 });
+			} else if (filterName.equalsIgnoreCase("worn")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, -60, 0, 1, 0, 0, -60, 0, 0, 1, 0,
+						-90, 0, 0, 0, 1, 0 });
+			} else if (filterName.equalsIgnoreCase("grayscale")) {
+
+				float[] matrix = new float[] { 0.3f, 0.59f, 0.11f, 0, 0, 0.3f,
+						0.59f, 0.11f, 0, 0, 0.3f, 0.59f, 0.11f, 0, 0, 0, 0, 0, 1,
+						0, };
+
+				cm.set(matrix);
+
+			} else if (filterName.equalsIgnoreCase("cool")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, 10, 0, 1, 0, 0, 10, 0, 0, 1, 0,
+						60, 0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("filter0")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, 30, 0, 1, 0, 0, 10, 0, 0, 1, 0,
+						20, 0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("filter1")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, -33, 0, 1, 0, 0, -8, 0, 0, 1, 0,
+						56, 0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("night")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, -42, 0, 1, 0, 0, -5, 0, 0, 1, 0,
+						-71, 0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("crush")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, -68, 0, 1, 0, 0, -52, 0, 0, 1, 0,
+						-15, 0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("filter4")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, -24, 0, 1, 0, 0, 48, 0, 0, 1, 0,
+						59, 0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("sunny")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, 83, 0, 1, 0, 0, 45, 0, 0, 1, 0, 8,
+						0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("filter6")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, 80, 0, 1, 0, 0, 65, 0, 0, 1, 0,
+						81, 0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("filter7")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, -44, 0, 1, 0, 0, 38, 0, 0, 1, 0,
+						46, 0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("filter8")) {
+
+				cm.set(new float[] { 1, 0, 0, 0, 84, 0, 1, 0, 0, 63, 0, 0, 1, 0,
+						73, 0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("random")) {
+
+				// pick an integer between -90 and 90 apply
+				int min = -90;
+				int max = 90;
+				Random rand = new Random();
+
+				int five = rand.nextInt(max - min + 1) + min;
+
+				int ten = rand.nextInt(max - min + 1) + min;
+				int fifteen = rand.nextInt(max - min + 1) + min;
+
+				Log.d(TAG, "five " + five);
+				Log.d(TAG, "ten " + ten);
+				Log.d(TAG, "fifteen " + fifteen);
+
+				cm.set(new float[] { 1, 0, 0, 0, five, 0, 1, 0, 0, ten, 0, 0, 1, 0,
+						fifteen, 0, 0, 0, 1, 0 });
+
+			} else if (filterName.equalsIgnoreCase("sepia")) {
+
+				float[] sepMat = { 0.3930000066757202f, 0.7689999938011169f,
+						0.1889999955892563f, 0, 0, 0.3490000069141388f,
+						0.6859999895095825f, 0.1679999977350235f, 0, 0,
+						0.2720000147819519f, 0.5339999794960022f,
+						0.1309999972581863f, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 };
+				cm.set(sepMat);
+			}
+			else if(filterName.equalsIgnoreCase("vignette"))
+			{
+
+				Bitmap border = null;
+				Bitmap scaledBorder = null;
+
+				border = BitmapFactory.decodeResource(this.getResources(), R.drawable.vignette);
+
+//				scaledBorder = Bitmap.createScaledBitmap(border,width,height, false);
+
+				}
+			
+			Paint localpaint = new Paint();
+
+			localpaint.setColorFilter(new ColorMatrixColorFilter(cm));
+			
+			return localpaint;
+			
+			
+		}
+	 public void createCorrespondingMask(float xTouchPos,float yTouchPos)
+	 {
+		 
+
+			Core.circle(fg_bandw_mask, new Point(xTouchPos,yTouchPos), 20,new Scalar(255,255,255,255) ,-1);
+		 	//rgbaMats_fg.set(3,fg_alpha);
+
+		    Log.d(TAG,"Timings -- 2:"+System.currentTimeMillis());
+			 
+		 	Core.subtract(temporary_ones,fg_bandw_mask, bg_bandw_mask);
+		 	
+		 	Core.bitwise_and(fg_bandw_mask, leftImgMat,converted_fgMat);
+		 	Core.bitwise_and(bg_bandw_mask, leftImgMat,converted_bgMat);
+		 	
+			Log.d(TAG,"Timings -- 3:"+System.currentTimeMillis());
+		 	//Core.merge(rgbaMats_fg, converted_fgMat);
+		
+			Utils.matToBitmap(converted_fgMat, fgBmp);
+			Utils.matToBitmap(converted_bgMat, bgBmp);
+			
+			Log.d(TAG,"Timings -- 4:"+System.currentTimeMillis());
+			
+			fgBmp=applyFiltertoBitmap(fgBmp,fg_filter);
+			bgBmp=applyFiltertoBitmap(bgBmp,bg_filter);
+		    
+			Log.d(TAG,"Timings -- 5:"+System.currentTimeMillis());
+			
+		 	Highgui.imwrite("/mnt/sdcard/Studio3D/img_mask_converted_fgmat.png",converted_fgMat);
+		 	Highgui.imwrite("/mnt/sdcard/Studio3D/img_mask_converted_bgmat.png",converted_bgMat);
+			
+		 	Log.d(TAG,"Timings -- 6:"+System.currentTimeMillis());
+		 	
+		 	
+		 	
+		 	
+	 }
+	 
+		static public Bitmap applyFiltertoBitmap(Bitmap imgViewBitmap,String filtName) 
 		{
 			// Bitmap
 			// imgViewBitmap=((BitmapDrawable)CanvasImageViews.get(currentSelectedLayer).getDrawable()).getBitmap();
@@ -263,7 +583,7 @@ public class FullScreenEditorView extends ImageView
 			ColorMatrix cm = new ColorMatrix();
 
 			String filterName = filtName;
-
+			
 			if (filterName.equalsIgnoreCase("stark")) {
 
 				Paint spaint = new Paint();
@@ -384,7 +704,7 @@ public class FullScreenEditorView extends ImageView
 				Bitmap border = null;
 				Bitmap scaledBorder = null;
 
-				border = BitmapFactory.decodeResource(this.getResources(), R.drawable.vignette);
+				border = BitmapFactory.decodeResource(ctxt.getResources(), R.drawable.vignette);
 
 				int width = modifiedBitmap.getWidth();
 				int height = modifiedBitmap.getHeight();
@@ -407,4 +727,15 @@ public class FullScreenEditorView extends ImageView
 			return modifiedBitmap;
 		}
 
+		public void initializeColormatrices()
+		{
+
+			//			if(FullScreenEditorActivity.activeLayer==1)
+			
+			
+			
+		}
+		
+		
+		
 }

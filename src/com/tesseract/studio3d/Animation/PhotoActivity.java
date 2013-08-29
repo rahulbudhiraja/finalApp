@@ -70,6 +70,7 @@ public class PhotoActivity extends Activity {
 
 	File seperatedLayersFolder;
 	
+	
 	File disparityFile;
 	int converted_x=0,converted_y=0;
 	boolean buttonClicked;
