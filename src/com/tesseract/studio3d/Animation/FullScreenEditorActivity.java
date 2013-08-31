@@ -3,10 +3,12 @@ package com.tesseract.studio3d.Animation;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -37,12 +39,12 @@ public class FullScreenEditorActivity extends Activity
 	ImageButton saveButton;
 	static Bitmap actualBitmap;
 	
-	static int activeLayer=1;
+	static int activeLayer=0;
 	OverlayTouchCanvas tCanvas1,tCanvas2;
 	int layerId=0;
 	
-	ZoomView zView;
-	
+	MultiTouchControllerView mTouchView;
+	static boolean activateViewMovement=true;
 	
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -59,32 +61,34 @@ public class FullScreenEditorActivity extends Activity
 		   
 //	    buttonClicked=i.getExtras().getBoolean("browseButtonClicked");
 //	    
-		zView=new ZoomView(this);
+		
 		activityLayout = new RelativeLayout(this);
 		
 		RelativeLayout.LayoutParams layoutParams2=new RelativeLayout.LayoutParams(
 				RelativeLayout.LayoutParams.MATCH_PARENT,
 				RelativeLayout.LayoutParams.MATCH_PARENT);
 		
-		layersView=new FullScreenEditorView(this,i.getExtras().getString("filter_fg"),i.getExtras().getString("filter_bg"));
-		layersView.setLayoutParams(layoutParams2);
+		
+		//layersView=new FullScreenEditorView(this,i.getExtras().getString("filter_fg"),i.getExtras().getString("filter_bg"));
+		//layersView.setLayoutParams(layoutParams2);
 		
 		ImageView backgroundView=new ImageView(this);
-		//actualBitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg");
-		actualBitmap=Bitmap.createBitmap(960,540,Bitmap.Config.ARGB_8888);
+		actualBitmap=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg");
 		
-		Canvas actualBitmapCanvas=new Canvas(actualBitmap);
-		actualBitmapCanvas.drawBitmap(((BitmapDrawable)AnimationActivity.CanvasImageViews.get(0).getDrawable()).getBitmap(),0,0,null);
-		actualBitmapCanvas.drawBitmap(((BitmapDrawable)AnimationActivity.CanvasImageViews.get(1).getDrawable()).getBitmap(),0,0,null);
-		actualBitmapCanvas.save();
+		//actualBitmap=Bitmap.createBitmap(960,540,Bitmap.Config.ARGB_8888);
+		
+//		Canvas actualBitmapCanvas=new Canvas(actualBitmap);
+//		actualBitmapCanvas.drawBitmap(((BitmapDrawable)AnimationActivity.CanvasImageViews.get(0).getDrawable()).getBitmap(),0,0,null);
+//		actualBitmapCanvas.drawBitmap(((BitmapDrawable)AnimationActivity.CanvasImageViews.get(1).getDrawable()).getBitmap(),0,0,null);
+//		actualBitmapCanvas.save();
 		
 		backgroundView.setImageBitmap(actualBitmap);
 		backgroundView.setLayoutParams(layoutParams2);
 		
 
-		activityLayout.addView(backgroundView);
+//		activityLayout.addView(backgroundView);
 		
-		activityLayout.addView(layersView);
+//		activityLayout.addView(layersView);
 		
 		 
 		
@@ -127,9 +131,29 @@ public class FullScreenEditorActivity extends Activity
 //		
 //		layer1Button.setOnClickListener(buttonClickListener);
 //		
+		//
+		mTouchView=new MultiTouchControllerView(this,actualBitmap);
+		mTouchView.setLayoutParams(layoutParams2);
+		activityLayout.addView(mTouchView);
+	
+			
 		initializeButtons();
+		
 		setContentView(activityLayout);
 
+	}
+	
+	protected void onResume() {
+		super.onResume();
+		//mTouchView.loadImages(this);
+        mTouchView.loadImages(this,false);
+		//mTouchView.setBitmap(actualBitmap);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		//mTouchView.unloadImages();
 	}
 	
 	public OnClickListener buttonClickListener = new OnClickListener() {
@@ -149,11 +173,14 @@ public class FullScreenEditorActivity extends Activity
 					     activeLayer=1;
 					     tCanvas1.activate=true;
 					     tCanvas2.activate=false;
+					     activateViewMovement=false;
 					}
 				else 
 					{
 						 layer1Button.setImageDrawable(getResources().getDrawable(R.drawable.brush_ntpressed_2));
 					     tCanvas1.activate=false;
+					     activateViewMovement=true;
+					     activeLayer=0;
 					}
 			}
 			
@@ -169,10 +196,15 @@ public class FullScreenEditorActivity extends Activity
 						activeLayer=2;	
 						tCanvas2.activate=true;
 						tCanvas1.activate=false;
+						
+						activateViewMovement=false;
 					}
 				else 
-					{layer2Button.setImageDrawable(getResources().getDrawable(R.drawable.eraser_ntpressed));
-					tCanvas2.activate=false;
+					{
+						layer2Button.setImageDrawable(getResources().getDrawable(R.drawable.eraser_ntpressed));
+						tCanvas2.activate=false;
+						activateViewMovement=true;
+						activeLayer=0;
 					}
 			}
 		}
