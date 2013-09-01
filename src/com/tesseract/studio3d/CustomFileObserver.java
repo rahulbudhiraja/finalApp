@@ -79,7 +79,7 @@ public class CustomFileObserver
 							option.inScaled = true;
 
 							Bitmap fullsize_bitmap=BitmapFactory.decodeFile(jpgfilename,option);
-							Log.d("studio3d","width="+fullsize_bitmap.getWidth()+" Height= "+fullsize_bitmap.getHeight());
+						//	Log.d("studio3d","width="+fullsize_bitmap.getWidth()+" Height= "+fullsize_bitmap.getHeight());
 
 							Bitmap left_img=Bitmap.createBitmap(fullsize_bitmap, 0,0,fullsize_bitmap.getWidth()/2,fullsize_bitmap.getHeight());
 
@@ -97,29 +97,29 @@ public class CustomFileObserver
 								outputStreamFull = new FileOutputStream ( Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_full.jpg");
 								fullsize_bitmap.compress(CompressFormat.JPEG, 100, outputStreamFull);
 
-								
+//								
 								File sdCardDirectory = Environment.getExternalStorageDirectory();
 						        File storedImagesDir = new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images");
-						       
+//						       
 						        if(!storedImagesDir.exists())
 						        	storedImagesDir.mkdirs();
-						        
+//						        
 								to.renameTo(new File(Environment.getExternalStorageDirectory()+"/Studio3D/images/"+storedImagesDir.listFiles().length+".jpg"));
-								
-								File thumbsImagesDir = new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache");
-							       
-								 if(!thumbsImagesDir.exists())
-									 thumbsImagesDir.mkdirs();
-								
-								numFiles=thumbsImagesDir.listFiles().length;
-								File currentFolder=new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles);
-								currentFolder.mkdirs();
-							    
-								outputStreamFull = new FileOutputStream ( sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles+"/img_full.jpg");
-								fullsize_bitmap.compress(CompressFormat.JPEG, 100, outputStreamFull);
-								
-								outputStream2 = new FileOutputStream (  sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles+"/img_left.jpg");
-								right_img.compress(CompressFormat.JPEG, 100, outputStream2);
+//								
+//								File thumbsImagesDir = new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache");
+//							       
+//								 if(!thumbsImagesDir.exists())
+//									 thumbsImagesDir.mkdirs();
+//								
+//								numFiles=thumbsImagesDir.listFiles().length;
+//								File currentFolder=new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles);
+//								currentFolder.mkdirs();
+//							    
+//								outputStreamFull = new FileOutputStream ( sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles+"/img_full.jpg");
+//								fullsize_bitmap.compress(CompressFormat.JPEG, 100, outputStreamFull);
+//								
+//								outputStream2 = new FileOutputStream (  sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles+"/img_left.jpg");
+//								right_img.compress(CompressFormat.JPEG, 100, outputStream2);
 
 							} catch (FileNotFoundException e) {
 								// TODO Auto-generated catch block

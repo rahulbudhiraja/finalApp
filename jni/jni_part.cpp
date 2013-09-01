@@ -328,6 +328,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getTh
     x = ji1;
     y = ji2;
 
+
     point1 = Point(x, y); // to get from android
     LOGD("Point initial");
 

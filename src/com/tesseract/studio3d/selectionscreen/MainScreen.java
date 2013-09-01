@@ -23,6 +23,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.tesseract.studio3d.R;
+import com.tesseract.studio3d.StartScreen;
 import com.tesseract.studio3d.Animation.PhotoActivity;
 import com.tesseract.studio3d.refocus.Refocus;
 import com.tesseract.studio3d.replace.MainListViewActivity;
@@ -139,7 +140,8 @@ public class MainScreen extends Activity
 	}
 	
 	
-	protected void onStart() {
+	protected void onStart() 
+	{
 	    super.onStart();  // Always call the superclass method first
 	    Log.d(TAG,"start");
 	   
@@ -152,6 +154,14 @@ public class MainScreen extends Activity
 		placeholderImage.setImageBitmap(tempBitmap);
 	    }	
 	    //
+	}
+	
+	public void onBackPressed() 
+	{
+		Intent intent = new Intent(MainScreen.this, StartScreen .class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+		
 	}
 	
 	protected void onResume() {
