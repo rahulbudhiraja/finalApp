@@ -222,7 +222,7 @@ public class ReplaceActivity extends Activity
 				Log.d("ReplaceActivity","val:  "+imgToLoad.cols()+"  "+imgToLoad.rows());
 				Log.d("File name","i value:  "+i+"place :"+ placesArray[i]);
 				
-				
+				Log.d("Sizes - -  - -","Structure sizes ;"+Structs.mRgba.cols()+"  "+Structs.mDisparity.cols()+"  "+finalImage.cols()+"    "+background.cols()+"    "+imgToLoad.cols()+"   "+foreground.cols());
 				// Take this mat and pass it to getThresholdFunction
 				getThreshold(Structs.mRgba.getNativeObjAddr(), Structs.mDisparity.getNativeObjAddr(), finalImage.getNativeObjAddr(), background.getNativeObjAddr(),foreground.getNativeObjAddr(),0,0,6,imgToLoad.getNativeObjAddr());
 				
@@ -239,7 +239,7 @@ public class ReplaceActivity extends Activity
 	             
 	            Utils.matToBitmap(finalImage, tempBitmap);
 	  
-				// Update the UI and assign the bitmap tp cusomview  
+				// Update the UI and assign the bitmap to customview  
 				customView=(LoaderImageView) findViewById(startingIndex+i);
 				
 				if(customView!=null)
@@ -247,9 +247,7 @@ public class ReplaceActivity extends Activity
 				runOnUiThread(new Runnable() {
 				     public void run() {
 				    	 customView.setImage(tempBitmap);
-							
-				//stuff that updates ui
-				    	 
+					   //stuff that updates ui
 
 				    }
 				});

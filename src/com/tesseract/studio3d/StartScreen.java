@@ -48,6 +48,11 @@ public class StartScreen extends Activity {
 		
 		Log.d(TAG,"window width ="+getWindowManager().getDefaultDisplay().getWidth()+" height ="+getWindowManager().getDefaultDisplay().getHeight());
 		
+		
+		if (getIntent().getBooleanExtra("EXIT", false)) {
+	        finish();
+	    }
+		
 		setContentView(R.layout.activity_start_screen);
 		
 		context=this;

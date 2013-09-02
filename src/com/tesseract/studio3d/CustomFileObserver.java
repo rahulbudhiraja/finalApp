@@ -20,17 +20,20 @@ import android.graphics.Bitmap.CompressFormat;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.util.Log;
+import android.widget.Toast;
 
 public class CustomFileObserver 
 {
 
 	Context activityContext;
 	static int numFiles;
+	static int i=-1;
 
 	public CustomFileObserver(Context context)
 	{
 		activityContext=context;
 		createLayersFolder();
+		i=-1;
 		
 		initializeFileObserver();
 		
@@ -48,21 +51,30 @@ public class CustomFileObserver
 	{
 		Log.d("com.tesseract.studio3d","Initializing");
 
-		FileObserver observer = new FileObserver(android.os.Environment.getExternalStorageDirectory().toString() + "/DCIM/100MEDIA/") { // set up a file observer to watch this directory on sd card
+		FileObserver observer = new FileObserver(android.os.Environment.getExternalStorageDirectory().toString() + "/dcim/100MEDIA/") { // set up a file observer to watch this directory on sd card
 		
 			public void onEvent(int event, String file) {
 				Log.d("fired","fired"+" Event:"+event);
 
 				PackageManager pm = activityContext.getPackageManager();
-
-				if(event == FileObserver.CLOSE_WRITE && !file.equals(".probe")){ // check if its a "create" and not equal to .probe because thats created every time camera is launched
+				Log.d("Value","i "+i);
+				if(event==8)
+					i++;
+				//Toast.makeText(activityContext, "I value" + i, Toast.LENGTH_SHORT).show();
+				
+// Uncomment this for EVO 3D
+				//if(event == FileObserver.CLOSE_WRITE && !file.equals(".probe")){ // check if its a "create" and not equal to .probe because thats created every time camera is launched
+				
+// Uncomment this for evo 4g
+				
+				if(event == FileObserver.CLOSE_WRITE && !file.equals(".probe")&&i>0){ // check if its a "create" and not equal to .probe because thats created every time camera is launched
 					{
-						Log.d("fds", "File created [" + android.os.Environment.getExternalStorageDirectory().toString() + "/DCIM/100MEDIA/" + file + "]");
+						Log.d("fds", "File created [" + android.os.Environment.getExternalStorageDirectory().toString() + "/dcim/100MEDIA/" + file + "]");
 					
 						try
 						{
 
-							String jpsfilename=Environment.getExternalStorageDirectory().toString() + "/DCIM/100MEDIA/" + file;
+							String jpsfilename=Environment.getExternalStorageDirectory().toString() + "/dcim/100MEDIA/" + file;
 							String jpgfilename=jpsfilename.substring(0,jpsfilename.length()-1)+"g";
 
 							Log.d("File name","name "+jpsfilename);
@@ -77,9 +89,14 @@ public class CustomFileObserver
 							BitmapFactory.Options option = new BitmapFactory.Options();
 							option.inSampleSize =2;
 							option.inScaled = true;
+							
+							Log.d("studio3d","jpg file name is "+jpgfilename);
 
 							Bitmap fullsize_bitmap=BitmapFactory.decodeFile(jpgfilename,option);
-						//	Log.d("studio3d","width="+fullsize_bitmap.getWidth()+" Height= "+fullsize_bitmap.getHeight());
+							
+							Log.d("studio3d","length "+ fullsize_bitmap.getRowBytes());
+							Log.d("studio3d","File name "+jpgfilename);
+							Log.d("studio3d","width="+fullsize_bitmap.getWidth()+" height= "+fullsize_bitmap.getHeight());
 
 							Bitmap left_img=Bitmap.createBitmap(fullsize_bitmap, 0,0,fullsize_bitmap.getWidth()/2,fullsize_bitmap.getHeight());
 
@@ -106,20 +123,20 @@ public class CustomFileObserver
 //						        
 								to.renameTo(new File(Environment.getExternalStorageDirectory()+"/Studio3D/images/"+storedImagesDir.listFiles().length+".jpg"));
 //								
-//								File thumbsImagesDir = new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache");
-//							       
-//								 if(!thumbsImagesDir.exists())
-//									 thumbsImagesDir.mkdirs();
-//								
-//								numFiles=thumbsImagesDir.listFiles().length;
-//								File currentFolder=new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles);
-//								currentFolder.mkdirs();
-//							    
-//								outputStreamFull = new FileOutputStream ( sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles+"/img_full.jpg");
-//								fullsize_bitmap.compress(CompressFormat.JPEG, 100, outputStreamFull);
-//								
-//								outputStream2 = new FileOutputStream (  sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles+"/img_left.jpg");
-//								right_img.compress(CompressFormat.JPEG, 100, outputStream2);
+								File thumbsImagesDir = new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache");
+							       
+								 if(!thumbsImagesDir.exists())
+									 thumbsImagesDir.mkdirs();
+								
+								numFiles=thumbsImagesDir.listFiles().length;
+								File currentFolder=new File (sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles);
+								currentFolder.mkdirs();
+							    
+								outputStreamFull = new FileOutputStream ( sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles+"/img_full.jpg");
+								fullsize_bitmap.compress(CompressFormat.JPEG, 100, outputStreamFull);
+								
+								outputStream2 = new FileOutputStream (  sdCardDirectory.getAbsolutePath()+"/Studio3D/images/cache/"+numFiles+"/img_left.jpg");
+								right_img.compress(CompressFormat.JPEG, 100, outputStream2);
 
 							} catch (FileNotFoundException e) {
 								// TODO Auto-generated catch block

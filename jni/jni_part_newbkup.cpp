@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <string>
 
-#define APPNAME "Studio 3d jni"
+#define APPNAME "Studio 3d"
 
 #define LOGD(TAG) __android_log_print(ANDROID_LOG_DEBUG , APPNAME,TAG);
 
@@ -44,10 +44,7 @@ int segmentBlurs(Mat img, Mat &foreground);
 int doOilPaint(Mat src, Mat& foreground);
 int doGraySingle(Mat img, Mat& retVal, Mat disp, Point p1);
 int getRange(Mat disp, Point p1);
-int stickImage(Mat &foreground, Mat &background);
-int histPick(Mat disp);
-int getThresholdHist(Mat img, int dispval, int range, Mat &foreground);
-int doMultiBlurHist(Mat img, Mat& retVal, Mat disp, int dispval);
+
 
 static jfloatArray gArray = NULL;
 static int width,height;
@@ -73,9 +70,6 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getTh
 
 JNIEXPORT void JNICALL Java_com_tesseract_studio3d_refocus_FocusImageView_Refocus(JNIEnv* env, jobject, jlong addrBgr, jlong addrDisp,jlong finalImage, jint ji1, jint ji2)
 {
-
-
-
   Mat& img = *(Mat*)addrBgr;
   Mat& disp = *(Mat*)addrDisp;
 
@@ -185,7 +179,7 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_Animation_AnimationActivity_g
     LOGD("Point initial");
 
 
-    getThreshold(disp, point1, 15, foreground);
+    getThreshold(disp, point1, 10, foreground);
     LOGD("THREESH");
     segmentForeground(img1, foreground, background,contours);
 
@@ -308,9 +302,6 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getTh
 
 //  const char *cparam = env->GetStringUTFChars(path, 0);
 //  string imgPath=cparam;
-	LOGD("JNI startttt");
-
-
 
   LOGD("Start");
   Mat& img = *(Mat*)addrBgr;
@@ -329,27 +320,20 @@ JNIEXPORT void JNICALL Java_com_tesseract_studio3d_replace_ReplaceActivity_getTh
 
   jfloatArray contourPoints;
   vector<vector<Point> > contours;
-LOGD("INITIALIZE RECT IMG");
+
   Mat img1(img, Rect(0, 0, img.cols/2, img.rows));
   Point point1;
-//
+
     int x, y;
     x = ji1;
     y = ji2;
 
-    int dispval;
 
-    LOGD("HIST PICK");
-    dispval = histPick(disp);
-    LOGD("get thresh");
-    getThresholdHist(disp, dispval, 15, foreground);
+    point1 = Point(x, y); // to get from android
+    LOGD("Point initial");
 
 
-    //point1 = Point(x, y); // to get from android
-    //LOGD("Point initial");
-
-
-    //getThreshold(disp, point1, 10, foreground);
+    getThreshold(disp, point1, 10, foreground);
     LOGD("THREESH");
     segmentForeground(img1, foreground, background,contours);
 
@@ -456,14 +440,9 @@ LOGD("INITIALIZE RECT IMG");
              LOGD(str);
 
              resize(stickimg, stickimg, Size(foreground.cols, foreground.rows));
-             bitwise_and(background, stickimg, stickimg);
-             stickimg.copyTo(background);
-             getMaskedImage(img1, foreground);
-
-             //resize(stickimg, stickimg, Size(foreground.cols, foreground.rows));
-             //bitwise_and(foreground, stickimg, stickimg);
-             //stickimg.copyTo(foreground);
-             //getMaskedImage(img1, background);
+             bitwise_and(foreground, stickimg, stickimg);
+             stickimg.copyTo(foreground);
+             getMaskedImage(img1, background);
          }
          else if(currentMode == -1)
          {
@@ -1399,147 +1378,4 @@ int getRange(Mat disp, Point p1)
     contours.clear();
     hierarchy.clear();
     return (maxVal - dispval);
-}
-
-int stickImage(Mat &foreground, Mat &background)
-{
-    Mat bitwise;
-    int i, j;
-    resize(background, background, Size(foreground.cols, foreground.rows));
-    for(i=0; i<background.rows; i++)
-    {
-        for(j=0; j<background.cols; j++)
-        {
-            if (foreground.at<Vec3b>(i,j)[0] != 0)
-            {
-                background.at<Vec3b>(i,j) = foreground.at<Vec3b>(i,j);
-            }
-        }
-    }
-
-}
-
-int histPick(Mat disp)
-{
-    
-    int pxv[256] = {0};
-
-//    char str[10];
-//     char str2[]={" Value"};
-//     sprintf(str, "%d", tLen);
-//     strcat(str,str2);
-
-    for(int i=0; i<disp.cols; i++)
-    {
-        for(int j=0; j<disp.rows; j++)
-        {
-            pxv[disp.at<uchar>(j, i)] += 1;
-
-//            LOGD("rows ");
-        }
-    }
-//LOGD("float initialization");
-    int maxval=0;
-    int val;
-    int maxindex = 255;
-
-    for(int i=230; i>100; i--)
-    {
-        val = pxv[i];
-        if (val > maxval)
-        {
-            maxval = val;
-            maxindex = i;
-        }
-    }
-
-    LOGD("max index found");
-    return (maxindex);
-}
-
-int doMultiBlurHist(Mat img, Mat& retVal, Mat disp, int dispval)
-{
-    int range, i, lval, hval;
-    int l1, l2, h1, h2;
-    vector<Mat> layers, blurs, finLayers;
-    //Mat thresh, blur, bitwiseImg;
-    int threshVal;
-
-    range = dispval/10;
-    //printf("%d %d\n", range, dispval);
-    lval = dispval+1;
-    hval = dispval-1;
-    for(i=1; i<4; i++)
-    {
-        l1 = lval - range;
-        l2 = lval;
-        h1 = hval;
-        h2 = hval + range;
-        //printf("%d %d %d %d\n", l1, l2, h1, h2);
-        Mat thresh;
-        Mat seg;
-        threshVal = getThresh(disp, thresh, l1, l2, h1, h2);
-        if (!threshVal)
-        {
-            //printf("break\n");
-            break;
-        }
-        thresh.copyTo(seg);
-        segmentBlurs(thresh, seg);
-        //imshow("thresh", thresh);
-        //imshow("seg", seg);
-        //waitKey(0);
-        layers.push_back(seg);
-
-        lval = l1;
-        hval = h2;
-        range*=2;
-    }
-
-    blurs.push_back(img);
-    for(i=1; i<layers.size(); i++)
-    {
-        Mat blur;
-        GaussianBlur(img, blur, Size(19, 19), 2*i);
-        //doCircBlur(img, blur, 3*i);
-        //imshow("blur", blur);
-        //waitKey(0);
-        blurs.push_back(blur);
-    }
-    int sigma = 2*i;
-    Mat backLayer;
-    backLayer = Mat::zeros(img.rows, img.cols, CV_8UC3);
-    for(i=1; i<layers.size(); i++)
-    {
-        Mat bitwiseImg;
-        //printf("%d %d %d %d\n", layers[i].cols, layers[i].rows, blurs[i].rows, blurs[i].cols);
-        //printf("%d %d\n", layers[i].channels(), blurs[i].channels());
-        bitwise_and(layers[i], blurs[i], bitwiseImg);
-        //imshow("bitwiseImg", bitwiseImg);
-        //waitKey(0);
-        //printf("%d %d %d %d\n", layers[i].cols, layers[i].rows, backLayer.rows, backLayer.cols);
-        add(backLayer, layers[i], backLayer);
-        //imshow("thresh", layers[i]);
-        
-        finLayers.push_back(bitwiseImg);
-    }
-    //imshow("backLayer", backLayer);
-    //waitKey(0);
-    Mat blurImage;
-    backLayer = Scalar(255, 255, 255) - backLayer;
-    GaussianBlur(img, blurImage, Size(19, 19), sigma);
-    bitwise_and(blurImage, backLayer, backLayer);
-    finLayers.push_back(backLayer);
-    stackUp(finLayers, retVal);
-
-    return 1;
-
-}
-
-int getThresholdHist(Mat img, int dispval, int range, Mat &foreground)
-{
-    range = dispval/10;
-    inRange(img, dispval - range, dispval + range, foreground);
-    medianBlur(foreground, foreground, 9);
-    return 1;
 }
