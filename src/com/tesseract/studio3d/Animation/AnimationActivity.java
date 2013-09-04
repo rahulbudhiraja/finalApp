@@ -14,8 +14,6 @@ import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -54,10 +52,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.TextView;
 
 import com.tesseract.studio3d.CustomFileObserver;
 import com.tesseract.studio3d.R;
+import com.tesseract.studio3d.manualEdit.CanvasActivity;
 import com.tesseract.studio3d.selectionscreen.MainScreen;
 import com.tesseract.studio3d.social.SocialSharing;
 
@@ -1450,7 +1448,7 @@ public boolean onOptionsItemSelected(MenuItem item) {
 	case 1:
 	    //write your code here
 
-		Intent it = new Intent(this,FullScreenEditorActivity.class);
+		Intent it = new Intent(this,CanvasActivity.class);
 		
 		if (null != it)
 			{

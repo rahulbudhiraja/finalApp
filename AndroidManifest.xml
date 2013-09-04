@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="11"
         android:targetSdkVersion="14" />
 
     <application
@@ -49,12 +49,14 @@
    	 <activity android:name=".refocus.Refocus" android:label="@string/app_name" android:screenOrientation="landscape" /> 
    	 <activity android:name=".replace.MainListViewActivity" android:label="@string/app_name" android:screenOrientation="landscape" /> 
    	 <activity android:name=".replace.ReplaceActivity" android:label="@string/app_name" android:screenOrientation="landscape" />	 
-    <activity android:name=".replace.FullScreenLayoutActivity" android:label="@string/app_name" android:screenOrientation="landscape" /> 
-   		
-   	 	 <activity android:name="com.facebook.LoginActivity"
-                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
-                  android:label="@string/app_name" />
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
+     <activity android:name=".replace.FullScreenLayoutActivity" android:label="@string/app_name" android:screenOrientation="landscape" /> 
+   	 <activity android:name="com.facebook.LoginActivity"
+              android:theme="@android:style/Theme.Translucent.NoTitleBar"
+              android:label="@string/app_name" />
+   
+   	 <activity android:name=".manualEdit.CanvasActivity" android:label="@string/app_name" android:screenOrientation="landscape" /> 
+   
+    <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
     
     </application>
     

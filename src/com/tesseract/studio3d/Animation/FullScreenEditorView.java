@@ -1,4 +1,4 @@
-package com.tesseract.studio3d.Animation;
+ package com.tesseract.studio3d.Animation;
 
 import java.util.Random;
 import java.util.Vector;
@@ -84,13 +84,15 @@ public class FullScreenEditorView extends ImageView
 		
 		fg_filter=filter1;
 		bg_filter=filter2;
+		
 		layerID=1;
+		
 		Log.d(TAG,"selected "+fg_filter);
 		Log.d(TAG,"selected "+bg_filter);
 
 /** aint working 	
 //		// Load the mats from disk
-//		
+//			
 //		fgMat=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png");
 //		bgMat=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_bg.png");
 //		

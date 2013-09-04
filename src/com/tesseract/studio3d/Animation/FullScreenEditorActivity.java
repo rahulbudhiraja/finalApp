@@ -136,7 +136,6 @@ public class FullScreenEditorActivity extends Activity
 		mTouchView.setLayoutParams(layoutParams2);
 		activityLayout.addView(mTouchView);
 	
-			
 		initializeButtons();
 		
 		setContentView(activityLayout);

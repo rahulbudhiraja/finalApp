@@ -1475,10 +1475,13 @@ int doMultiBlurHist(Mat img, Mat& retVal, Mat disp, int dispval)
         l2 = lval;
         h1 = hval;
         h2 = hval + range;
+
         //printf("%d %d %d %d\n", l1, l2, h1, h2);
+
         Mat thresh;
         Mat seg;
         threshVal = getThresh(disp, thresh, l1, l2, h1, h2);
+
         if (!threshVal)
         {
             //printf("break\n");
