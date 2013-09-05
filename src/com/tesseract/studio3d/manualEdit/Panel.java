@@ -7,7 +7,9 @@ import java.util.Vector;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
@@ -174,7 +176,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 	 public Panel(Context context,String filter1,String filter2) 
 	 {
 		   super(context);
-		   
+		   activityContext=context;
 		   
 		    getHolder().addCallback(this);
 		    canvasthread = new CanvasThread(getHolder(), this);
@@ -705,15 +707,13 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		Imgproc.threshold(fg_bandw_mask, binaryMat, 1, 255, Imgproc.THRESH_BINARY);
 		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_fg.png", binaryMat);
 
+		temporary_ones=Mat.ones(binaryMat.rows(), binaryMat.cols(), binaryMat.type());
 		
-		Utils.bitmapToMat(RedCirclesBmp,bg_bandw_mask);
-		Imgproc.cvtColor(bg_bandw_mask, bg_bandw_mask, Imgproc.COLOR_RGBA2GRAY);
-		
-		binaryMat=new Mat();
-		binaryMat.create(bg_bandw_mask.rows(), bg_bandw_mask.cols(),bg_bandw_mask.type() );
-		
-		Imgproc.threshold(bg_bandw_mask, binaryMat, 1, 255, Imgproc.THRESH_BINARY);
-		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_bg.png", binaryMat);
+		temporary_ones.setTo(new Scalar(255,255,255,255));
+		 
+	 	Core.subtract(temporary_ones,binaryMat, bg_bandw_mask);
+	 	
+		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_bg.png", bg_bandw_mask);
 		
 		CanvasThread.setRunning(false);
 		((CanvasActivity) activityContext).finish();
