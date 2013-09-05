@@ -534,6 +534,7 @@ public class FullScreenEditorView extends ImageView
 			
 			
 		}
+		
 	 public void createCorrespondingMask(float xTouchPos,float yTouchPos)
 	 {
 		 

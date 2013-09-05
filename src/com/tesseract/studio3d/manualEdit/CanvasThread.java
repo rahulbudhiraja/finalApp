@@ -43,6 +43,11 @@ public class CanvasThread extends Thread {
 	                }
 	            }
            }
+      
+       
+       
+       
+       
        }
    }
 }

@@ -1,9 +1,17 @@
 package com.tesseract.studio3d.manualEdit;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Random;
+import java.util.Vector;
 
-import com.tesseract.studio3d.R;
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,14 +24,17 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.os.Environment;
-import android.util.AttributeSet;
 import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import com.tesseract.studio3d.R;
 
 
 public class Panel extends SurfaceView implements SurfaceHolder.Callback{
@@ -77,7 +88,26 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
  	 Bitmap mask_fg,mask_bg;
  	 Canvas mask_fgCanvas,mask_bgCanvas;
  	 
- 	 
+   /***** mask stuff **/
+     
+     Bitmap mask,mask2;
+
+	private Paint maskPaint,borderPaint;
+
+	 /** OpenCV stuff **/
+	
+	Mat fgMat,bgMat;
+	Mat converted_fgMat,converted_bgMat;
+	Mat temporary_ones,fg_bandw_mask,bg_bandw_mask;
+     
+	Mat fg_gray,bg_gray;
+
+	Vector<Mat> rgbaMats_fg,rgbaMats_bg;
+	Mat fg_alpha,bg_alpha;
+	Mat leftImgMat;
+	
+	Context activityContext;
+	
  	 
      /** Old ,old old ,this will be used if the surfaceview is define in the xml file ..*/
 //    public Panel(Context context, AttributeSet attrs) {
@@ -144,23 +174,35 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 	 public Panel(Context context,String filter1,String filter2) 
 	 {
 		   super(context);
+		   
+		   
 		    getHolder().addCallback(this);
 		    canvasthread = new CanvasThread(getHolder(), this);
 		    setFocusable(true);
 		    
 		    bluePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		    bluePaint.setColor(Color.BLUE);
+		   // bluePaint.setColor(Color.BLUE);
 		    bluePaint.setStyle(Paint.Style.FILL);  
-		    bluePaint.setAlpha(125);
+		    bluePaint.setStrokeWidth(-1);
 		    
 		    
 		    redPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		    redPaint.setColor(Color.RED);
+		   // redPaint.setColor(Color.RED);
 		    redPaint.setStyle(Paint.Style.FILL);  
-		    redPaint.setAlpha(125);
+		    
+		    redPaint.setStrokeWidth(-1);
+		    
+		    borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		    borderPaint.setColor(Color.YELLOW);
+		    borderPaint.setStyle(Paint.Style.STROKE);  
+		    
+		    borderPaint.setStrokeWidth(5);
+		    
 		    
 		    transparentPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
-		    transparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR)); 
+		    transparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+		    transparentPaint.setStrokeWidth(-1);
+		    transparentPaint.setStyle(Paint.Style.FILL); 
     
 			leftImgBitmap = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg");
 			leftImgBitmap=Bitmap.createScaledBitmap(leftImgBitmap	, 960,540, true);
@@ -177,15 +219,15 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 			overlayBitmap=Bitmap.createBitmap(leftImgBitmap.getWidth(),leftImgBitmap.getHeight(),Bitmap.Config.ARGB_8888);
 			combinedOverlayCanvas=new Canvas(overlayBitmap);
 						
+			redPaint.setAlpha(175);
+			bluePaint.setAlpha(175);
+			   
 			
 			fg_filter=filter1;
 			bg_filter=filter2;
 			
 			layer1Paint=findPaint(fg_filter);
 			layer2Paint=findPaint(bg_filter);
-			
-			=Bitmap.createBitmap(fgBmp.getWidth(),fgBmp.getHeight(),Bitmap.Config.ARGB_8888);
-			
 			
 			
 			dst = new float[2];
@@ -197,6 +239,41 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 			src[1]=0;
 			
 			matrixValues=new float[9];
+			
+			/** Mask stuff ...*/
+			
+			mask=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_fg.png");
+			mask2=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_bg.png");	
+			
+			Log.d("Size",mask2.getWidth()+"  h="+mask2.getHeight());
+			
+			float[] alphaSrc = 
+				{
+				    0, 0, 0, 0, 255,
+				    0, 0, 0, 0, 255,
+				    0, 0, 0, 0, 255,
+				    1, 1, 1, -1, 0,
+				};
+			
+			ColorMatrix cm = new ColorMatrix(alphaSrc);
+			ColorMatrixColorFilter filter = new ColorMatrixColorFilter(cm);
+			
+			maskPaint = new Paint();
+			maskPaint.setColorFilter(filter);
+			maskPaint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
+
+			overlayBlueCanvas.drawRect(new Rect(0,0,overlayBitmap.getWidth(),overlayBitmap.getHeight()), layer1Paint);
+			overlayRedCanvas.drawRect(new Rect(0,0,overlayBitmap.getWidth(),overlayBitmap.getHeight()), layer2Paint);
+		
+			
+			
+			overlayBlueCanvas.drawBitmap(BlueCirclesBmp, 0, 0, null);
+			overlayBlueCanvas.drawBitmap(mask, 0, 0, maskPaint);
+			
+			overlayRedCanvas.drawBitmap(RedCirclesBmp, 0, 0, null);
+			overlayRedCanvas.drawBitmap(mask2, 0, 0, maskPaint);
+
+			
 	 }
 	 
 	 @Override
@@ -219,8 +296,11 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 			canvas.drawBitmap(leftImgBitmap,matrix,null);
 		    canvas.drawBitmap(BlueCirclesBmp,matrix,bluePaint);
 		    canvas.drawBitmap(RedCirclesBmp,matrix,redPaint);
+		    canvas.save();
 		    
-		    
+		    canvas.setMatrix(matrix);
+		    canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), borderPaint);
+		    canvas.restore();
 		    /* Draw a border */
 
         /* End */
@@ -232,14 +312,13 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 //		combinedOverlayCanvas.drawBitmap(BlueCirclesBmp,matrix,bluePaint);
 //		combinedOverlayCanvas.drawBitmap(RedCirclesBmp,matrix,redPaint);
 //
+//		    combinedOverlayCanvas.save();
+//		    combinedOverlayCanvas.setMatrix(matrix);
+//		    combinedOverlayCanvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), borderPaint);
+//		    combinedOverlayCanvas.restore();
+		    
 //		canvas.drawColor(Color.BLACK);
 //	    canvas.drawBitmap(overlayBitmap, new Matrix(), null);
-		    
-		    
-		    
-		    
-		    
-		    
 		    
 		//canvas.drawCircle(src[0], src[1], 30, bluePaint);
 	}
@@ -380,11 +459,11 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		
 		if(CanvasActivity.activeLayer==1)
 	    { 
-		  overlayRedCanvas.drawCircle(dst[0],dst[1], circleRadius, transparentPaint);
+		  overlayRedCanvas.drawCircle(dst[0],dst[1], circleRadius-1, transparentPaint);
 	      overlayBlueCanvas.drawCircle(dst[0],dst[1], circleRadius, layer1Paint);
 	    }
 		if(CanvasActivity.activeLayer==2)
-		    {overlayBlueCanvas.drawCircle(dst[0],dst[1], circleRadius, transparentPaint);
+		    {overlayBlueCanvas.drawCircle(dst[0],dst[1], circleRadius-1, transparentPaint);
 			overlayRedCanvas.drawCircle(dst[0],dst[1], circleRadius, layer2Paint);
 		    
 		    }
@@ -567,7 +646,78 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		
 		
 	}
+	public void initializeMats()
+	{
+		
+		fgMat =new Mat();
+		bgMat=new Mat();
+		converted_fgMat=new Mat();
+		converted_bgMat=new Mat();
+		fg_gray=new Mat();
+		bg_gray=new Mat();
+		
+		fg_alpha=new Mat();
+		bg_alpha=new Mat();
+		
+		rgbaMats_fg=new Vector<Mat>();
+		rgbaMats_bg=new Vector<Mat>();
+		
+		fg_bandw_mask=new Mat();
+		bg_bandw_mask=new Mat();
+		
+		fg_bandw_mask=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_fg.png");
+		bg_bandw_mask=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_fg.png");
+		
+		Imgproc.cvtColor(fg_bandw_mask, fg_bandw_mask, Imgproc.COLOR_BGR2RGBA);
+		Imgproc.cvtColor(bg_bandw_mask, bg_bandw_mask, Imgproc.COLOR_BGR2RGBA);
+		
+		Core.split(fg_bandw_mask,rgbaMats_fg);
+		rgbaMats_fg.set(3,rgbaMats_fg.get(0));
+		Core.merge(rgbaMats_fg, fg_bandw_mask);
+		
+		
+//		Core.split(bg_bandw_mask,rgbaMats_bg);
+//		rgbaMats_bg.set(3,rgbaMats_bg.get(0));
+//		Core.merge(rgbaMats_bg, bg_bandw_mask);
+		
+		rgbaMats_fg=new Vector<Mat>();
+		rgbaMats_bg=new Vector<Mat>();
+		
+		leftImgMat=new Mat();
+		leftImgMat=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_left.jpg");
+		
+		Imgproc.cvtColor(leftImgMat, leftImgMat, Imgproc.COLOR_BGR2RGBA);
+		
+	}
 
+	void saveMaskandExit()
+	{
+		
+		fg_bandw_mask=new Mat();
+		bg_bandw_mask=new Mat();
+		
+		Utils.bitmapToMat(BlueCirclesBmp,fg_bandw_mask);
+		Imgproc.cvtColor(fg_bandw_mask, fg_bandw_mask, Imgproc.COLOR_RGBA2GRAY);
+		
+		Mat binaryMat=new Mat();
+		binaryMat.create(fg_bandw_mask.rows(), fg_bandw_mask.cols(),fg_bandw_mask.type() );
+		
+		Imgproc.threshold(fg_bandw_mask, binaryMat, 1, 255, Imgproc.THRESH_BINARY);
+		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_fg.png", binaryMat);
 
-
+		
+		Utils.bitmapToMat(RedCirclesBmp,bg_bandw_mask);
+		Imgproc.cvtColor(bg_bandw_mask, bg_bandw_mask, Imgproc.COLOR_RGBA2GRAY);
+		
+		binaryMat=new Mat();
+		binaryMat.create(bg_bandw_mask.rows(), bg_bandw_mask.cols(),bg_bandw_mask.type() );
+		
+		Imgproc.threshold(bg_bandw_mask, binaryMat, 1, 255, Imgproc.THRESH_BINARY);
+		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_bg.png", binaryMat);
+		
+		CanvasThread.setRunning(false);
+		((CanvasActivity) activityContext).finish();
+		
+	}
+	
 }   

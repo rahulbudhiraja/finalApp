@@ -891,20 +891,30 @@ public class AnimationActivity extends Activity {
 
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
+				
 				for (int i = 0; i < mimageViews.size(); i++) {
 
 					Log.d(TAG,"View id="+i+" size"+mimageViews.size());
 					ImageView temp2 =(ImageView)mimageViews.get(i);
+					//temp2.setImageBitmap(addBorder(  ((BitmapDrawable)temp2.getDrawable()).getBitmap(),5,Color.WHITE));
+					temp2.setPadding(0, 0,0,0);
+					
+					temp2.setPadding(3,3,3,3);
 					temp2.setImageBitmap(addBorder(  ((BitmapDrawable)temp2.getDrawable()).getBitmap(),5,Color.WHITE));
-
+					
+					
 					if (v.getId() == mimageViews.get(i).getId()) {
 						currentSelectedLayer = i;
 
 						// add a red border to show it is selected ..
 
-						ImageView temp =(ImageView)v;
-						temp.setImageBitmap(addBorder(  ((BitmapDrawable)temp.getDrawable()).getBitmap(),5,Color.RED));
-
+						//temp2.setImageBitmap(layerBitmaps.get(0));
+						//temp.setImageBitmap(addBorder(  ((BitmapDrawable)temp.getDrawable()).getBitmap(),5,Color.RED));
+						temp2.setImageBitmap(addBorder(  ((BitmapDrawable)temp2.getDrawable()).getBitmap(),5,Color.RED));
+//						addBorder(  ((BitmapDrawable)temp2.getDrawable()).getBitmap(),5,Color.RED);
+						temp2.setPadding(3,3,3,3);
+						temp2.setImageBitmap(addBorder(  ((BitmapDrawable)temp2.getDrawable()).getBitmap(),5,Color.RED));
+						
 						hs.removeAllViews();
 						filtersLayout.removeAllViews();
 
@@ -922,9 +932,15 @@ public class AnimationActivity extends Activity {
 
 						Log.d(TAG, "passing");
 					}
+					
+
 
 				}
 
+//				ImageView temp =(ImageView)v;
+//				temp.setImageBitmap(addBorder(  ((BitmapDrawable)temp.getDrawable()).getBitmap(),5,Color.RED));
+//				temp.invalidate();
+				
 			}
 			layersScroll.invalidate();
 

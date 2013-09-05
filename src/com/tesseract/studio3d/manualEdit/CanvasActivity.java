@@ -131,6 +131,7 @@ public class CanvasActivity extends Activity {
 		saveButton.setLayoutParams(layoutParams);
 		saveButton.setId(998879);
 		
+		saveButton.setOnClickListener(buttonClickListener);
 		activityLayout.addView(saveButton);
 		
 		
@@ -183,6 +184,12 @@ public class CanvasActivity extends Activity {
 						activateViewMovement=true;
 						activeLayer=0;
 					}
+			}
+			
+			else if (v.getId()==998879)
+			{
+				
+				SurfacePaintView.saveMaskandExit();
 			}
 		}
 		

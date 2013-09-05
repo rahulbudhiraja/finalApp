@@ -206,6 +206,8 @@ public class FullScreenEditorActivity extends Activity
 						activeLayer=0;
 					}
 			}
+			
+			
 		}
 		
 	};
@@ -268,6 +270,7 @@ public class FullScreenEditorActivity extends Activity
 		saveButton.setLayoutParams(layoutParams);
 		saveButton.setId(998879);
 		
+		saveButton.setOnClickListener(buttonClickListener);
 		activityLayout.addView(saveButton);
 		
 		
