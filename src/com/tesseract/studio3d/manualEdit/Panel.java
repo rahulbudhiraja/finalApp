@@ -221,8 +221,8 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 			overlayBitmap=Bitmap.createBitmap(leftImgBitmap.getWidth(),leftImgBitmap.getHeight(),Bitmap.Config.ARGB_8888);
 			combinedOverlayCanvas=new Canvas(overlayBitmap);
 						
-			redPaint.setAlpha(175);
-			bluePaint.setAlpha(175);
+			redPaint.setAlpha(210);
+			bluePaint.setAlpha(210);
 			   
 			
 			fg_filter=filter1;
@@ -637,10 +637,11 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 
 			}
 		
-		Paint localpaint = new Paint();
+		Paint localpaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
 		localpaint.setColorFilter(new ColorMatrixColorFilter(cm));
 		localpaint.setStrokeWidth(0);
+		
 		localpaint.setStyle(Style.FILL);
 		
 		
@@ -713,7 +714,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		 
 	 	Core.subtract(temporary_ones,binaryMat, bg_bandw_mask);
 	 	
-		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_bg.png", bg_bandw_mask);
+		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_bg_inverted.png", bg_bandw_mask);
 		
 		CanvasThread.setRunning(false);
 		((CanvasActivity) activityContext).finish();
