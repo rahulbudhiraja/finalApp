@@ -9,7 +9,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -28,9 +27,10 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
 import com.tesseract.studio3d.R;
+import com.tesseract.studio3d.menu.MenuActivity;
 import com.tesseract.studio3d.utils.Structs;
 
-public class ReplaceActivity extends Activity
+public class ReplaceActivity extends MenuActivity
 {
 
 	Button replaceButton;

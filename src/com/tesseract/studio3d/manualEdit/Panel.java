@@ -66,7 +66,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
     Bitmap overlayBitmap,BlueCirclesBmp,RedCirclesBmp;
     Canvas overlayBlueCanvas,overlayRedCanvas,combinedOverlayCanvas;
 
-     private static final String TAG = "DebugTag";
+     private static final String TAG = "Debug Tag";
      
      float[] dst;
      float[] src;
@@ -183,13 +183,13 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		    setFocusable(true);
 		    
 		    bluePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		   // bluePaint.setColor(Color.BLUE);
+		    bluePaint.setColor(Color.BLUE);
 		    bluePaint.setStyle(Paint.Style.FILL);  
 		    bluePaint.setStrokeWidth(-1);
 		    
 		    
 		    redPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		   // redPaint.setColor(Color.RED);
+		    redPaint.setColor(Color.RED);
 		    redPaint.setStyle(Paint.Style.FILL);  
 		    
 		    redPaint.setStrokeWidth(-1);
@@ -201,13 +201,13 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		    borderPaint.setStrokeWidth(5);
 		    
 		    
-		    transparentPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
+		    transparentPaint=	new Paint(Paint.ANTI_ALIAS_FLAG);
 		    transparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 		    transparentPaint.setStrokeWidth(-1);
 		    transparentPaint.setStyle(Paint.Style.FILL); 
     
 			leftImgBitmap = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg");
-			leftImgBitmap=Bitmap.createScaledBitmap(leftImgBitmap	, 960,540, true);
+			leftImgBitmap=Bitmap.createScaledBitmap(leftImgBitmap,960,540, true);
 			
 			originalbmpWidth=leftImgBitmap.getWidth();
 			originalbmpHeight=leftImgBitmap.getHeight();
@@ -221,8 +221,8 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 			overlayBitmap=Bitmap.createBitmap(leftImgBitmap.getWidth(),leftImgBitmap.getHeight(),Bitmap.Config.ARGB_8888);
 			combinedOverlayCanvas=new Canvas(overlayBitmap);
 						
-			redPaint.setAlpha(210);
-			bluePaint.setAlpha(210);
+			redPaint.setAlpha(120);
+			bluePaint.setAlpha(120);
 			   
 			
 			fg_filter=filter1;
@@ -264,15 +264,13 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 			maskPaint.setColorFilter(filter);
 			maskPaint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
 
-			overlayBlueCanvas.drawRect(new Rect(0,0,overlayBitmap.getWidth(),overlayBitmap.getHeight()), layer1Paint);
-			overlayRedCanvas.drawRect(new Rect(0,0,overlayBitmap.getWidth(),overlayBitmap.getHeight()), layer2Paint);
-		
+			overlayBlueCanvas.drawRect(new Rect(0,0,overlayBitmap.getWidth(),overlayBitmap.getHeight()), bluePaint);
+			overlayRedCanvas.drawRect(new Rect(0,0,overlayBitmap.getWidth(),overlayBitmap.getHeight()), redPaint);
 			
-			
-			overlayBlueCanvas.drawBitmap(BlueCirclesBmp, 0, 0, null);
+			overlayBlueCanvas.drawBitmap(BlueCirclesBmp, 0, 0, bluePaint);
 			overlayBlueCanvas.drawBitmap(mask, 0, 0, maskPaint);
 			
-			overlayRedCanvas.drawBitmap(RedCirclesBmp, 0, 0, null);
+			overlayRedCanvas.drawBitmap(RedCirclesBmp, 0, 0, redPaint);
 			overlayRedCanvas.drawBitmap(mask2, 0, 0, maskPaint);
 
 			
@@ -294,6 +292,9 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		
 		/* Works well */ 
 
+		if(canvas==null)
+			((CanvasActivity) activityContext).finish();
+		
 			canvas.drawColor(Color.BLACK);
 			canvas.drawBitmap(leftImgBitmap,matrix,null);
 		    canvas.drawBitmap(BlueCirclesBmp,matrix,bluePaint);
@@ -309,7 +310,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		
 		/* One way of working */
 //		combinedOverlayCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-//		combinedOverlayCanvas.drawBitmap(leftImgBitmap,ma trix,null);
+//		combinedOverlayCanvas.drawBitmap(leftImgBitmap,matrix,null);
 //
 //		combinedOverlayCanvas.drawBitmap(BlueCirclesBmp,matrix,bluePaint);
 //		combinedOverlayCanvas.drawBitmap(RedCirclesBmp,matrix,redPaint);
@@ -452,7 +453,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 //		bmpWidth=originalbmpWidth*matrixValues[0];
 //		bmpHeight=originalbmpHeight*matrixValues[4];
 		
-		Log.d(TAG,"the modified bitmap width and height"+bmpWidth+"   "+ bmpHeight);
+		//Log.d(TAG,"the modified bitmap width and height"+bmpWidth+"   "+ bmpHeight);
 		
 		
 //	    overlayCanvas.drawCircle(event.getX()*matrixValues[0]+matrixValues[2],event.getY()*matrixValues[4]+matrixValues[5],30,bluePaint);
@@ -462,11 +463,11 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		if(CanvasActivity.activeLayer==1)
 	    { 
 		  overlayRedCanvas.drawCircle(dst[0],dst[1], circleRadius-1, transparentPaint);
-	      overlayBlueCanvas.drawCircle(dst[0],dst[1], circleRadius, layer1Paint);
+		  overlayBlueCanvas.drawCircle(dst[0],dst[1], circleRadius, bluePaint);
 	    }
 		if(CanvasActivity.activeLayer==2)
 		    {overlayBlueCanvas.drawCircle(dst[0],dst[1], circleRadius-1, transparentPaint);
-			overlayRedCanvas.drawCircle(dst[0],dst[1], circleRadius, layer2Paint);
+		    overlayRedCanvas.drawCircle(dst[0],dst[1], circleRadius, redPaint);
 		    
 		    }
 		
@@ -716,7 +717,8 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 	 	
 		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_bg_inverted.png", bg_bandw_mask);
 		
-		CanvasThread.setRunning(false);
+		canvasthread.setRunning(false);
+	
 		((CanvasActivity) activityContext).finish();
 		
 	}

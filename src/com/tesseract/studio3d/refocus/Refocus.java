@@ -1,15 +1,14 @@
 package com.tesseract.studio3d.refocus;
 
-import com.tesseract.studio3d.R;
-
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-public class Refocus extends Activity
+import com.tesseract.studio3d.menu.MenuActivity;
+
+public class Refocus extends MenuActivity
 {
 	ImageView placeholderImage;
 	ImageButton startFocusActivity,startPhotoActivity,startReplaceActivity;

@@ -11,10 +11,17 @@ public class CanvasThread extends Thread {
    public CanvasThread(SurfaceHolder surfaceHolder, Panel panel) {
        _surfaceHolder = surfaceHolder;
        _panel = panel;
+       
    }
 
    public static void setRunning(boolean run) {
        _run = run;
+   }
+   
+   public void stopThread()
+   {
+	   
+	   this.stop();
    }
 
   

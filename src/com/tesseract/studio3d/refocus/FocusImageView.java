@@ -36,6 +36,8 @@ public class FocusImageView extends ImageView {
 	Timer circleUpdater;
 	long timePassed=0;
 	Bitmap tempBitmap;
+	long startTime=0;
+	boolean cancelThread=false;
 
 	  public FocusImageView(Context context) 
 	  {
@@ -110,14 +112,17 @@ public class FocusImageView extends ImageView {
 
 	class ProgressDialogClass extends AsyncTask<String, Void, String> {
 	
+		
 
 		@Override
 		protected String doInBackground(String... params) {
 			// TODO Auto-generated method stub
 			
-			
 			Refocus(Structs.mRgba.getNativeObjAddr(), Structs.mDisparity.getNativeObjAddr(), finalImage.getNativeObjAddr(), (int)converted_xcoord, (int)converted_ycoord);
-			
+		 
+			if(cancelThread)
+				this.cancel(true);
+			//
 			return null;
 		}
 		
@@ -130,7 +135,8 @@ public class FocusImageView extends ImageView {
 			circleCount=599;
 			
 			// circleCount is set at 3 ,so we start drawing 3 circles then 
-			mHandler.removeCallbacksAndMessages(r);
+			
+			mHandler.removeCallbacksAndMessages(null);
 			
 			tempBitmap=Bitmap.createBitmap(finalImageRGBA.cols(),finalImageRGBA.rows(), 
 	         		 Bitmap.Config.ARGB_8888);
@@ -152,6 +158,9 @@ public class FocusImageView extends ImageView {
 			circleCount=599;
 			mHandler=new Handler();
 			mHandler.postDelayed(r, 500);
+			startTime=System.currentTimeMillis();
+			cancelThread=false;
+			
 			invalidate();
 		}
 
@@ -165,6 +174,10 @@ public class FocusImageView extends ImageView {
 		{
 		    public void run() 
 		    {
+		    	
+		    	if(System.currentTimeMillis()-startTime>10000)
+		    	   cancelThread=true;
+		    	
 		    	if(System.currentTimeMillis()-timePassed>500)
 		    	{
 			    	timePassed=System.currentTimeMillis();

@@ -13,7 +13,6 @@ import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -56,10 +55,11 @@ import android.widget.ScrollView;
 import com.tesseract.studio3d.CustomFileObserver;
 import com.tesseract.studio3d.R;
 import com.tesseract.studio3d.manualEdit.CanvasActivity;
+import com.tesseract.studio3d.menu.MenuActivity;
 import com.tesseract.studio3d.selectionscreen.MainScreen;
 import com.tesseract.studio3d.social.SocialSharing;
 
-public class AnimationActivity extends Activity {
+public class AnimationActivity extends MenuActivity {
 
 	Vector<ImageView> mimageViews;
 	Vector<ImageView> layerViews;
@@ -1449,14 +1449,14 @@ private Bitmap addCircles(Bitmap bmp,float x,float y) {
         
   } 
  
- public boolean onCreateOptionsMenu(Menu menu) {
+// public boolean onCreateOptionsMenu(Menu menu) {
+//
+//	    menu.add(group1Id, menuSettings, menuSettings, "Edit Layers");
+//	  
+//	    return super.onCreateOptionsMenu(menu); 
+//	    }
 
-	    menu.add(group1Id, menuSettings, menuSettings, "Edit Layers");
-	  
-	    return super.onCreateOptionsMenu(menu); 
-	    }
-
-	   @Override
+ @Override
 public boolean onOptionsItemSelected(MenuItem item) {
 
 	    switch (item.getItemId()) {
