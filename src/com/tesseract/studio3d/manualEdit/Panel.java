@@ -667,7 +667,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		binaryMat.create(fg_bandw_mask.rows(), fg_bandw_mask.cols(),fg_bandw_mask.type() );
 		
 		Imgproc.threshold(fg_bandw_mask, binaryMat, 1, 255, Imgproc.THRESH_BINARY);
-		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_fg.png", binaryMat);
+		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_fg.png", binaryMat);
 
 		Log.d(TAG,"Type : "+binaryMat.type());
 		
@@ -677,7 +677,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		 
 	 	Core.subtract(temporary_ones,binaryMat, bg_bandw_mask);
 	 	
-		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_bg.png", bg_bandw_mask);
+		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_bg.png", bg_bandw_mask);
 		
 		
 		Mat leftImg=Highgui.imread((Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg"));
