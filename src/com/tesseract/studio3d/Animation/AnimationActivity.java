@@ -112,8 +112,6 @@ public class AnimationActivity extends MenuActivity {
 	 public Mat limg;	
 	 public Mat foreground,background;
 	 
-	 Bitmap backupBitmap;
-	 
 	 Vector<Integer> selectedFilters; 
 	 
 	 Context activityContext;
@@ -1464,6 +1462,7 @@ public boolean onOptionsItemSelected(MenuItem item) {
 	case 1:
 	    //write your code here
 
+		deallocateMemory();
 		Intent it = new Intent(this,CanvasActivity.class);
 		
 		if (null != it)
@@ -1486,6 +1485,18 @@ public boolean onOptionsItemSelected(MenuItem item) {
 	}
 
     
+ /** Freeing up precious memory ! **/
+ 
+ void deallocateMemory()
+ {
+	
+	 for(int i=0;i<layerBitmaps.size();i++)
+		layerBitmaps.set(i,null);
+
+	fullScreenLayout.removeAllViews();
+	 activityLayout.removeAllViews();
+ }
+ 
     
 	public native void getThreshold(long matAddrRgba, long matAddrDisp, long matAddrfinalImage,long matAddrBackground, long matAddrForeground, int ji1, int ji2,int choice);
 	   

@@ -1,20 +1,17 @@
 package com.tesseract.studio3d.manualEdit;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Random;
 import java.util.Vector;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
-import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -37,6 +34,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.tesseract.studio3d.R;
+import com.tesseract.studio3d.Animation.AnimationActivity;
 
 
 public class Panel extends SurfaceView implements SurfaceHolder.Callback{
@@ -87,7 +85,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
      
  	 /* Variables used for Loading the image masks */
 
- 	 Bitmap mask_fg,mask_bg;
+ 	 Bitmap final_mask_fg,final_mask_bg;
  	 Canvas mask_fgCanvas,mask_bgCanvas;
  	 
    /***** mask stuff **/
@@ -109,74 +107,15 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 	Mat leftImgMat;
 	
 	Context activityContext;
-	
+	Boolean exitPressed;
  	 
      /** Old ,old old ,this will be used if the surfaceview is define in the xml file ..*/
-//    public Panel(Context context, AttributeSet attrs) {
-//		super(context, attrs); 
-//		
-//		// TODO Auto-generated constructor stub
-//	    getHolder().addCallback(this);
-//	    canvasthread = new CanvasThread(getHolder(), this);
-//	    setFocusable(true);
-//	    
-//	    bluePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-//	    bluePaint.setColor(Color.BLUE);
-//	    bluePaint.setStrokeWidth(3);  
-//	    bluePaint.setStyle(Paint.Style.FILL);  
-//	    bluePaint.setAlpha(120);
-//	    
-//	    
-//	    redPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-//	    redPaint.setColor(Color.RED);
-//	    redPaint.setStrokeWidth(3);  
-//	    redPaint.setStyle(Paint.Style.FILL);  
-//	    redPaint.setAlpha(120);
-//	    
-//	    transparentPaint=new Paint(Paint.ANTI_ALIAS_FLAG);
-//	    
-//	    transparentPaint.setColor(Color.TRANSPARENT);
-//	    transparentPaint.setColor(Color.RED);
-//	    transparentPaint.setStrokeWidth(3);  
-//	    transparentPaint.setStyle(Paint.Style.FILL);  
-//	    
-//	    
-//	    
-//		leftImgBitmap = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg");
-//		leftImgBitmap=Bitmap.createScaledBitmap(leftImgBitmap	, 960,540, true);
-//		
-//		originalbmpWidth=leftImgBitmap.getWidth();
-//		originalbmpHeight=leftImgBitmap.getHeight();
-//		
-//		BlueCirclesBmp=Bitmap.createBitmap(leftImgBitmap.getWidth(),leftImgBitmap.getHeight(),Bitmap.Config.ARGB_8888);
-//		RedCirclesBmp=Bitmap.createBitmap(leftImgBitmap.getWidth(),leftImgBitmap.getHeight(),Bitmap.Config.ARGB_8888);
-//		
-//		overlayBlueCanvas=new Canvas(BlueCirclesBmp);
-//		overlayRedCanvas=new Canvas(RedCirclesBmp);
-//		
-//		
-//		
-//		
-//		
-//		
-//		
-//		dst = new float[2];
-//		dst[0]=0;
-//		dst[1]=0;
-//		
-//		src=new float[2];
-//		src[0]=0;
-//		src[1]=0;
-//		
-//		
-//		matrixValues=new float[9];
-//	}
 
-	 
 	 public Panel(Context context,String filter1,String filter2) 
 	 {
 		   super(context);
 		   activityContext=context;
+		   exitPressed=false;
 		   
 		    getHolder().addCallback(this);
 		    canvasthread = new CanvasThread(getHolder(), this);
@@ -220,9 +159,13 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 			
 			overlayBitmap=Bitmap.createBitmap(leftImgBitmap.getWidth(),leftImgBitmap.getHeight(),Bitmap.Config.ARGB_8888);
 			combinedOverlayCanvas=new Canvas(overlayBitmap);
-						
-			redPaint.setAlpha(120);
-			bluePaint.setAlpha(120);
+			
+			final_mask_fg=Bitmap.createBitmap(leftImgBitmap.getWidth(),leftImgBitmap.getHeight(),Bitmap.Config.ARGB_8888);
+			final_mask_bg=Bitmap.createBitmap(leftImgBitmap.getWidth(),leftImgBitmap.getHeight(),Bitmap.Config.ARGB_8888);
+			
+			
+			redPaint.setAlpha(170);
+			bluePaint.setAlpha(170);
 			   
 			
 			fg_filter=filter1;
@@ -274,6 +217,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 			overlayRedCanvas.drawBitmap(mask2, 0, 0, maskPaint);
 
 			
+			
 	 }
 	 
 	 @Override
@@ -292,10 +236,12 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		
 		/* Works well */ 
 
-		if(canvas==null)
-			((CanvasActivity) activityContext).finish();
 		
-			canvas.drawColor(Color.BLACK);
+		canvas.drawColor(Color.BLACK);
+		if(!exitPressed)
+			{
+			
+			
 			canvas.drawBitmap(leftImgBitmap,matrix,null);
 		    canvas.drawBitmap(BlueCirclesBmp,matrix,bluePaint);
 		    canvas.drawBitmap(RedCirclesBmp,matrix,redPaint);
@@ -304,6 +250,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		    canvas.setMatrix(matrix);
 		    canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), borderPaint);
 		    canvas.restore();
+			}
 		    /* Draw a border */
 
         /* End */
@@ -466,10 +413,11 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		  overlayBlueCanvas.drawCircle(dst[0],dst[1], circleRadius, bluePaint);
 	    }
 		if(CanvasActivity.activeLayer==2)
-		    {overlayBlueCanvas.drawCircle(dst[0],dst[1], circleRadius-1, transparentPaint);
-		    overlayRedCanvas.drawCircle(dst[0],dst[1], circleRadius, redPaint);
-		    
-		    }
+	    {
+		  overlayBlueCanvas.drawCircle(dst[0],dst[1], circleRadius-1, transparentPaint);
+	      overlayRedCanvas.drawCircle(dst[0],dst[1], circleRadius, redPaint);
+	    
+	    }
 		
 //	    overlayCanvas.drawCircle(dst[0],dst[1], 30, redPaint);
 			//
@@ -709,17 +657,56 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		Imgproc.threshold(fg_bandw_mask, binaryMat, 1, 255, Imgproc.THRESH_BINARY);
 		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_fg.png", binaryMat);
 
+		Log.d(TAG,"Type : "+binaryMat.type());
+		
 		temporary_ones=Mat.ones(binaryMat.rows(), binaryMat.cols(), binaryMat.type());
 		
 		temporary_ones.setTo(new Scalar(255,255,255,255));
 		 
 	 	Core.subtract(temporary_ones,binaryMat, bg_bandw_mask);
 	 	
-		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_bg_inverted.png", bg_bandw_mask);
+		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/mask_revised_bg.png", bg_bandw_mask);
 		
+		
+		Mat leftImg=Highgui.imread((Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg"));
+		
+		Mat mask1,mask2;
+		mask1=new Mat(fg_bandw_mask.rows(), fg_bandw_mask.cols(),binaryMat.type());
+		
+		mask2=new Mat(fg_bandw_mask.rows(), fg_bandw_mask.cols(),binaryMat.type());
+		
+		leftImg.copyTo(mask1, binaryMat);
+		leftImg.copyTo(mask2, bg_bandw_mask);
+
+		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/zmask_1.png", mask1);
+		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/zmask_2.png", mask2);
+		
+	
+		Log.d(TAG,"Saved ..");
+		
+		deallocateStructs();
 		canvasthread.setRunning(false);
 	
-		((CanvasActivity) activityContext).finish();
+		System.gc();
+		
+//		((CanvasActivity) activityContext).finish();
+		Intent i=new Intent(activityContext,AnimationActivity.class);
+				activityContext.startActivity(i);
+		
+	}
+
+	private void deallocateStructs() 
+	{
+		// TODO Auto-generated method stub
+		//leftImgBitmap=null;
+		//BlueCirclesBmp=null;
+		//RedCirclesBmp=null;
+		overlayBitmap=null;
+		final_mask_fg=null;
+		final_mask_bg=null;
+		mask=null;
+		mask2=null;
+		//exitPressed=true;
 		
 	}
 	
