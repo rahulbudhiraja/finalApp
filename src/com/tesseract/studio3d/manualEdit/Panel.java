@@ -1,5 +1,7 @@
 package com.tesseract.studio3d.manualEdit;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 import java.util.Vector;
 
@@ -10,6 +12,9 @@ import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
+import ColorFilters.ApplyFilterstoLayer;
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -26,6 +31,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.FloatMath;
 import android.util.Log;
@@ -33,8 +39,12 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.tesseract.studio3d.CustomFileObserver;
 import com.tesseract.studio3d.R;
 import com.tesseract.studio3d.Animation.AnimationActivity;
+import com.tesseract.studio3d.Animation.PointsImageView;
+
+import com.tesseract.studio3d.utils.Structs;
 
 
 public class Panel extends SurfaceView implements SurfaceHolder.Callback{
@@ -108,6 +118,8 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 	
 	Context activityContext;
 	Boolean exitPressed;
+	
+	ProgressDialog conversionProgress;
  	 
      /** Old ,old old ,this will be used if the surfaceview is define in the xml file ..*/
 
@@ -164,8 +176,8 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 			final_mask_bg=Bitmap.createBitmap(leftImgBitmap.getWidth(),leftImgBitmap.getHeight(),Bitmap.Config.ARGB_8888);
 			
 			
-			redPaint.setAlpha(170);
-			bluePaint.setAlpha(170);
+			redPaint.setAlpha(130);
+			bluePaint.setAlpha(130);
 			   
 			
 			fg_filter=filter1;
@@ -216,7 +228,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 			overlayRedCanvas.drawBitmap(RedCirclesBmp, 0, 0, redPaint);
 			overlayRedCanvas.drawBitmap(mask2, 0, 0, maskPaint);
 
-			
+			conversionProgress = new ProgressDialog(activityContext);
 			
 	 }
 	 
@@ -669,6 +681,8 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		
 		
 		Mat leftImg=Highgui.imread((Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg"));
+		Imgproc.cvtColor(leftImg, leftImg, Imgproc.COLOR_BGR2BGRA);
+		
 		
 		Mat mask1,mask2;
 		mask1=new Mat(fg_bandw_mask.rows(), fg_bandw_mask.cols(),binaryMat.type());
@@ -678,8 +692,8 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		leftImg.copyTo(mask1, binaryMat);
 		leftImg.copyTo(mask2, bg_bandw_mask);
 
-		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/zmask_1.png", mask1);
-		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/zmask_2.png", mask2);
+		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/Layers/img_fg.png", mask1);
+		Highgui.imwrite(Environment.getExternalStorageDirectory()+"/Studio3D/Layers/img_bg.png", mask2);
 		
 	
 		Log.d(TAG,"Saved ..");
@@ -687,12 +701,12 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		deallocateStructs();
 		canvasthread.setRunning(false);
 	
+		
+		new ProgressDialogClass().execute("");
+
 		System.gc();
 		
-//		((CanvasActivity) activityContext).finish();
-		Intent i=new Intent(activityContext,AnimationActivity.class);
-				activityContext.startActivity(i);
-		
+
 	}
 
 	private void deallocateStructs() 
@@ -709,5 +723,100 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		//exitPressed=true;
 		
 	}
+	
+	class ProgressDialogClass extends AsyncTask<String, Void, String> {
+
+		@Override
+		protected String doInBackground(String... params) {
+
+			
+	
+			((Activity) activityContext).runOnUiThread(new Runnable() {
+			     public void run() {
+			    	 conversionProgress.setMessage("Processing Image - Applying Color Filters ");
+						
+			//stuff that updates ui
+
+			    }
+			});
+			
+			applyColorFilterstoLayers();
+
+			return "";
+
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+
+			conversionProgress.dismiss();
+			
+//			((CanvasActivity) activityContext).finish();
+			Intent i=new Intent(activityContext,AnimationActivity.class);
+					activityContext.startActivity(i);
+					
+		Log.d("done", "done");
+
+			
+			
+			
+			// might want to change "executed" for the returned string passed
+			// into onPostExecute() but that is upto you
+		}
+
+		@Override
+		protected void onPreExecute() {
+		//	conversionProgress.setTitle("Processing Image");
+			conversionProgress
+					.setMessage("Updating Depth Map");
+			conversionProgress.show();
+			
+		}
+
+		@Override
+		protected void onProgressUpdate(Void... values) {
+		}
+		
+	}
+	
+	public void applyColorFilterstoLayers() {
+
+		File sdCard = Environment.getExternalStorageDirectory();
+		File filtersdir = new File(Environment.getExternalStorageDirectory()
+				+ "/Studio3D/Layers/Filters/");
+
+		File seperatedLayersFolder = new File(Environment.getExternalStorageDirectory()
+						+ "/Studio3D/Layers/");
+
+		// Find all the files in the folder..
+
+		File[] files = seperatedLayersFolder.listFiles();
+
+		Log.d(TAG, "Number of files:" + files.length);
+		int count = 0;
+		
+		for (File file : files) {
+
+			// Log.d("File path:","Path="+file.getPath());
+
+			if (file.getName().toUpperCase().endsWith(("JPG"))|| file.getName().toUpperCase().endsWith(("PNG"))) {
+				
+				File dir = new File(sdCard.getAbsolutePath()
+						+ "/Studio3D/Layers/Filters/" + count + "/");
+
+				Log.d(TAG,"File name"+file.getAbsolutePath());
+				Log.d(TAG, "path" + dir.getPath());
+				dir.mkdirs();
+
+				ApplyFilterstoLayer Filters;
+											
+		    	Filters=new ApplyFilterstoLayer(activityContext,file.getAbsolutePath(),count);
+
+				count++;
+			}
+		}
+    
+	}
+	
 	
 }   

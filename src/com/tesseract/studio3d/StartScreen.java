@@ -2,20 +2,14 @@ package com.tesseract.studio3d;
 
 import java.io.File;
 
-import com.tesseract.studio3d.Animation.AnimationActivity;
-import com.tesseract.studio3d.browseimages.BrowseImages;
-import com.tesseract.studio3d.social.SettingsActivity;
-import com.tesseract.studio3d.social.SocialSharing;
-
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -24,8 +18,10 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.tesseract.studio3d.browseimages.BrowseImages;
+import com.tesseract.studio3d.social.SettingsActivity;
 
 public class StartScreen extends Activity {
 
@@ -53,11 +49,14 @@ public class StartScreen extends Activity {
 	        finish();
 	    }
 		
-		setContentView(R.layout.activity_start_screen);
 		
 		context=this;
 		
 		
+		
+		setContentView(R.layout.activity_start_screen);
+		
+	
 //		RelativeLayout rLayout = (RelativeLayout) findViewById (R.id.mainlayout);
 //	    Resources res = getResources(); //resource handle
 //	    Drawable drawable = res.getDrawable(R.drawable.studio3d_logo_00000); //new Image that was added to the res folder

@@ -1,6 +1,7 @@
 package com.tesseract.studio3d.Animation;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
@@ -27,6 +28,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
@@ -173,15 +175,31 @@ public class AnimationActivity extends MenuActivity {
 		initializeVerticalScroller();
 		
 		initializeMats();
-		    
+		
+		logHeap();
+		
 		// setContentView(R.layout.timepasslayout);
 		setContentView(activityLayout);
 
 	}
+	
+	public static void logHeap() {
+        Double allocated = new Double(Debug.getNativeHeapAllocatedSize())/new Double((1048576));
+        Double available = new Double(Debug.getNativeHeapSize())/1048576.0;
+        Double free = new Double(Debug.getNativeHeapFreeSize())/1048576.0;
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        df.setMinimumFractionDigits(2);
+
+        Log.d("tag", "debug ==");
+        Log.d("tag", "debug.heap native: allocated " + df.format(allocated) + "MB of " + df.format(available) + "MB (" + df.format(free) + "MB free)");
+        Log.d("tag", "debug.memory: allocated: " + df.format(new Double(Runtime.getRuntime().totalMemory()/1048576)) + "MB of " + df.format(new Double(Runtime.getRuntime().maxMemory()/1048576))+ "MB (" + df.format(new Double(Runtime.getRuntime().freeMemory()/1048576)) +"MB free)");
+    }
 	 static {
 		    if (!OpenCVLoader.initDebug()) {
 		        // Handle initialization error
-		    	Log.d("error","error");}
+		    	Log.d("error","error");
+		    	}
 		    	else  System.loadLibrary("depth_magic");
 			    
 		    
@@ -263,6 +281,7 @@ public class AnimationActivity extends MenuActivity {
 				if (count == 0)
 					filtersLayout.addView(temp);
 
+				
 			}
 
 			filteredViews.add(images);
@@ -407,7 +426,7 @@ public class AnimationActivity extends MenuActivity {
 		for (int i = 0; i < CanvasImageViews.size(); i++) {
 			AnimationSet tempAnimation = new AnimationSet(true);
 
-			TranslateAnimation anim = new TranslateAnimation(0,90, 0, -60); // probably -130
+			TranslateAnimation anim = new TranslateAnimation(0,90, 0, -60); // probably /30
 
 			anim.setFillAfter(true);
 			anim.setFillEnabled(true);
@@ -1491,10 +1510,42 @@ public boolean onOptionsItemSelected(MenuItem item) {
  {
 	
 	 for(int i=0;i<layerBitmaps.size();i++)
-		layerBitmaps.set(i,null);
+		layerBitmaps.get(i).recycle();
 
-	fullScreenLayout.removeAllViews();
-	 activityLayout.removeAllViews();
+	 for(int i=0;i<mimageViews.size();i++)
+	 {
+		 mimageViews.get(i).setImageDrawable(null);
+		 
+		 CanvasImageViews.get(i).setImageDrawable(null);
+	 }
+	 
+	 
+	 
+	 Iterator<Vector<ImageView>> itr = filteredViews.iterator();
+
+		while(itr.hasNext())
+		{
+
+
+			Vector<ImageView> row= (Vector<ImageView>)itr.next();
+
+			for(int i=0;i<row.size();i++)
+			{
+				ImageView temp=row.elementAt(i);
+				temp.setImageDrawable(null);
+			}
+
+
+		}
+
+	 
+	 
+		 fullScreenLayout.removeAllViews();
+		 activityLayout.removeAllViews();
+		
+	 
+	 
+	 
  }
  
     
