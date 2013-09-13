@@ -250,19 +250,20 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 
 		
 		canvas.drawColor(Color.BLACK);
-		if(!exitPressed)
-			{
-			
-			
+		
+		if(leftImgBitmap!=null)
 			canvas.drawBitmap(leftImgBitmap,matrix,null);
-		    canvas.drawBitmap(BlueCirclesBmp,matrix,bluePaint);
-		    canvas.drawBitmap(RedCirclesBmp,matrix,redPaint);
+		if(BlueCirclesBmp!=null)  
+		canvas.drawBitmap(BlueCirclesBmp,matrix,bluePaint);
+		if(RedCirclesBmp!=null)
+		{   canvas.drawBitmap(RedCirclesBmp,matrix,redPaint);
+		
 		    canvas.save();
 		    
 		    canvas.setMatrix(matrix);
 		    canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), borderPaint);
 		    canvas.restore();
-			}
+		}
 		    /* Draw a border */
 
         /* End */
@@ -610,49 +611,51 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		
 		
 	}
-	public void initializeMats()
-	{
-		
-		fgMat =new Mat();
-		bgMat=new Mat();
-		converted_fgMat=new Mat();
-		converted_bgMat=new Mat();
-		fg_gray=new Mat();
-		bg_gray=new Mat();
-		
-		fg_alpha=new Mat();
-		bg_alpha=new Mat();
-		
-		rgbaMats_fg=new Vector<Mat>();
-		rgbaMats_bg=new Vector<Mat>();
-		
-		fg_bandw_mask=new Mat();
-		bg_bandw_mask=new Mat();
-		
-		fg_bandw_mask=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_fg.png");
-		bg_bandw_mask=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_fg.png");
-		
-		Imgproc.cvtColor(fg_bandw_mask, fg_bandw_mask, Imgproc.COLOR_BGR2RGBA);
-		Imgproc.cvtColor(bg_bandw_mask, bg_bandw_mask, Imgproc.COLOR_BGR2RGBA);
-		
-		Core.split(fg_bandw_mask,rgbaMats_fg);
-		rgbaMats_fg.set(3,rgbaMats_fg.get(0));
-		Core.merge(rgbaMats_fg, fg_bandw_mask);
-		
-		
-//		Core.split(bg_bandw_mask,rgbaMats_bg);
-//		rgbaMats_bg.set(3,rgbaMats_bg.get(0));
-//		Core.merge(rgbaMats_bg, bg_bandw_mask);
-		
-		rgbaMats_fg=new Vector<Mat>();
-		rgbaMats_bg=new Vector<Mat>();
-		
-		leftImgMat=new Mat();
-		leftImgMat=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_left.jpg");
-		
-		Imgproc.cvtColor(leftImgMat, leftImgMat, Imgproc.COLOR_BGR2RGBA);
-		
-	}
+	
+/** Currently Unused */ 	
+//	public void initializeMats()
+//	{
+//		
+//		fgMat =new Mat();
+//		bgMat=new Mat();
+//		converted_fgMat=new Mat();
+//		converted_bgMat=new Mat();
+//		fg_gray=new Mat();
+//		bg_gray=new Mat();
+//		
+//		fg_alpha=new Mat();
+//		bg_alpha=new Mat();
+//		
+//		rgbaMats_fg=new Vector<Mat>();
+//		rgbaMats_bg=new Vector<Mat>();
+//		
+//		fg_bandw_mask=new Mat();
+//		bg_bandw_mask=new Mat();
+//		
+//		fg_bandw_mask=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_fg.png");
+//		bg_bandw_mask=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_mask_fg.png");
+//		
+//		Imgproc.cvtColor(fg_bandw_mask, fg_bandw_mask, Imgproc.COLOR_BGR2RGBA);
+//		Imgproc.cvtColor(bg_bandw_mask, bg_bandw_mask, Imgproc.COLOR_BGR2RGBA);
+//		
+//		Core.split(fg_bandw_mask,rgbaMats_fg);
+//		rgbaMats_fg.set(3,rgbaMats_fg.get(0));
+//		Core.merge(rgbaMats_fg, fg_bandw_mask);
+//		
+//		
+////		Core.split(bg_bandw_mask,rgbaMats_bg);
+////		rgbaMats_bg.set(3,rgbaMats_bg.get(0));
+////		Core.merge(rgbaMats_bg, bg_bandw_mask);
+//		
+//		rgbaMats_fg=new Vector<Mat>();
+//		rgbaMats_bg=new Vector<Mat>();
+//		
+//		leftImgMat=new Mat();
+//		leftImgMat=Highgui.imread(Environment.getExternalStorageDirectory()+"/Studio3D/img_left.jpg");
+//		
+//		Imgproc.cvtColor(leftImgMat, leftImgMat, Imgproc.COLOR_BGR2RGBA);
+//		
+//	}
 
 	void saveMaskandExit()
 	{
@@ -698,6 +701,14 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 	
 		Log.d(TAG,"Saved ..");
 		
+		mask1.release();
+		mask2.release();
+		fg_bandw_mask.release();
+		bg_bandw_mask.release();
+		temporary_ones.release();
+		leftImg.release();
+		binaryMat.release();
+		
 		deallocateStructs();
 		canvasthread.setRunning(false);
 	
@@ -712,9 +723,9 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 	private void deallocateStructs() 
 	{
 		// TODO Auto-generated method stub
-		//leftImgBitmap=null;
-		//BlueCirclesBmp=null;
-		//RedCirclesBmp=null;
+		leftImgBitmap=null;
+		BlueCirclesBmp=null;
+		RedCirclesBmp=null;
 		overlayBitmap=null;
 		final_mask_fg=null;
 		final_mask_bg=null;
