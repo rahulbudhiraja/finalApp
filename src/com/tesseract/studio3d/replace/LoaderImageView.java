@@ -1,27 +1,33 @@
 package com.tesseract.studio3d.replace;
 
-import com.tesseract.studio3d.utils.Structs;
-
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+
+import com.tesseract.studio3d.utils.Structs;
 
 public class LoaderImageView extends RelativeLayout {
     private Context     context;
     private ProgressBar progressBar;
     private ImageView   imageView;
     private Bitmap bmp;
+    public int position;
 
     public LoaderImageView(final Context context) {
     super(context);
     instantiate(context);
+    }
+    
+    public void setPosition(int i) {
+    	// TODO Auto-generated method stub
+    	position=i;
+    	
     }
 
    private void instantiate(final Context _context) {
@@ -81,14 +87,18 @@ public class LoaderImageView extends RelativeLayout {
 		Structs.selectedBitmap=Bitmap.createBitmap(bmp.getWidth(),bmp.getHeight(),Bitmap.Config.ARGB_8888);
 		
 		Structs.selectedBitmap=bmp;
+		Log.d("Id","id"+v.getId());
 		
-		  Intent i=new Intent(context,FullScreenLayoutActivity.class);
-		  		  
+		Log.d("Id","position"+position);
+		//  Intent i=new Intent(context,FullScreenLayoutActivity.class);
+		  Intent i=new Intent(context,SwipingViewPager.class);		  		  
 		  context.startActivity(i);
-		
+		SwipingViewPager.clickPosition=position;
 		
 	}
 
    };
+
+
 
 }

@@ -2,6 +2,7 @@ package com.tesseract.studio3d.replace;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Vector;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -13,9 +14,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
@@ -40,10 +44,15 @@ public class ReplaceActivity extends MenuActivity
 	RelativeLayout tempLayout;
 	LinearLayout parentLayout;
 	LoaderImageView customView;
-	int startingIndex=111222,totalPlaces;
+	int startingIndex=111222,totalPlaces,positionIndex;
 	ScrollView mainScrollView;
-	String[] placesArray;
+	
+	public static String[] placesArray;
 	String subFolder;
+	
+	Bitmap Img,foregroundImg;
+	
+	public static  Vector<Bitmap>ImageList;
 	
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -70,6 +79,8 @@ public class ReplaceActivity extends MenuActivity
 		subFolder=i.getExtras().getString("Category");
 		Log.d("ReplaceActivity","Sub folder: "+subFolder);
 		
+		loadCategoryImages();
+		
 		addPlacesCards();
 		 
 	    setContentView(mainScrollView);
@@ -78,6 +89,46 @@ public class ReplaceActivity extends MenuActivity
 	    
 	    backgroundThread.start();
 	   
+	}
+	
+	public void loadCategoryImages()
+	{
+		 ImageList=new Vector<Bitmap>();
+		 	try {
+		 		
+					placesArray=getAssets().list("images/Places");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		 	
+		 	foregroundImg=BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png");
+		 	
+		 	for (int i=0;i<placesArray.length;i++)
+				 {
+		 	
+					try {
+						InputStream is ;
+						is = getAssets().open("images/Places/"+placesArray[i]);
+						
+						Img=BitmapFactory.decodeStream(is);
+			    		Img=Bitmap.createScaledBitmap(Img, foregroundImg.getWidth(),foregroundImg.getHeight(), true);
+			    		
+			    		Canvas img=new Canvas(Img);
+			    		img.drawBitmap(Img,0, 0, new Paint());
+			    		img.drawBitmap(foregroundImg,0,0,new Paint());
+			    		
+						Log.d("Tag",placesArray[i]);
+			    		ImageList.add(Img);
+			    		Img=null;
+					
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+			 
+				 }
+			 
 	}
 	
 	public  void initializeMats() {
@@ -172,6 +223,7 @@ public class ReplaceActivity extends MenuActivity
 			    
 			  customView=new LoaderImageView(this);
 			  customView.setBackgroundResource(R.drawable.border);
+			  
 			  customView.setId(startingIndex+i);
 			 
 			  customView.setLayoutParams(customLayoutParams);
@@ -242,11 +294,15 @@ public class ReplaceActivity extends MenuActivity
 				// Update the UI and assign the bitmap to customview  
 				customView=(LoaderImageView) findViewById(startingIndex+i);
 				
+				
+				positionIndex=i;
+				
 				if(customView!=null)
 				{
 				runOnUiThread(new Runnable() {
 				     public void run() {
 				    	 customView.setImage(tempBitmap);
+				    	 customView.setPosition(positionIndex);
 					   //stuff that updates ui
 
 				    }

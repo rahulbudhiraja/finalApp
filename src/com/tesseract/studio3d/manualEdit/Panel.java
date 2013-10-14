@@ -43,6 +43,7 @@ import com.tesseract.studio3d.CustomFileObserver;
 import com.tesseract.studio3d.R;
 import com.tesseract.studio3d.Animation.AnimationActivity;
 import com.tesseract.studio3d.Animation.PointsImageView;
+import com.tesseract.studio3d.NewImageFilters.InterfaceClass;
 
 import com.tesseract.studio3d.utils.Structs;
 
@@ -120,6 +121,8 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 	Boolean exitPressed;
 	
 	ProgressDialog conversionProgress;
+	
+	InterfaceClass newFilterInterface;
  	 
      /** Old ,old old ,this will be used if the surfaceview is define in the xml file ..*/
 
@@ -183,8 +186,8 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 			fg_filter=filter1;
 			bg_filter=filter2;
 			
-			layer1Paint=findPaint(fg_filter);
-			layer2Paint=findPaint(bg_filter);
+			//layer1Paint=findPaint(fg_filter);
+			//layer2Paint=findPaint(bg_filter);
 			
 			
 			dst = new float[2];
@@ -700,7 +703,7 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 		
 	
 		Log.d(TAG,"Saved ..");
-		
+		updateDisp();
 		mask1.release();
 		mask2.release();
 		fg_bandw_mask.release();
@@ -819,9 +822,10 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
 				Log.d(TAG, "path" + dir.getPath());
 				dir.mkdirs();
 
-				ApplyFilterstoLayer Filters;
+//				ApplyFilterstoLayer Filters;
 											
-		    	Filters=new ApplyFilterstoLayer(activityContext,file.getAbsolutePath(),count);
+//		    	Filters=new ApplyFilterstoLayer(activityContext,file.getAbsolutePath(),count);
+		    	newFilterInterface=new InterfaceClass(activityContext,file.getAbsolutePath(),count);
 
 				count++;
 			}
@@ -829,5 +833,5 @@ public class Panel extends SurfaceView implements SurfaceHolder.Callback{
     
 	}
 	
-	
+	public native void updateDisp();
 }   

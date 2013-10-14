@@ -13,7 +13,6 @@ import java.util.Random;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
-import org.opencv.imgproc.Imgproc;
 
 import ColorFilters.ApplyFilterstoLayer;
 import android.app.Activity;
@@ -33,11 +32,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.View.OnTouchListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
@@ -45,6 +42,7 @@ import android.widget.ImageView;
 
 import com.tesseract.studio3d.CustomFileObserver;
 import com.tesseract.studio3d.R;
+import com.tesseract.studio3d.NewImageFilters.InterfaceClass;
 import com.tesseract.studio3d.utils.Structs;
 
 public class PhotoActivity extends Activity {
@@ -75,6 +73,8 @@ public class PhotoActivity extends Activity {
 	int converted_x=0,converted_y=0;
 	boolean buttonClicked;
 	Context mContext;
+	
+	InterfaceClass newFilterInterface;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -214,8 +214,11 @@ public class PhotoActivity extends Activity {
 				dir.mkdirs();
 
 				ApplyFilterstoLayer Filters;
+				
 											
-		    	Filters=new ApplyFilterstoLayer(getBaseContext(),file.getAbsolutePath(),count);
+		    	//Filters=new ApplyFilterstoLayer(getBaseContext(),file.getAbsolutePath(),count);
+		    	
+		    	newFilterInterface=new InterfaceClass(getBaseContext(),file.getAbsolutePath(),count);
 
 				count++;
 			}

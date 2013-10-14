@@ -58,6 +58,7 @@
               android:label="@string/app_name" />
    
    	 <activity android:name=".manualEdit.CanvasActivity" android:label="@string/app_name" android:screenOrientation="landscape" /> 
+   	 <activity android:name=".replace.SwipingViewPager" android:label="@string/app_name" android:screenOrientation="landscape" /> 
    
     <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
     

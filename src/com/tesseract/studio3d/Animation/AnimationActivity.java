@@ -3,7 +3,6 @@ package com.tesseract.studio3d.Animation;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.Vector;
 
 import org.opencv.android.OpenCVLoader;
@@ -20,9 +19,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -56,6 +52,7 @@ import android.widget.ScrollView;
 
 import com.tesseract.studio3d.CustomFileObserver;
 import com.tesseract.studio3d.R;
+import com.tesseract.studio3d.NewImageFilters.InterfaceClass;
 import com.tesseract.studio3d.manualEdit.CanvasActivity;
 import com.tesseract.studio3d.menu.MenuActivity;
 import com.tesseract.studio3d.selectionscreen.MainScreen;
@@ -73,16 +70,14 @@ public class AnimationActivity extends MenuActivity {
 	File seperatedLayersFolder;
 	String TAG = "AnimationActivity";
 	
-
 	int currentSelectedLayer = 0;
 	private Animation animFadeIn;
 	Paint canvasPaint;
 
 	// This has the different layers ,Each layer has an arraylist of different
 	// images ..
-	String[] imageFilters = { "sepia", "stark", "sunnyside", "cool", "worn",
-			"grayscale","vignette","crush","sunny","night" };
-
+	String[] imageFilters = { "none", "Retro", "Breeze","MonoTint","Glorify","Pensive" };
+	
 
 	//Vector<ArrayList<ImageToLoad>> Layers;
 	LinearLayout layersLayout, filtersLayout;
@@ -114,12 +109,15 @@ public class AnimationActivity extends MenuActivity {
 	 public Mat limg;	
 	 public Mat foreground,background;
 	 
-	 Vector<Integer> selectedFilters; 
+	public static Vector<Integer> selectedFilters; 
 	 
 	 Context activityContext;
 	 
 	 int menuSettings=Menu.FIRST;
 		private int group1Id = 1;
+		
+		
+	InterfaceClass newFiltersInterface;
 
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -177,6 +175,8 @@ public class AnimationActivity extends MenuActivity {
 		initializeMats();
 		
 		logHeap();
+		
+		newFiltersInterface=new InterfaceClass();
 		
 		// setContentView(R.layout.timepasslayout);
 		setContentView(activityLayout);
@@ -300,6 +300,7 @@ public class AnimationActivity extends MenuActivity {
 
 	private Bitmap addBorder(Bitmap bmp, int borderSize,int borderColor) {
 
+		Log.d("Border","border");
 		Bitmap bmpWithBorder = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), bmp.getConfig());
 
 		Canvas canvas = new Canvas(bmpWithBorder);
@@ -463,153 +464,10 @@ public class AnimationActivity extends MenuActivity {
 
 		Bitmap modifiedBitmap = Bitmap.createScaledBitmap(imgViewBitmap,
 				imgViewBitmap.getWidth(), imgViewBitmap.getHeight(), true);
-		Canvas imageViewCanvas = new Canvas(modifiedBitmap);
-
-		imageViewCanvas.drawBitmap(modifiedBitmap, 0, 0, new Paint());
-
-		ColorMatrix cm = new ColorMatrix();
-
-		String filterName = imageFilters[currentSelectedFilter];
-
-		if (filterName.equalsIgnoreCase("stark")) {
-
-			Paint spaint = new Paint();
-			ColorMatrix scm = new ColorMatrix();
-
-			scm.setSaturation(0);
-			final float m[] = scm.getArray();
-			final float c = 1;
-			scm.set(new float[] { m[0] * c, m[1] * c, m[2] * c, m[3] * c,
-					m[4] * c + 15, m[5] * c, m[6] * c, m[7] * c, m[8] * c,
-					m[9] * c + 8, m[10] * c, m[11] * c, m[12] * c, m[13] * c,
-					m[14] * c + 10, m[15], m[16], m[17], m[18], m[19] });
-
-			spaint.setColorFilter(new ColorMatrixColorFilter(scm));
-			Matrix smatrix = new Matrix();
-			imageViewCanvas.drawBitmap(modifiedBitmap, smatrix, spaint);
-
-			cm.set(new float[] { 1, 0, 0, 0, -90, 0, 1, 0, 0, -90, 0, 0, 1, 0,
-					-90, 0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("sunnyside")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, 10, 0, 1, 0, 0, 10, 0, 0, 1, 0,
-					-60, 0, 0, 0, 1, 0 });
-		} else if (filterName.equalsIgnoreCase("worn")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, -60, 0, 1, 0, 0, -60, 0, 0, 1, 0,
-					-90, 0, 0, 0, 1, 0 });
-		} else if (filterName.equalsIgnoreCase("grayscale")) {
-
-			float[] matrix = new float[] { 0.3f, 0.59f, 0.11f, 0, 0, 0.3f,
-					0.59f, 0.11f, 0, 0, 0.3f, 0.59f, 0.11f, 0, 0, 0, 0, 0, 1,
-					0, };
-
-			cm.set(matrix);
-
-		} else if (filterName.equalsIgnoreCase("cool")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, 10, 0, 1, 0, 0, 10, 0, 0, 1, 0,
-					60, 0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("filter0")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, 30, 0, 1, 0, 0, 10, 0, 0, 1, 0,
-					20, 0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("filter1")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, -33, 0, 1, 0, 0, -8, 0, 0, 1, 0,
-					56, 0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("night")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, -42, 0, 1, 0, 0, -5, 0, 0, 1, 0,
-					-71, 0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("crush")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, -68, 0, 1, 0, 0, -52, 0, 0, 1, 0,
-					-15, 0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("filter4")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, -24, 0, 1, 0, 0, 48, 0, 0, 1, 0,
-					59, 0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("sunny")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, 83, 0, 1, 0, 0, 45, 0, 0, 1, 0, 8,
-					0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("filter6")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, 80, 0, 1, 0, 0, 65, 0, 0, 1, 0,
-					81, 0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("filter7")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, -44, 0, 1, 0, 0, 38, 0, 0, 1, 0,
-					46, 0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("filter8")) {
-
-			cm.set(new float[] { 1, 0, 0, 0, 84, 0, 1, 0, 0, 63, 0, 0, 1, 0,
-					73, 0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("random")) {
-
-			// pick an integer between -90 and 90 apply
-			int min = -90;
-			int max = 90;
-			Random rand = new Random();
-
-			int five = rand.nextInt(max - min + 1) + min;
-
-			int ten = rand.nextInt(max - min + 1) + min;
-			int fifteen = rand.nextInt(max - min + 1) + min;
-
-			Log.d(TAG, "five " + five);
-			Log.d(TAG, "ten " + ten);
-			Log.d(TAG, "fifteen " + fifteen);
-
-			cm.set(new float[] { 1, 0, 0, 0, five, 0, 1, 0, 0, ten, 0, 0, 1, 0,
-					fifteen, 0, 0, 0, 1, 0 });
-
-		} else if (filterName.equalsIgnoreCase("sepia")) {
-
-			float[] sepMat = { 0.3930000066757202f, 0.7689999938011169f,
-					0.1889999955892563f, 0, 0, 0.3490000069141388f,
-					0.6859999895095825f, 0.1679999977350235f, 0, 0,
-					0.2720000147819519f, 0.5339999794960022f,
-					0.1309999972581863f, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 };
-			cm.set(sepMat);
-		}
-		else if(filterName.equalsIgnoreCase("vignette"))
-		{
-
-			Bitmap border = null;
-			Bitmap scaledBorder = null;
-
-			border = BitmapFactory.decodeResource(this.getResources(), R.drawable.vignette);
-
-			int width = modifiedBitmap.getWidth();
-			int height = modifiedBitmap.getHeight();
-
-			scaledBorder = Bitmap.createScaledBitmap(border,width,height, false);
-			if (scaledBorder != null && border != null) {
-				imageViewCanvas.drawBitmap(scaledBorder, 0, 0, new Paint());
-			}
-		}
-
-		Paint paint = new Paint();
-
-		paint.setColorFilter(new ColorMatrixColorFilter(cm));
-		Matrix matrix = new Matrix();
-
-		if(!filterName.equalsIgnoreCase("vignette"))
-			imageViewCanvas.drawBitmap(modifiedBitmap, matrix, paint);
-
+		
+		modifiedBitmap=newFiltersInterface.applyFiltertoView(modifiedBitmap,imageFilters[currentSelectedFilter]);
+				
+		
 		CanvasImageViews.get(currentSelectedLayer).setImageBitmap(
 				modifiedBitmap);
 
@@ -1482,17 +1340,25 @@ public boolean onOptionsItemSelected(MenuItem item) {
 	    //write your code here
 
 		deallocateMemory();
+		
 		Intent it = new Intent(this,CanvasActivity.class);
 		
+		 Bundle b = new Bundle();
+		 
+		 b.putString("filter1", imageFilters[selectedFilters.get(0)]);
+		 b.putString("filter2", imageFilters[selectedFilters.get(1)]);
+		 b.putInt("filterNum", selectedFilters.get(1));
 		if (null != it)
 			{
 			
 			it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			Log.d(TAG,"filters are .filter_fg : "+imageFilters[selectedFilters.get(0)]+ " filter_bg :"+imageFilters[selectedFilters.get(1)]);
 			
-			it.putExtra("filter_fg", imageFilters[selectedFilters.get(0)]);
-			it.putExtra("filter_bg", imageFilters[selectedFilters.get(1)]);
+			it.putExtra("filterNum",selectedFilters.get(1));
+			it.putExtra("android.intent.extra.INTENT", b);
 			
-			this.startActivity(it);
+			
+			startActivity(it);
 			}   
 		break;
 

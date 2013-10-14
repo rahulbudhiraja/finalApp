@@ -29,6 +29,7 @@ public class MainListViewActivity extends Activity
 	String[] values = new String[] { "Places","Beach" };
 
     final ArrayList<String> list = new ArrayList<String>();
+    public static int clickedImage;
    
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -52,13 +53,16 @@ public class MainListViewActivity extends Activity
 		mainList.setAdapter(listAdapter);
 		
 		mainList.setOnItemClickListener(new OnItemClickListener() {
-			  @Override
+			 
+
+			@Override
 			  public void onItemClick(AdapterView<?> parent, View view,
 			    int position, long id) {
 			
 				  Log.d("Category"," value "+values[position]);
 				  Intent i=new Intent(getBaseContext(),ReplaceActivity.class);
 				  i.putExtra("Category",values[position]);
+				 // i.putExtra("Position",position);
 				  
 				  startActivity(i);
 				  
