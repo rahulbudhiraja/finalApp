@@ -2,34 +2,25 @@ package com.tesseract.studio3d.browseimages;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintStream;
-
-import com.tesseract.studio3d.CustomFileObserver;
-import com.tesseract.studio3d.R;
-import com.tesseract.studio3d.StartScreen;
-import com.tesseract.studio3d.Animation.PhotoActivity;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
-import android.media.MediaScannerConnection.MediaScannerConnectionClient;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.GridView;
+
+import com.tesseract.studio3d.R;
+import com.tesseract.studio3d.selectionscreen.MainScreen;
 
 public class BrowseImages extends Activity {
 
@@ -38,6 +29,7 @@ public class BrowseImages extends Activity {
     private static final String FILE_TYPE = "*/*";
     private MediaScannerConnection conn;
     GridView gridView;
+    static boolean fileSelected=false;
     
 
     /** Called when the activity is first created. */
@@ -57,7 +49,8 @@ public class BrowseImages extends Activity {
         File folder = new File(Environment.getExternalStorageDirectory()+"/Studio3D/images/cache");
 
         gridView.setAdapter(new ImagesAdapter(this,folder));
-     
+        
+        fileSelected=true;
         
         
         /**
@@ -90,10 +83,13 @@ public class BrowseImages extends Activity {
 				}
 			
             // Sending image id to FullScreenActivity
-            Intent it = new Intent(getApplicationContext(), PhotoActivity.class);
+      //      Intent it = new Intent(getApplicationContext(), PhotoActivity.class);
+            Intent it = new Intent(getApplicationContext(),MainScreen.class);
+//        	
             // passing array index
-            it.putExtra("browseButtonClicked", true);
-	        it.putExtra("foldernum", position);
+//            it.putExtra("browseButtonClicked", true);
+	       // it.putExtra("foldernum", position);
+            it.putExtra("computeDisparity", true);
             startActivity(it);
           }
           

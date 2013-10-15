@@ -64,6 +64,7 @@ public class MainScreen extends Activity
 		Log.d(TAG,"width"+ tempWidth);
 		Log.d(TAG,"height"+ tempHeight);
 		
+		clickedImage=null;
 		clickedImage=Highgui.imread(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg");
 		
 		Structs.left_img_path=Environment.getExternalStorageDirectory().getPath()+"/Studio3D/img_left.jpg";
