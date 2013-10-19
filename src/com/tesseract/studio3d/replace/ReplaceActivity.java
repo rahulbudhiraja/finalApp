@@ -116,7 +116,7 @@ public class ReplaceActivity extends MenuActivity
 			    		
 			    		Canvas img=new Canvas(Img);
 			    		img.drawBitmap(Img,0, 0, new Paint());
-			    		img.drawBitmap(foregroundImg,0,0,new Paint());
+//			    		img.drawBitmap(foregroundImg,0,0,new Paint());
 			    		
 						Log.d("Tag",placesArray[i]);
 			    		ImageList.add(Img);

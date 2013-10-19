@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -33,6 +34,7 @@ public class SwipingViewPager extends Activity {
 	  Bitmap Img;
 	  Bitmap foregroundImg;
 	  public static int clickPosition;
+	  ImageView foregroundImageView;  
 		
 	  public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
@@ -42,13 +44,17 @@ public class SwipingViewPager extends Activity {
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		 setContentView(R.layout.viewpageractivity);
 		   
-		 
+		 foregroundImageView=(ImageView)findViewById(R.id.foregroundImageView);
+		 foregroundImageView.setImageBitmap(BitmapFactory.decodeFile(Environment.getExternalStorageDirectory().getPath()+"/Studio3D/Layers/img_fg.png"));
 		 
 	    ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
 	    ImagePagerAdapter adapter = new ImagePagerAdapter();
 	    viewPager.setAdapter(adapter);
 //	    viewPager.setCurrentItem(MainListViewActivity.clickedImage);
 	    viewPager.setCurrentItem(clickPosition);
+	    
+	    
+	    
 	  }
 	  
 	  

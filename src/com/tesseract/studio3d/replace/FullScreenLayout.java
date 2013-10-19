@@ -37,7 +37,7 @@ public class FullScreenLayout extends ImageView {
   
     public void configurePaint()
       {
-        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    	  paint = new Paint(Paint.ANTI_ALIAS_FLAG);
       
           paint.setColor(Color.WHITE);                    // set the color
           paint.setStrokeWidth(3);               // set the size
